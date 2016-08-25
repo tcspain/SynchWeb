@@ -19,3 +19,4 @@ sftp-config.json
 api/lib
 api/config.php
 client/js/config.json
+/.project
