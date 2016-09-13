@@ -8,6 +8,7 @@ class ProposalType {
     var $generic_pages = array(
         'proposal', 'fault', 'cal', 'feedback', 'vstat', 'users',
         'sample', 'shipment', 'pdf', 'contact', 'download',
+    	'xpdfsample',
     );
     
     var $visit_table;
@@ -153,7 +154,7 @@ class ProposalType {
         }
         
         $this->ty = $ty;
-        
+ 
         // Load specific proposal type
         if ($ty && file_exists('includes/class.type.'.$ty.'.php')) {
             include_once('includes/class.type.'.$ty.'.php');
@@ -174,11 +175,11 @@ class ProposalType {
         $db = $this->db;
         $cl = $this;
         foreach (array_merge($this->pages, $this->generic_pages) as $i => $p) {
-            $app->group('/'.$p, function () use ($app, $db, $p, $cl) {
+        	$app->group('/'.$p, function () use ($app, $db, $p, $cl) {
                 $class = in_array($p, $cl->generic_pages) ? 'includes/pages/class.'.$p.'.php' 
                                                           : 'includes/pages/'.$cl->dir.'/class.'.$p.'.php';
                 if (file_exists($class)) {
-                    require_once($class);
+                	require_once($class);
                     // $ns = $cl->ty == 'mx' || $cl->ty == 'sm' || in_array($p, $cl->generic_pages) ? '\\' : '\\'.$cl->dir.'\\';
                     $ns = $cl->dir && !in_array($p, $cl->generic_pages) ? '\\'.$cl->dir.'\\' : '\\';
                     $cn = $ns.ucfirst($p);

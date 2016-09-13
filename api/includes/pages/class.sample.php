@@ -310,6 +310,7 @@
         # ------------------------------------------------------------------------
         # List of samples for a proposal
         function _samples() {
+            error_log('Retrieving samples');
             if (!$this->has_arg('prop')) $this->_error('No proposal specified');
             
             $args = array($this->proposalid);
