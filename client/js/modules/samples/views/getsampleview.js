@@ -5,6 +5,9 @@ define(['views/getview',
         'modules/types/gen/samples/views/list',
         'modules/types/gen/samples/views/view',
 
+        'modules/types/xpdf/samples/views/list',
+        'modules/types/xpdf/samples/views/view',
+        
         'modules/samples/views/proteinlist',
         'modules/samples/views/proteinview',
         'modules/samples/views/proteinadd',
@@ -15,6 +18,7 @@ define(['views/getview',
 ], function(GetView,
 	SampleList, SampleView,
 	GenSampleList, GenSampleView,
+	XpdfSampleList, XpdfSampleView,
 
 	ProteinList, ProteinView, AddProteinView,
 	GenComponentList, GenComponentAdd, GenComponentView
@@ -26,6 +30,7 @@ define(['views/getview',
 		SampleList: new GetView({
 			views: {
  				mx: SampleList,
+ 				xpdf: XpdfSampleList,
               	gen: GenSampleList,
 			},
 			default: GenSampleList,
@@ -34,6 +39,7 @@ define(['views/getview',
 		SampleView: new GetView({
         	views: {
         		mx: SampleView,
+        		xpdf: XpdfSampleView,
                 gen: GenSampleView,
         	},
         	default: GenSampleView,
