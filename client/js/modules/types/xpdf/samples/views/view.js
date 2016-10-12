@@ -6,11 +6,15 @@ define(["marionette",
         "utils/editable",
         "collections/datacollections",
         "modules/dc/views/getdcview",
+        "collections/phasecollection",
+        "modules/types/xpdf/samples/views/proteinlist",
         "tpl!templates/types/xpdf/sample.html"
         ], function(Marionette,
         		Editable,
         		DCCol,
         		GetDCView,
+        		PhaseCollection,
+        		PhaseView,
         		template) {
 	return Marionette.LayoutView.extend({
 		className: "content",
@@ -18,6 +22,7 @@ define(["marionette",
 		
 		regions: {
 			history: '.history',
+			phases: ".phases",
 		},
 		
 		initialize: function(options) {
@@ -28,6 +33,9 @@ define(["marionette",
 			// (sid) mathches that of this sample
 			this.dcs = new DCCol(null, { queryParams: {sid: this.model.get("BLSAMPLEID"), pp:5} });
 			this.dcs.fetch();
+			
+			this.phaseCollection = new PhaseCollection();
+			this.phaseCollection.fetch();
 			
 		},
 		
@@ -43,6 +51,9 @@ define(["marionette",
 			
 			// Show the Data Collections in the history region
 			this.history.show(GetDCView.DCView.get(app.type, { model: this.model, collection: this.dcs, params: { visit: null }, noPageUrl: true, noFilterUrl: true, noSearchUrl: true}));
+			
+			// Show the phases in the "phases" region
+			this.phases.show(new PhaseView({ model: this.model, collection: this.phaseCollection}));
 		}
 		
 	});
