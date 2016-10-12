@@ -20,3 +20,4 @@ api/lib
 api/config.php
 client/js/config.json
 /.project
+client/assets/css/stylesheets/pretty.main.css
