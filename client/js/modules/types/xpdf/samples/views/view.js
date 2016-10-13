@@ -8,6 +8,7 @@ define(["marionette",
         "modules/dc/views/getdcview",
         "collections/phasecollection",
         "modules/types/xpdf/samples/views/proteinlist",
+        "views/table",
         "tpl!templates/types/xpdf/sample.html"
         ], function(Marionette,
         		Editable,
@@ -15,6 +16,7 @@ define(["marionette",
         		GetDCView,
         		PhaseCollection,
         		PhaseView,
+        		TableView,
         		template) {
 	return Marionette.LayoutView.extend({
 		className: "content",
@@ -52,8 +54,18 @@ define(["marionette",
 			// Show the Data Collections in the history region
 			this.history.show(GetDCView.DCView.get(app.type, { model: this.model, collection: this.dcs, params: { visit: null }, noPageUrl: true, noFilterUrl: true, noSearchUrl: true}));
 			
+			var phaseColumns = [
+			        			{name: "NAME", label: "Name", cell: "string", editable: false},
+			        			{name: "ACRONYM", label: "Identifier", cell: "string", editable: false},
+			        			{name: "MOLECULARMASS", label: "Molecular Mass", cell: "string", editable: false},
+			        			{name: "COMPOSITION", label: "Composition", cell: "string", editable: false},
+			        			{name: "XDENSITY", label: "Crys. Density", cell: "string", editable: false},
+			        			{name: "ABUNDANCE", label: "Fraction", cell: "string", editable: false},
+			                    ];
+			
 			// Show the phases in the "phases" region
-			this.phases.show(new PhaseView({ model: this.model, collection: this.phaseCollection}));
+//			this.phases.show(new PhaseView({ model: this.model, collection: this.phaseCollection}));
+			this.phases.show(new TableView({ collection: this.phaseCollection, columns: phaseColumns, loading: true}));
 		}
 		
 	});
