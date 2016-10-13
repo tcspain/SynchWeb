@@ -7,7 +7,6 @@ define(["marionette",
         "collections/datacollections",
         "modules/dc/views/getdcview",
         "collections/phasecollection",
-        "modules/types/xpdf/samples/views/proteinlist",
         "views/table",
         "tpl!templates/types/xpdf/sample.html"
         ], function(Marionette,
@@ -15,7 +14,6 @@ define(["marionette",
         		DCCol,
         		GetDCView,
         		PhaseCollection,
-        		PhaseView,
         		TableView,
         		template) {
 	return Marionette.LayoutView.extend({
