@@ -8,6 +8,7 @@ define(["marionette",
         "modules/dc/views/getdcview",
         "collections/phasecollection",
         "views/table",
+        "utils/phasecompositor",
         "tpl!templates/types/xpdf/sample.html"
         ], function(Marionette,
         		Editable,
@@ -15,6 +16,7 @@ define(["marionette",
         		GetDCView,
         		PhaseCollection,
         		TableView,
+        		phaseCompositor,
         		template) {
 	return Marionette.LayoutView.extend({
 		className: "content",
@@ -36,7 +38,9 @@ define(["marionette",
 			
 			this.phaseCollection = new PhaseCollection();
 			this.phaseCollection.fetch();
-			
+
+			// Calculate the total density and composition, and display
+			this.updateDensityComposition();
 		},
 		
 		onRender: function() {
@@ -64,7 +68,28 @@ define(["marionette",
 			// Show the phases in the "phases" region
 //			this.phases.show(new PhaseView({ model: this.model, collection: this.phaseCollection}));
 			this.phases.show(new TableView({ collection: this.phaseCollection, columns: phaseColumns, loading: true}));
-		}
+			
+		},
 		
+		updateDensityComposition: function() {
+			if (this.phaseCollection.length > 0) { 
+				var density = phaseCompositor.densityComposite(this.phaseCollection);
+				var roundedDensity = this.roundXdp(density, 2);
+				this.model.set("XDENSITY", roundedDensity);
+			
+				var composition = phaseCompositor.compositionComposite(this.phaseCollection);
+				this.model.set("COMPOSITION", composition);
+			}
+		},
+		
+		/*
+		 * Naive method of rounding to a set number of decimal places (not 
+		 * significant figures).
+		 */
+		roundXdp: function(value, dp) {
+			var dpp = Math.max(0, dp);
+			var scaling = Math.pow(10, dpp);
+			return Math.round(value*scaling)/scaling;
+		}
 	});
 });
