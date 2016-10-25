@@ -17,9 +17,10 @@ define(["underscore"],
 		 */
 		compositionComposite: function(phaseCollection) {
 			var totalFimi = 0;
-			var elements = {};
+//			var elements = {};
 			// iterate over all phases
-			phaseCollection.each(function(phaseModel) {
+			var elementsAndFimi = phaseCollection.reduce(function(localElementMemo, phaseModel, key, list) {
+				
 				/* decode the composition in the phase, and return the
 				 * weighted elemental abundances (moles per unit mass) and the
 				 * weighting
@@ -27,21 +28,32 @@ define(["underscore"],
 				var result = this.weightedComposition(phaseModel);
 				// Increment the weighting sum
 				console.log(phaseModel.get("COMPOSITION")+" fi/mi:" + result.fimi.toString());
-				totalFimi += result.fimi;
+				localElementMemo.totalFimi += result.fimi;
 				// Add the weighted atoms to the list
 				_.each(result.elements, function(value, key, list) {
-					console.log(key+": "+value.toString);
+					console.log(key+": "+value.toString());
 				});
-				_.each(result.elements, function(value, key, list) {
-					this[key] = ((key in this.elements) ? this.elements[key] : 0) + value;
-				}, { "elements":elements, 
-					"weightedComposition": this.weightedComposition,
-					"flattenBrackets": this.flattenBrackets,
-					"mapFormula": this.mapFormula,
-					"stringifyElementHash": this.stringifyElementHash,
-					"allTheElements": this.allTheElements,
+				console.log(phaseModel.get("COMPOSITION")+": "+"compositionComposite:reduce:localElements:"+localElementMemo.elements.toString());
+
+				localElementMemo.elements = _.reduce(result.elements, function(memo, value, key, list) {
+					console.log(phaseModel.get("COMPOSITION")+": "+"compositionComposite:reduce:reduce: found "+key.toString()+", "+value.toString());
+					if (key in memo) {
+						console.log(key.toString()+" already present in the sample!");
+						memo[key] += value;
+					} else {
+						memo[key] = value;
+					}
+					return memo;
+				}, localElementMemo.elements);
+				
+				console.log("Totalling the accumulated elements"+"("+Object.keys(localElementMemo.elements).length.toString()+" found)"+":");
+				_.each(localElementMemo.elements, function(value, key, list) {
+						console.log("total "+key+": "+value.toString());
 					});
-			}, {
+				return localElementMemo;
+			},
+			{"elements": {}, "totalFimi":0, },
+			{
 				"weightedComposition": this.weightedComposition,
 				"flattenBrackets": this.flattenBrackets,
 				"mapFormula": this.mapFormula,
@@ -51,11 +63,11 @@ define(["underscore"],
 			/* Normalize the elemental abundances to the total number of moles
 			 * per unit mass.
 			 * */
-			_.each(elements, function(value, key, list) {
-				list[key] = value/totalFimi;
-			});			
+			_.each(elementsAndFimi.elements, function(value, key, list) {
+				list[key] = value/this.totalFimi;
+			}, {"totalFimi": elementsAndFimi.totalFimi, });			
 			// Compose the chemical formula.
-			return this.stringifyElementHash(elements);
+			return this.stringifyElementHash(elementsAndFimi.elements);
 		},
 		
 		flattenBrackets: function(bracketedFormula) {
@@ -96,6 +108,7 @@ define(["underscore"],
 			_.each(compositionHash, function(value, key, list) {
 				console.log(key + " " + value.toString());
 			}, {"allTheElements": this.allTheElements});
+			return compositionHash;
 		},
 		
 		/* Compose the chemical formula string from the hash array of
@@ -104,25 +117,28 @@ define(["underscore"],
 		stringifyElementHash: function(elementHash) {
 			var formula = "";
 			if ("C" in elementHash) {
-				formula = this.addElement(formula, "C", elementHash);
+				formula = this.addElementToString(formula, "C", elementHash);
 				elementHash.delete("C");
 				if ("H" in elementHash) {
-					formula = this.addElement(formula, "H", elementHash);
+					formula = this.addElementToString(formula, "H", elementHash);
 					elementHash.delete("H");
 				}
 			}
 			// Get the list of remaining keys, and sort alphabetically.
 			var allElements = _.keys(elementHash);
 			allElements.sort();
-			_.reduce(allElements, function(memo, element) {
-				return this.addElementToString(memo, element, this)
-			}, formula, elementHash);
+			formula = _.reduce(elementHash, function(memo, value, key, list) {
+				return this.addElementToString(memo, key, list)
+			}, formula, {
+				"addElementToString": this.addElementToString,
+				elementHash,
+			});
 			return formula;
 		},
 		
-		addElementToString: function(string, element, elementHash) {
+		addElementToString: function(formula, element, elementHash) {
 			formula += element;
-			formula += elementHash[element].toFixed(3);
+			formula += "<sub>"+elementHash[element].toFixed(3)+"</sub>";
 			return formula;
 		},
 		
@@ -144,10 +160,12 @@ define(["underscore"],
 			var elementNumbers = this.mapFormula(this.flattenBrackets(phaseModel.get("COMPOSITION")));
 			
 			_.each(elementNumbers, function(value, key, list) {
-				elementNumbers[key] *= fimi;
-			});
+				console.log("weightedComposition: key = "+key.toString()+", unweighted value = "+list[key].toString());
+				list[key] *= fimi;
+				console.log("weighted value = "+list[key].toString());
+			}, {"fimi": fimi});
 
-			return {"composition": elementNumbers, "fimi": fimi};
+			return {"elements": elementNumbers, "fimi": fimi};
 		},
 		
 		allTheElements: [
