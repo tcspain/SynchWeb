@@ -27,18 +27,10 @@ define(["underscore"],
 				 */
 				var result = this.weightedComposition(phaseModel);
 				// Increment the weighting sum
-				console.log(phaseModel.get("COMPOSITION")+" fi/mi:" + result.fimi.toString());
 				localElementMemo.totalFimi += result.fimi;
 				// Add the weighted atoms to the list
-				_.each(result.elements, function(value, key, list) {
-					console.log(key+": "+value.toString());
-				});
-				console.log(phaseModel.get("COMPOSITION")+": "+"compositionComposite:reduce:localElements:"+localElementMemo.elements.toString());
-
 				localElementMemo.elements = _.reduce(result.elements, function(memo, value, key, list) {
-					console.log(phaseModel.get("COMPOSITION")+": "+"compositionComposite:reduce:reduce: found "+key.toString()+", "+value.toString());
 					if (key in memo) {
-						console.log(key.toString()+" already present in the sample!");
 						memo[key] += value;
 					} else {
 						memo[key] = value;
@@ -46,10 +38,6 @@ define(["underscore"],
 					return memo;
 				}, localElementMemo.elements);
 				
-				console.log("Totalling the accumulated elements"+"("+Object.keys(localElementMemo.elements).length.toString()+" found)"+":");
-				_.each(localElementMemo.elements, function(value, key, list) {
-						console.log("total "+key+": "+value.toString());
-					});
 				return localElementMemo;
 			},
 			{"elements": {}, "totalFimi":0, },
@@ -66,8 +54,9 @@ define(["underscore"],
 			_.each(elementsAndFimi.elements, function(value, key, list) {
 				list[key] = value/this.totalFimi;
 			}, {"totalFimi": elementsAndFimi.totalFimi, });			
+
 			// Compose the chemical formula.
-			return this.stringifyElementHash(elementsAndFimi.elements);
+			return this.subscriptifyNumbers(this.stringifyElementHash(elementsAndFimi.elements));
 		},
 		
 		flattenBrackets: function(bracketedFormula) {
@@ -83,31 +72,22 @@ define(["underscore"],
 			var elementSymbolPattern = /[A-Z][a-z]?/;
 			var numberPattern = /[0-9]+/;
 			var elements = formula.match(elementNumberPattern);
-			console.log(formula+" number of elements = " + elements.length);
-			_.each(elements, function(element, index, list) {
-				console.log("Element " + index.toString() + " is " + element);
-			});
 			
 			// Each element of the 'elements' array consists of an element symbol, and possibly a number
 			var compositionHash = _.reduce(elements, 
 					function(memo, parsee) {
 				var element = parsee.match(elementSymbolPattern)[0];
 				var number = 1
+				
 				if (parsee.match(numberPattern) != null)
 					number = parsee.match(numberPattern)[0];
-				console.log(element + " " + number);
+
 				if (this.allTheElements.indexOf(element) != -1) {
-					console.log("Found an element! "+ element);
 					memo[element] = ((element in memo) ? memo[element] : 0) + parseInt(number);
 				}
-				console.log("Number of elements added: " + _.keys(memo).length);
 				return memo;
 			}, {}, {"allTheElements": this.allTheElements});
 			
-			console.log("Expansion of the hash:");
-			_.each(compositionHash, function(value, key, list) {
-				console.log(key + " " + value.toString());
-			}, {"allTheElements": this.allTheElements});
 			return compositionHash;
 		},
 		
@@ -127,19 +107,26 @@ define(["underscore"],
 			// Get the list of remaining keys, and sort alphabetically.
 			var allElements = _.keys(elementHash);
 			allElements.sort();
-			formula = _.reduce(elementHash, function(memo, value, key, list) {
-				return this.addElementToString(memo, key, list)
+			formula = _.reduce(allElements, function(memo, element, index, list) {
+				return this.addElementToString(memo, element, this.elementHash);
 			}, formula, {
 				"addElementToString": this.addElementToString,
-				elementHash,
+				"elementHash": elementHash,
 			});
 			return formula;
 		},
 		
 		addElementToString: function(formula, element, elementHash) {
 			formula += element;
-			formula += "<sub>"+elementHash[element].toFixed(3)+"</sub>";
+			var multiplicity = elementHash[element].toFixed(3);
+			// Format the multiplicity value nicely: get rid of trailing 0s, and then any trailing decimal points, and then any solitary 1s.
+			formula += multiplicity.replace(/0+$/, '').replace(/\.$/, '').replace(/^1$/, '');
 			return formula;
+		},
+		
+		// Given a string, returns the same string with all numbers converted to Unicode subscripts
+		subscriptifyNumbers: function(input) {
+			return input.replace(/0/g, '₀').replace(/1/g, '₁').replace(/2/g, '₂').replace(/3/g, '₃').replace(/4/g, '₄').replace(/5/g, '₅').replace(/6/g, '₆').replace(/7/g, '₇').replace(/8/g, '₈').replace(/9/g, '₉');
 		},
 		
 		/*
@@ -160,9 +147,7 @@ define(["underscore"],
 			var elementNumbers = this.mapFormula(this.flattenBrackets(phaseModel.get("COMPOSITION")));
 			
 			_.each(elementNumbers, function(value, key, list) {
-				console.log("weightedComposition: key = "+key.toString()+", unweighted value = "+list[key].toString());
 				list[key] *= fimi;
-				console.log("weighted value = "+list[key].toString());
 			}, {"fimi": fimi});
 
 			return {"elements": elementNumbers, "fimi": fimi};
