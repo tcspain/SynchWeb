@@ -9,7 +9,8 @@ define(["marionette",
         "collections/phasecollection",
         "views/table",
         "utils/phasecompositor",
-        "tpl!templates/types/xpdf/sample.html"
+        "modules/types/xpdf/samples/views/newphaseview",
+        "tpl!templates/types/xpdf/sample.html",
         ], function(Marionette,
         		Editable,
         		DCCol,
@@ -17,6 +18,7 @@ define(["marionette",
         		PhaseCollection,
         		TableView,
         		phaseCompositor,
+        		NewPhaseView,
         		template) {
 	return Marionette.LayoutView.extend({
 		className: "content",
@@ -25,6 +27,7 @@ define(["marionette",
 		regions: {
 			history: '.history',
 			phases: ".phases",
+			newphase: ".newphase",
 		},
 		
 		initialize: function(options) {
@@ -68,6 +71,9 @@ define(["marionette",
 			// Show the phases in the "phases" region
 //			this.phases.show(new PhaseView({ model: this.model, collection: this.phaseCollection}));
 			this.phases.show(new TableView({ collection: this.phaseCollection, columns: phaseColumns, loading: true}));
+			
+			// Show the add phases hidden form in the "newphase" region
+			this.newphase.show(new NewPhaseView());
 			
 		},
 		
