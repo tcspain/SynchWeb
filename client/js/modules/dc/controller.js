@@ -32,6 +32,9 @@ define(['marionette', 'modules/dc/views/getdcview', 'modules/dc/views/imageviewe
                 var dcs = new DCCol(null, { queryParams: { visit: visit, s: search, t: type, id: id, dcg: dcg } })
                 dcs.setPageSize(app.mobile() ? 5 : 15)
                 dcs.state.currentPage = page
+                console.log("DC experiment type was: "+model.get("TYPE"));
+                // force DC type to xpdf for testing
+                model.set({"TYPE" : "xpdf"});
                 dcs.fetch().done(function() {
                     console.log('DC TYPE', model.get('TYPE'))
                     app.content.show(GetView.DCView.get(model.get('TYPE'), { collection: dcs,  params: { visit: visit, search: search, type: type, id: id, dcg: dcg }, model: model }))
