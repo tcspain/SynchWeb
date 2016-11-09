@@ -4,7 +4,7 @@
 define(["marionette",
         "utils/editable",
         "collections/samples", // generic sample collection for now
-        "tpl!templates/types/xpdf/phase.html",
+        "tpl!templates/types/xpdf/samples/phase.html",
         ], function(Marionette,
         		Editable,
         		Samples,
