@@ -32,7 +32,7 @@ define(["marionette",
 		
 		initialize: function(options) {
 			// bind the validation
-			// Backbone.Validation.bind(this);
+			Backbone.Validation.bind(this);
 			
 			// Data collections for this sample, that is where the sample ID 
 			// (sid) mathches that of this sample
