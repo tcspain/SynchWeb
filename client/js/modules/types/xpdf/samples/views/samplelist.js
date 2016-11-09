@@ -7,7 +7,7 @@ define(["marionette",
         "views/table",
         "utils/table",
         "modules/types/xpdf/samples/views/newsampleview",
-        "tpl!templates/types/xpdf/samplelist.html"
+        "tpl!templates/types/xpdf/samples/samplelist.html"
         ], function(Marionette,
         		SampleList,
         		TableView,
