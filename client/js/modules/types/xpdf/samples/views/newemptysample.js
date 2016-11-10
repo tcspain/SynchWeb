@@ -76,8 +76,7 @@ define([
 				var self = this;
 				var newPhase = new Phase();
 				newPhase.set({"ACRONYM": "newxpdfphase"});
-				//FIXME Need to set proposalId
-				//newPhase.set({"PROPOSALID": ???});
+				newPhase.set({"PROPOSALID": app.prop});
 				newPhase.save({}, {
 					success: function(model, response, options){
 						var newPhaseId = model.get("PROTEINID");
