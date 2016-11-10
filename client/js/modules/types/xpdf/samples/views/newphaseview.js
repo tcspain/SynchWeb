@@ -4,7 +4,7 @@
 
 define(["marionette",
         "models/protein",
-        "tpl!templates/types/xpdf/newphase.html"],
+        "tpl!templates/types/xpdf/samples/newphase.html"],
         function(Marionette,
         		Protein,
         		template) {
