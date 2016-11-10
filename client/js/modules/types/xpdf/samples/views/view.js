@@ -6,7 +6,7 @@ define(["marionette",
         "utils/editable",
         "collections/datacollections",
         "modules/dc/views/getdcview",
-        "collections/phasecollection",
+        "collections/proteins", /*"collections/phasecollection",*/
         "views/table",
         "utils/phasecompositor",
         "modules/types/xpdf/samples/views/newphaseview",
@@ -43,7 +43,7 @@ define(["marionette",
 			this.phaseCollection.fetch();
 
 			// Calculate the total density and composition, and display
-			this.updateDensityComposition();
+//			this.updateDensityComposition();
 		},
 		
 		onRender: function() {
@@ -64,7 +64,7 @@ define(["marionette",
 			        			{name: "ACRONYM", label: "Identifier", cell: "string", editable: false},
 			        			{name: "MOLECULARMASS", label: "Molecular Mass", cell: "string", editable: false},
 			        			{name: "COMPOSITION", label: "Composition", cell: "string", editable: false},
-			        			{name: "XDENSITY", label: "Crys. Density", cell: "string", editable: false},
+//			        			{name: "XDENSITY", label: "Crys. Density", cell: "string", editable: false},
 			        			{name: "ABUNDANCE", label: "Fraction", cell: "string", editable: false},
 			                    ];
 			
