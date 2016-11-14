@@ -25,7 +25,9 @@ define(["marionette",
 		},
 		
 		initialize: function(options) {
-			// get all samples containing this phase
+            Backbone.Validation.bind(this);
+
+            // get all samples containing this phase
 			this.samples = new Samples();
 			this.samples.state.pageSize = 5;
 			this.samples.queryParams.pid = this.model.get("PROTEINID");
@@ -42,7 +44,7 @@ define(["marionette",
 			var edit = new Editable({ model: this.model, el: this.$el });
 			edit.create("NAME", "text");
 			edit.create("ACRONYM", "text");
-			edit.create("COMPOSITION", "text");
+			edit.create("SEQUENCE", "text");
 			edit.create("DENSITY", "text");
 		
             // Prevent cyclic dependency
