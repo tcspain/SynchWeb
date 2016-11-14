@@ -8,9 +8,10 @@ define(["marionette",
         "modules/dc/views/getdcview",
         "models/protein",
         "collections/proteins", /*"collections/phasecollection",*/
-        "views/table",
+//        "views/table",
         "utils/phasecompositor",
         "modules/types/xpdf/samples/views/newphaseview",
+        "modules/types/xpdf/samples/views/phasetableview",
         "tpl!templates/types/xpdf/samples/sample.html",
         ], function(Marionette,
         		Editable,
@@ -18,9 +19,10 @@ define(["marionette",
         		GetDCView,
         		Phase,
         		PhaseCollection,
-        		TableView,
+//        		TableView,
         		phaseCompositor,
         		NewPhaseView,
+        		PhaseTableView,
         		template) {
 	return Marionette.LayoutView.extend({
 		className: "content",
@@ -84,17 +86,17 @@ define(["marionette",
 		},
 		
 		drawPhaseTable: function() {
-			var phaseColumns = [
-			                    {name: "PROTEINID", label: "Code", cell: "string", editable: false},
-			                    {name: "NAME", label: "Name", cell: "string", editable: false},
-			        			{name: "ACRONYM", label: "Identifier", cell: "string", editable: false},
-			        			{name: "MOLECULARMASS", label: "Molecular Mass", cell: "string", editable: false},
-			        			{name: "COMPOSITION", label: "Composition", cell: "string", editable: false},
-//			        			{name: "XDENSITY", label: "Crys. Density", cell: "string", editable: false},
-			        			{name: "ABUNDANCE", label: "Fraction", cell: "string", editable: false},
-			                    ];
+//			var phaseColumns = [
+//			                    {name: "PROTEINID", label: "Code", cell: "string", editable: false},
+//			                    {name: "NAME", label: "Name", cell: "string", editable: false},
+//			        			{name: "ACRONYM", label: "Identifier", cell: "string", editable: false},
+//			        			{name: "MOLECULARMASS", label: "Molecular Mass", cell: "string", editable: false},
+//			        			{name: "COMPOSITION", label: "Composition", cell: "string", editable: false},
+////			        			{name: "XDENSITY", label: "Crys. Density", cell: "string", editable: false},
+//			        			{name: "ABUNDANCE", label: "Fraction", cell: "string", editable: false},
+//			                    ];
 			
-			this.phases.show(new TableView({ collection: this.phaseCollection, columns: phaseColumns, loading: true}));
+			this.phases.show(new PhaseTableView({ collection: this.phaseCollection, loading: true}));
 		},
 		
 		
