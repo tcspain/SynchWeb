@@ -134,9 +134,10 @@ define(["underscore"],
 		 * number of atoms
 		 */
 		massOfCompositionHash: function(compoHash) {
-			_.reduce(compoHash,
+			var self = this;
+			return _.reduce(compoHash,
 					function(memo, value, key) {
-				return memo + elementMasses[key] * value;
+				return memo + self.elementMasses[key] * value;
 			}, 0.0);
 		},
 				
