@@ -86,16 +86,6 @@ define(["marionette",
 		},
 		
 		drawPhaseTable: function() {
-//			var phaseColumns = [
-//			                    {name: "PROTEINID", label: "Code", cell: "string", editable: false},
-//			                    {name: "NAME", label: "Name", cell: "string", editable: false},
-//			        			{name: "ACRONYM", label: "Identifier", cell: "string", editable: false},
-//			        			{name: "MOLECULARMASS", label: "Molecular Mass", cell: "string", editable: false},
-//			        			{name: "COMPOSITION", label: "Composition", cell: "string", editable: false},
-////			        			{name: "XDENSITY", label: "Crys. Density", cell: "string", editable: false},
-//			        			{name: "ABUNDANCE", label: "Fraction", cell: "string", editable: false},
-//			                    ];
-			
 			this.phases.show(new PhaseTableView({ collection: this.phaseCollection, loading: true}));
 		},
 		
