@@ -81,7 +81,7 @@ define(["marionette",
 			});
 			
 			// Show the add phases hidden form in the "newphase" region
-			this.newphase.show(new NewPhaseView());
+			this.newphase.show(new NewPhaseView({"CRYSTALID" : this.model.get("CRYSTALID")}));
 			
 		},
 		
