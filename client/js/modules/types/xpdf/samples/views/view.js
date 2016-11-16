@@ -38,7 +38,7 @@ define(["marionette",
 			// bind the validation
 			Backbone.Validation.bind(this);
 			
-			this.model.initialize(); // This is a terrible idea?
+			this.model.initialize(); // Is this a terrible idea?
 			
 			// Data collections for this sample, that is where the sample ID 
 			// (sid) mathches that of this sample
@@ -47,8 +47,6 @@ define(["marionette",
 			
 			this.phaseCollection = new PhaseCollection();
 			
-//			this.phaseCollection.fetch(null, {queryParams: {sid: this.model.get("BLSAMPLEID"), pp:5} });
-
 			// Calculate the total density and composition, and display
 //			this.updateDensityComposition();
 		},
@@ -67,34 +65,22 @@ define(["marionette",
 			// Show the Data Collections in the history region
 			this.history.show(GetDCView.DCView.get(app.type, { model: this.model, collection: this.dcs, params: { visit: null }, noPageUrl: true, noFilterUrl: true, noSearchUrl: true}));
 			
-			// Show the phases in the "phases" region
-//			this.phases.show(new PhaseView({ model: this.model, collection: this.phaseCollection}));
-
 			// Get the models for all the phases, more or less in parallel
 			this.getAllPhases(this.drawPhaseTable);
-			
-//			var primaryPhase = new Phase({PROTEINID: this.model.get("PROTEINID")});
-//			primaryPhase.fetch({
-//				success: function() {
-//					self.phaseCollection.add(primaryPhase);
-//					self.phaseCollection.add(self.model.get("Components"));
-//					self.drawPhaseTable();
-//				},
-//				error: function() {
-//					console.log("Could not get primary phase for "+self.model.get("BLSAMPLEID"));
-//				},
-//			});
 			
 			// Show the add phases hidden form in the "newphase" region
 			this.newphase.show(new NewPhaseView({"CRYSTALID" : this.model.get("CRYSTALID")}));
 			
 		},
 		
+		// draw the table of all contained phases
 		drawPhaseTable: function(self) {
-			console.log("Drawing phase table");
 			self.phases.show(new PhaseTableView({ collection: self.phaseCollection, loading: true}));
 		},
-		
+
+		// Get all the phases into the phase collection, and then do something.
+		// The something is successFunction, which takes one argument, intended
+		// to be a pointer to this view.
 		getAllPhases: function(successFunction) {
 			// Get the IDs of the primary phase and all secondary components
 			var primaryID = this.model.get("PROTEINID");
@@ -104,8 +90,8 @@ define(["marionette",
 			this.model.updateComponentIds();
 			phaseIDs = this.model.get("COMPONENTIDS");
 			
+			// Add the primary phase to the front of the list
 			phaseIDs.unshift(primaryID);
-			console.log("Found "+phaseIDs.length+" components");
 			
 			// For each ID, fetch the data, and add to the phase collection
 			_.each(phaseIDs, function(element, index, list) {
@@ -113,11 +99,11 @@ define(["marionette",
 				phase.fetch({
 					success: function() {
 						self.phaseCollection.add(phase);
+						// if the number of collected phases is equal to the
+						// number desired, fire the success function
 						if (self.phaseCollection.length == list.length) {
-							console.log("Success! Found all phases");
 							successFunction(self);
 						}
-						console.log("Would add phase "+element+" to the phase table for sample "+self.model.get("BLSAMPLEID"));
 					},
 					error: function() {
 						console.log("Could not get phase information for "+element);
