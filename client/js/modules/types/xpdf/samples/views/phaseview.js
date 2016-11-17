@@ -5,11 +5,13 @@ define(["marionette",
         "utils/editable",
         "collections/samples", // generic sample collection for now
         "modules/types/xpdf/samples/views/molecularmass",
+        "modules/types/xpdf/samples/views/copyphaseview",
         "tpl!templates/types/xpdf/samples/phase.html",
         ], function(Marionette,
         		Editable,
         		Samples,
         		MolecularMassView,
+        		CopyPhaseView,
         		template) {
 	return Marionette.LayoutView.extend({
 		className: "content",
@@ -21,10 +23,12 @@ define(["marionette",
 //			dc: ".datacollections",
 //			containers: ".containers",
 			molecularmass: ".molecularmass",
+			copyPhaseRegio: ".copyphase",
 		},
 		
 		events: {
-			
+            "click a.copyphase": "copyPhase",
+
 		},
 		
 		initialize: function(options) {
@@ -40,16 +44,13 @@ define(["marionette",
 			// Data collections
 			
 			// Formula mass calculation
-			console.log("this.model.MOLECULARMASS is "+this.model.get("MOLECULARMASS"));
 			this.model.set({"MOLECULARMASS" : 9001});
-			console.log("this.model.MOLECULARMASS is "+this.model.get("MOLECULARMASS"));
 			
 			// Crystallographic information: unit cell params, CIF files
 			
 		},
 		
 		onRender: function() {
-			console.log("phaseview:onRender");
 			var self = this;
 			var edit = new Editable({ model: this.model, el: this.$el });
 			edit.create("NAME", "text");
@@ -65,20 +66,20 @@ define(["marionette",
             this.molecularmass.show(new MolecularMassView({model: this.model}));
             
 		},
-		onAttach: function() {
-			console.log("phaseview:onAttach");
+		
+		// Open a modal dialog to allow selection of a phase to copy details
+		// from
+		copyPhase: function() {
+			console.log("phaseview:copyPhase");
+			var copyPhaseView = new CopyPhaseView({ model: this.model });
+			this.listenTo(copyPhaseView, "copyPhaseRegio:success", this.refreshPhase);
+			app.dialog.show(copyPhaseView);
 		},
-		onShow: function() {
-			console.log("phaseview:onShow");
-		},
-		onDomRefresh: function() {
-			console.log("phaseview:onDomRefresh");
-		},
-		onAddChild: function() {
-			console.log("phaseview:onAddChild");
-		},
-		onDestroy: function() {
-			console.log("phaseview:onDestroy");
+
+		// Fetch the model and re-render the view
+		refreshPhase: function() {
+//			this.model.fetch();
+			this.render();
 		}
 	});
 });
