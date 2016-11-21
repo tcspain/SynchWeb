@@ -4,25 +4,23 @@
  */
 
 define([
+        "backgrid",
         "views/dialog",
+        "models/protein",
         "collections/proteins",
         "utils/table",
         "modules/types/xpdf/samples/views/proteinlist",
         "tpl!templates/types/xpdf/samples/copyphase.html"
         ], function(
+        		Backgrid,
         		DialogView,
+        		Phase,
         		Phases,
         		table,
         		PhaseList,
         		template
         		) {
 
-	var selectARow = table.ClickableRow.extend({
-		event: "proteins:select",
-		argument: "PROTEINID",
-		cookie: true,
-	});
-	
 	return DialogView.extend({
 		template: template,
 		className: "form",
@@ -41,11 +39,24 @@ define([
 			var self = this;
 			this.model = options.model;
 
+			// The Backgrid row class
+			var selectARow = Backgrid.Row.extend({
+				events:{
+					"click": "onClick",
+				},
+				
+				onClick: function(e) {
+					self.doSelect(this.model.get("PROTEINID"));
+				}
+			});
+			
 			this.phases = new Phases();
 			this.phases.fetch().done( function() {
 				self.phaseList.show(new PhaseList({collection: self.phases, row: selectARow}));
 			});
-			this.listenTo(this.phaseList, "proteins:select", this.doSelect)
+			
+			this.onSuccess = options.onSuccess;
+
 			// Get all phases for the current proposal
 			//			this.allPhases =
 		},
@@ -62,7 +73,35 @@ define([
         	var self = this;
         	console.log("copyphaseview:doCopy");
         	self.closeDialog();
-			app.trigger("copyPhaseRegio:success");
+        	
+        	var sourcePhase = new Phase();
+        	sourcePhase.set({"PROTEINID": this.selectedProtein,});
+        	sourcePhase.fetch({
+        		success: function() {
+        			self.copyData(sourcePhase);
+        		},
+        		error: function() {
+        			console.log("Could not get source phase, pid=" + self.selectedProtein);
+        		}
+        	});
+        	
 		},
+		
+		copyData : function(sourcePhase) {
+        	console.log("Copying from source phase id "+sourcePhase.get("PROTEINID")+" to target phase id "+this.model.get("PROTEINID"));
+        	
+        	// Copy the actual data across
+        	var copyProperties = ["NAME", "ACRONYM", "MOLECULARMASS", "SEQUENCE"];
+        	this.model.save({
+        		"NAME": sourcePhase.get("NAME"),
+        		"ACRONYM": sourcePhase.get("ACRONYM"),
+        		"MOLECULARMASS": sourcePhase.get("MOLECULARMASS"),
+        		"SEQUENCE": sourcePhase.get("SEQUENCE"),
+        	}, {patch: true});
+        	
+//			app.trigger("copyPhaseRegio:success");
+        	this.onSuccess();
+
+		}
 	});
 });
