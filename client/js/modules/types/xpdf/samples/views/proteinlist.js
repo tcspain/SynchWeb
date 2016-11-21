@@ -3,8 +3,14 @@
  */
 
 define(["marionette",
+        "views/table",
+        "utils/table",
+        "collections/componenttypes",
         "modules/samples/views/proteinlist"
         ], function(Marionette,
+        		TableView,
+        		table,
+        		ComponentTypes,
         		ProteinList) {
 	
 	return ProteinList.extend({
@@ -21,9 +27,8 @@ define(["marionette",
 	
 		hiddenColumns: [],
 		
-		intialize: function(options) {
+		initialize: function(options) {
 //			ProteinList.initialize(options);
-			console.log("Init XPDF phase list");
 			// Mostly a copy-paste of the base class initialize() 
 			if (app.mobile()) {
 				_.each(this.getOption('hiddenColumns'), function(v) {
@@ -31,16 +36,18 @@ define(["marionette",
 				});
 			}
 
-			console.log(options);
+//			console.log(options);
 			// Allow some flexibility in the row type
-			var row = (typeof (options.row) == "undefined") ?
-					table.ClickableRow.extend({
+			var row;
+			if (typeof (options.row) == "undefined") {
+				row = table.ClickableRow.extend({
 						event: 'proteins:view',
 						argument: 'PROTEINID',
 						cookie: true,
-			  }) : 
-				  options.row;
-
+			  });
+			  } else {
+				  row = options.row;
+			  }
 			
 			var self = this;
 			this.table = new TableView({ collection: options.collection, columns: this.getOption('columns'), tableClass: 'proposals', filter: 's', search: options.params && options.params.s, loading: true, 
