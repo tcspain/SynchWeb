@@ -31,6 +31,10 @@ define(["marionette",
 
 		},
 		
+		modelEvents: {
+			"sync" : "render",
+			},
+		
 		initialize: function(options) {
 			console.log("phaseview:initialize");
 			Backbone.Validation.bind(this);
@@ -70,16 +74,13 @@ define(["marionette",
 		// Open a modal dialog to allow selection of a phase to copy details
 		// from
 		copyPhase: function() {
-			console.log("phaseview:copyPhase");
-			var copyPhaseView = new CopyPhaseView({ model: this.model });
-			this.listenTo(copyPhaseView, "copyPhaseRegio:success", this.refreshPhase);
+			var copyPhaseView = new CopyPhaseView({ model: this.model, onSuccess: this.refreshPhase });
 			app.dialog.show(copyPhaseView);
 		},
 
 		// Fetch the model and re-render the view
 		refreshPhase: function() {
-//			this.model.fetch();
-			this.render();
+			this.model.fetch();
 		}
 	});
 });
