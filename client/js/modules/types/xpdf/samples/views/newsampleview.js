@@ -5,7 +5,7 @@
 define(["marionette",
         "models/protein",
         "models/sample",
-        "tpl!templates/types/xpdf/newsample.html"],
+        "tpl!templates/types/xpdf/samples/newsample.html"],
         function(Marionette,
         		Phase,
         		Sample,
