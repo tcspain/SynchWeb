@@ -75,7 +75,7 @@ define(["marionette",
 		
 		// draw the table of all contained phases
 		drawPhaseTable: function(self) {
-			self.phases.show(new PhaseTableView({ collection: self.phaseCollection, loading: true}));
+			self.phases.show(new PhaseTableView({ collection: self.phaseCollection, loading: true, sampleId: self.model.get("BLSAMPLEID")}));
 		},
 
 		// Get all the phases into the phase collection, and then do something.
