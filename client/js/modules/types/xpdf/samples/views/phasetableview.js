@@ -69,21 +69,23 @@ define([
 		},
 
 		doRemove: function(event) {
-			console.log("Removing phase "+this.model.get("PROTEINID")+" from "+this.sampleId);
+			console.log("Removing phase "+this.model.get("PROTEINID")+" from "+this.sample.get("BLSAMPLEID"));
 
-			var theSample = new Sample();
-			theSample.set({"BLSAMPLEID": this.sampleId});
+//			var theSample = new Sample();
+//			theSample.set({"BLSAMPLEID": this.sampleId});
 			var removedPhaseId = this.model.get("PROTEINID");
-			theSample.fetch({
-				success: function(model, response, options) {
-					removePhase(theSample, removedPhaseId);
-				},
-				error: function(model, response, options){
-					// Cannot get the sample with that ID? Do nothing
-				}
-			
-			});
-		
+//			theSample.fetch({
+//				success: function(model, response, options) {
+//					removePhase(theSample, removedPhaseId);
+//				},
+//				error: function(model, response, options){
+//					// Cannot get the sample with that ID? Do nothing
+//				}
+//			
+//			});
+
+			var theSample = this.sample;
+			removePhase(theSample, removedPhaseId);
 		},
 	});
 	
@@ -99,7 +101,7 @@ define([
 			               {name: "SEQUENCE", label: "Composition", cell: "string", editable: false},
 //			               {name: "XDENSITY", label: "Crys. Density", cell: "string", editable: false},
 			               {name: "ABUNDANCE", label: "Fraction", cell: "string", editable: true},
-			               {name: "REMOVE", label: "Remove", cell: RemoveCell.extend({sampleId: options.sampleId,}), editable: false},
+			               {name: "REMOVE", label: "Remove", cell: RemoveCell.extend({sampleId: options.sampleId, sample: options.sample,}), editable: false},
 	                  ];
 			TableView.prototype.initialize.apply(this, [options]);
 		},
