@@ -34,6 +34,10 @@ define(["marionette",
 			newphase: ".newphase",
 		},
 		
+		modelEvents: {
+			"sync" : "render",
+		},
+		
 		initialize: function(options) {
 			// bind the validation
 			Backbone.Validation.bind(this);
@@ -75,7 +79,7 @@ define(["marionette",
 		
 		// draw the table of all contained phases
 		drawPhaseTable: function(self) {
-			self.phases.show(new PhaseTableView({ collection: self.phaseCollection, loading: true, sampleId: self.model.get("BLSAMPLEID")}));
+			self.phases.show(new PhaseTableView({ collection: self.phaseCollection, loading: true, sampleId: self.model.get("BLSAMPLEID"), sample: self.model}));
 		},
 
 		// Get all the phases into the phase collection, and then do something.
@@ -88,11 +92,12 @@ define(["marionette",
 			var self = this;
 			
 			this.model.updateComponentIds();
-			phaseIDs = this.model.get("COMPONENTIDS");
+			phaseIDs = this.model.get("COMPONENTIDS").slice();
 			
 			// Add the primary phase to the front of the list
 			phaseIDs.unshift(primaryID);
 			
+			this.phaseCollection = new PhaseCollection();
 			// For each ID, fetch the data, and add to the phase collection
 			_.each(phaseIDs, function(element, index, list) {
 				var phase = new Phase({PROTEINID: element});
