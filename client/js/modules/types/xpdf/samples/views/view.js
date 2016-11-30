@@ -12,6 +12,7 @@ define(["marionette",
         "utils/phasecompositor",
         "modules/types/xpdf/samples/views/newphaseview",
         "modules/types/xpdf/samples/views/phasetableview",
+        "modules/types/xpdf/samples/views/createinstance",
         "tpl!templates/types/xpdf/samples/sample.html",
         ], function(Marionette,
         		Editable,
@@ -23,7 +24,9 @@ define(["marionette",
         		phaseCompositor,
         		NewPhaseView,
         		PhaseTableView,
+        		CreateInstanceView,
         		template) {
+	
 	return Marionette.LayoutView.extend({
 		className: "content",
 		template: template,
@@ -32,6 +35,12 @@ define(["marionette",
 			history: '.history',
 			phases: ".phases",
 			newphase: ".newphase",
+			makeInstance: ".makeinstance",
+			xpdfContainer: ".xpdfcontainer",
+		},
+		
+		events: {
+			"click a.makeinstance": "showInstance",
 		},
 		
 		modelEvents: {
@@ -75,6 +84,14 @@ define(["marionette",
 			// Show the add phases hidden form in the "newphase" region
 			this.newphase.show(new NewPhaseView({"CRYSTALID" : this.model.get("CRYSTALID")}));
 			
+			// The instance information
+			var sampleComment = this.model.get("COMMENT"); 
+			if (!(new Boolean(sampleComment)) && sampleComment.includes("INSTANCE")) {
+				this.xpdfContainer.show(new Marionette.LayoutView.extend({
+					template:"<span class=\"thecontainer\">xx mm capillary</span>",
+				}));
+			}
+			
 		},
 		
 		// draw the table of all contained phases
@@ -116,6 +133,15 @@ define(["marionette",
 				});
 			}, {});
 			
+		},
+		
+		// Based on whether the ISPyB Sample is an XPDF instance, showing the 
+		// details of the container if it is, and the button to select the 
+		// container if it is not.
+		// Currently, an instance has the word INSTANCE in its comment
+		showInstance: function() {
+			var makeInstanceView = new CreateInstanceView({model: this.model});
+			app.dialog.show(makeInstanceView);
 		},
 		
 		
