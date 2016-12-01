@@ -284,7 +284,6 @@
                         array_push($params, &$row[$field->name]);
                     }
                     call_user_func_array(array($stmt, 'bind_result'), $params);
-
                     while ($stmt->fetch()) {
                         $c = array();
                         // Oracle returns all values as strings - Need to be consistent :(
@@ -310,17 +309,17 @@
             if ($this->debug) print_r(array('rows', sizeof($data)));
 
             // Need mysqlnd for this :(
-            // $result = $stmt->get_result();
+            $result = $stmt->get_result();
             
-            // $data = array();
+            $data = array();
             
-            // if ($result) {
-            //     if($result->num_rows > 0) {
-            //         while($row = $result->fetch_assoc()) {
-            //             array_push($data, array_change_key_case($row, CASE_UPPER));
-            //         }
-            //     }
-            // }
+            if ($result) {
+                if($result->num_rows > 0) {
+                    while($row = $result->fetch_assoc()) {
+                        array_push($data, array_change_key_case($row, CASE_UPPER));
+                    }
+                }
+            }
             
             $stmt->close();
 
