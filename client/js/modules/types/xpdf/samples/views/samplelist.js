@@ -6,13 +6,15 @@ define(["marionette",
         "modules/samples/views/list",
         "views/table",
         "utils/table",
-        "modules/types/xpdf/samples/views/newsampleview",
+        "models/proposal",
+        "modules/types/xpdf/samples/views/newemptysample",
         "tpl!templates/types/xpdf/samples/samplelist.html"
         ], function(Marionette,
         		SampleList,
         		TableView,
         		table,
-        		NewSampleView,
+        		Proposal,
+        		newEmptySample,
         		template) {
 	
 	  var ClickableRow = table.ClickableRow.extend({
@@ -26,8 +28,11 @@ define(["marionette",
 		template: template,
 		regions: {
 			wrap: ".wrapper",
-			newsample: ".newsample"
 				},
+				
+		events: {
+			"click #new_sample": "newSample",
+		},
 				
 		filters:[],
 				
@@ -58,7 +63,21 @@ define(["marionette",
          
          onRender: function() {
         	 this.wrap.show(this.sampleTable);
-        	 this.newsample.show(new NewSampleView());
+         },
+         
+         newSample: function() {
+        	 // This page lists samples from all visits in this proposal. Get the most recent visit.
+        	 var prop = new Proposal({PROPOSAL: app.prop});
+        	 prop.fetch({
+        		 success: function(model, response, options) {
+        			 var visitString = prop.get("PROPOSAL")+"-"+prop.get("VCOUNT");
+        			 console.log("New sample for visit "+visitString);
+        			 newEmptySample.run(visitString);
+        		 },
+        		 error: function(model, response, options) {
+        			 console.log("Could not get proposal data.");
+        		 },
+        	 });
          }
 	});
 	
