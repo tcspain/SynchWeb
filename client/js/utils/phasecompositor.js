@@ -6,8 +6,9 @@ define(["underscore"],
 		function(_) {
 	return {
 		densityComposite: function(phaseCollection) {
-			var totalMass = phaseCollection.reduce(function(memo, phase) {return memo +  phase.get("ABUNDANCE")}, 0.0);
-			var totalVolume = phaseCollection.reduce(function(memo, phase) {return memo + phase.get("ABUNDANCE")/phase.get("XDENSITY")}, 0.0);
+			var nonNullPhaseCollection = phaseCollection.reject(function(phase){phase.get("ABUNDANCE") == 0 || phase.get("XDENSITY") == 0});
+			var totalMass = nonNullPhaseCollection.reduce(function(memo, phase) {return memo +  phase.get("ABUNDANCE")}, 0.0);
+			var totalVolume = nonNullPhaseCollection.reduce(function(memo, phase) {return memo + phase.get("ABUNDANCE")/phase.get("XDENSITY")}, 0.0);
 			return totalMass/totalVolume;
 		},
 		
@@ -19,7 +20,9 @@ define(["underscore"],
 			var totalFimi = 0;
 //			var elements = {};
 			// iterate over all phases
-			var elementsAndFimi = phaseCollection.reduce(function(localElementMemo, phaseModel, key, list) {
+			var nonNullPhaseCollection = phaseCollection.reject(function(phase){phase.get("SEQUENCE") === null});
+			
+			var elementsAndFimi = nonNullPhaseCollection.reduce(function(localElementMemo, phaseModel, key, list) {
 				
 				/* decode the composition in the phase, and return the
 				 * weighted elemental abundances (moles per unit mass) and the

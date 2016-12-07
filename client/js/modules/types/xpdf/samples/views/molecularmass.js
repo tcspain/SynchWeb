@@ -25,8 +25,12 @@ define([
 		},
 		
 		updateMolecularMass: function() {
-			this.model.set({"MOLECULARMASS": phaseCompositor.massOfCompositionHash(phaseCompositor.mapFormula(this.model.get("SEQUENCE")))});
-			console.log("molecularmass:UpdateMolecularMass"+this.model.get("MOLECUALRMASS"));
+			if (this.model.get("SEQUENCE") === null) {
+				// Do nothing
+			} else {
+				this.model.set({"MOLECULARMASS": phaseCompositor.massOfCompositionHash(phaseCompositor.mapFormula(this.model.get("SEQUENCE")))});
+				console.log("molecularmass:UpdateMolecularMass"+this.model.get("MOLECUALRMASS"));
+			}
 		},
 	});
 });
