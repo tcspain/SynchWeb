@@ -47,9 +47,6 @@ define(["marionette",
 			
 			// Data collections
 			
-			// Formula mass calculation
-			this.model.set({"MOLECULARMASS" : 9001});
-			
 			// Crystallographic information: unit cell params, CIF files
 			
 		},
