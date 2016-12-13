@@ -147,7 +147,7 @@ define(["jquery",
 					type: "text",
 					submit: "OK",
 					tooltip: "Click to edit",
-					onblur: "submit",
+//					onblur: "submit",
 
 				});
 			});
