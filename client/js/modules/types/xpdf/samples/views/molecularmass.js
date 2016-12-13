@@ -17,19 +17,21 @@ define([
 		template: template,
 		initialize: function(options) {
 			this.model = options.model;
-			this.updateMolecularMass();
+			this.checkAndUpdateMolecularMass();
 		},
 		
 		onRender: function() {
-			this.updateMolecularMass();
+			this.checkAndUpdateMolecularMass()
 		},
 		
-		updateMolecularMass: function() {
+		checkAndUpdateMolecularMass: function() {
 			if (this.model.get("SEQUENCE") === null) {
 				// Do nothing
 			} else {
-				this.model.set({"MOLECULARMASS": phaseCompositor.massOfCompositionHash(phaseCompositor.mapFormula(this.model.get("SEQUENCE")))});
-				console.log("molecularmass:UpdateMolecularMass"+this.model.get("MOLECUALRMASS"));
+				var currentMolecularMass = this.model.get("MOLECULARMASS");
+				var molecularMass = phaseCompositor.massOfCompositionHash(phaseCompositor.mapFormula(this.model.get("SEQUENCE")));
+				if (currentMolecularMass != molecularMass)
+					this.model.save({"MOLECULARMASS": molecularMass}, {patch:true});
 			}
 		},
 	});
