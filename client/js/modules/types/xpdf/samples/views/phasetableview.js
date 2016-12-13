@@ -2,12 +2,14 @@
  * A class to draw the editable table of phases in the XPDF sample page. 
  */
 
-define([
+define(["jquery",
         "marionette",
         "views/table",
         "utils/table",
-        "models/sample"
+        "models/sample",
+        "jquery.editable",
         ], function(
+        		$,
         		Marionette,
         		TableView,
         		table,
@@ -89,6 +91,18 @@ define([
 		},
 	});
 	
+	var AbundanceCell = table.TemplateCell.extend({
+		getTemplate: function() {
+			return "<div class=\"abundance editable "+this.model.get("PROTEINID")+"\">Click to edit</div>";
+		},
+		
+		
+		setAbundance: function(event) {
+			console.log("Setting abundance for "+this.model.get("PROTEINID")+" in sample"+this.sampleId);
+		}
+		
+	});
+	
 	return TableView.extend({
 		
 
@@ -100,7 +114,7 @@ define([
 			               {name: "MOLECULARMASS", label: "Molecular Mass", cell: "string", editable: false},
 			               {name: "SEQUENCE", label: "Composition", cell: "string", editable: false},
 //			               {name: "XDENSITY", label: "Crys. Density", cell: "string", editable: false},
-			               {name: "ABUNDANCE", label: "Fraction", cell: "string", editable: true},
+			               {name: "ABUNDANCE", label: "Fraction", cell: AbundanceCell.extend({sampleId: options.sampleId, sample: options.sample}), editable: false},
 			               {name: "REMOVE", label: "Remove", cell: RemoveCell.extend({sampleId: options.sampleId, sample: options.sample,}), editable: false},
 	                  ];
 			TableView.prototype.initialize.apply(this, [options]);
@@ -114,6 +128,29 @@ define([
         		argument: "PROTEINID",
         		cookie: true,
         	}),
+        },
+		onRender() {
+        	TableView.prototype.onRender.apply(this, []);
+			// Set up the editable abundance cell as soon as the DOM can handle it
+			var view = this;
+			console.log("TableView.extend.onRender()");
+			$(function() {
+				console.log("Readying AbundanceCell");
+				console.log("$.editable"+$.editable);
+				
+				view.$(".abundance").editable(function(value, settings) {
+//					console.log("PROTEINID="+model.get("PROTEINID"));
+					console.log("Value="+value);
+					console.log(settings);
+					return value;
+				}, {
+					type: "text",
+					submit: "OK",
+					tooltip: "Click to edit",
+					onblur: "submit",
+
+				});
+			});
         },
 	});
 });
