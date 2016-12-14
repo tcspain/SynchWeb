@@ -12,7 +12,6 @@ define([
         		template
         		) {
 	
-	
 	return Marionette.LayoutView.extend({
 		template: template,
 		initialize: function(options) {
@@ -28,10 +27,10 @@ define([
 			if (this.model.get("SEQUENCE") === null) {
 				// Do nothing
 			} else {
-				var currentMolecularMass = this.model.get("MOLECULARMASS");
-				var molecularMass = phaseCompositor.massOfCompositionHash(phaseCompositor.mapFormula(this.model.get("SEQUENCE")));
-				if (currentMolecularMass != molecularMass)
-					this.model.save({"MOLECULARMASS": molecularMass}, {patch:true});
+				/*string*/ var currentMolecularMass = this.model.get("MOLECULARMASS");
+				/*double*/ var molecularMass = phaseCompositor.massOfCompositionHash(phaseCompositor.mapFormula(this.model.get("SEQUENCE")));
+				if (currentMolecularMass != molecularMass.toFixed(3))
+					this.model.save({"MOLECULARMASS": molecularMass.toFixed(3)}, {patch:true});
 			}
 		},
 	});
