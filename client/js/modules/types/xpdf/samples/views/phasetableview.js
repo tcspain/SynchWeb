@@ -85,20 +85,24 @@ define(["jquery",
 	
 	var AbundanceCell = table.TemplateCell.extend({
 		getTemplate: function() {
-			return "<div class=\"abundance editable "+this.model.get("PROTEINID")+"\">Click to edit</div>";
+			var abundance = this.abundanceMap[this.model.get("PROTEINID")];
+			if (Number.isNaN(Number.parseFloat(abundance)))
+					abundance = "-";
+						
+			return "<div class=\"abundance editable "+this.model.get("PROTEINID")+"\">"+abundance+"</div>";
 		},
-		
-		
-		setAbundance: function(event) {
-			console.log("Setting abundance for "+this.model.get("PROTEINID")+" in sample"+this.sampleId);
-		}
-		
 	});
 	
 	return TableView.extend({
 		
 
 		initialize: function(options) {
+			this.sampleId = options.sampleId;
+			this.sample = options.sample;
+
+			// create a map of proteinids to abundances
+			var abundanceMap = this.makeAbundanceMap(this.sample);
+			
 			this.columns= [
 			               {name: "PROTEINID", label: "Code", cell: "string", editable: false},
 			               {name: "NAME", label: "Name", cell: "string", editable: false},
@@ -106,7 +110,7 @@ define(["jquery",
 			               {name: "MOLECULARMASS", label: "Molecular Mass", cell: "string", editable: false},
 			               {name: "SEQUENCE", label: "Composition", cell: "string", editable: false},
 //			               {name: "XDENSITY", label: "Crys. Density", cell: "string", editable: false},
-			               {name: "ABUNDANCE", label: "Fraction", cell: AbundanceCell.extend({sampleId: options.sampleId, sample: options.sample}), editable: false},
+			               {name: "ABUNDANCE", label: "Fraction", cell: AbundanceCell.extend({sampleId: options.sampleId, sample: options.sample, abundanceMap: abundanceMap}), editable: false},
 			               {name: "REMOVE", label: "Remove", cell: RemoveCell.extend({sampleId: options.sampleId, sample: options.sample,}), editable: false},
 			               {name: "GOTO", label: "Phase Details", cell: GotoCell, editable: false},
 	                  ];
@@ -123,19 +127,18 @@ define(["jquery",
 //        	}),
 //        },
 
-		onRender() {
+		onRender: function() {
         	TableView.prototype.onRender.apply(this, []);
 			// Set up the editable abundance cell as soon as the DOM can handle it
 			var view = this;
-			console.log("TableView.extend.onRender()");
 			$(function() {
-				console.log("Readying AbundanceCell");
-				console.log("$.editable"+$.editable);
-				
 				view.$(".abundance").editable(function(value, settings) {
-					console.log("Value="+value);
-					console.log(settings);
-					return value;
+					// If there is a better way to get per-cell model parameters here, please change this
+					var allClasses = this.classList;
+					var idClass = _.without(allClasses, "abundance", "editable");
+					var phaseId = (idClass)[0];
+					var validatedValue = view.setAbundance(phaseId, value);
+					return validatedValue;
 				}, {
 					type: "text",
 					submit: "OK",
@@ -144,5 +147,52 @@ define(["jquery",
 				});
 			});
         },
+        
+        setAbundance: function(phaseId, abundance) {
+        	
+        	var componentAbundancesString = "COMPONENTAMOUNTS";
+        	var validateAbundance = function(rawAbundance) {
+        		var abundance = Number(rawAbundance);
+        		return (abundance >= 0.0) && (abundance <= 1.0);
+        	}
+
+			// Check for primary phase
+        	if (this.sample.get("PROTEINID") === phaseId) {
+        		// Assign the new primary phase abundance, after validation
+        		console.log("changing primary phase abundance to "+abundance);
+        		if (!validateAbundance(abundance)) return this.sample.get("ABUNDANCE");
+        		this.sample.save({"ABUNDANCE": abundance}, {patch: true});
+        	} else {
+        		
+        		// Assign the new abundance to the correct model from the
+        		// sample components collection, after validation
+        		var targetPhase = this.sample.get("components").findWhere({PROTEINID: phaseId});
+        		var oldAbundance = targetPhase.get("ABUNDANCE");
+				if (!validateAbundance(abundance)) return oldAbundance;
+        		targetPhase.set({"ABUNDANCE": abundance});
+        		this.sample.save();        		
+			}
+			return abundance;
+        },
+        
+        makeAbundanceMap: function(sample) {
+        	var aMap = {};
+        	var key;
+        	var abundance;
+        	// primary
+        	key = sample.get("PROTEINID");
+        	abundance = sample.get("ABUNDANCE");
+        	aMap[key] = abundance;
+        	
+        	// components
+        	var nComponents = sample.get("COMPONENTIDS").length;
+        	for (i=0; i < nComponents; i++) {
+        		key = sample.get("COMPONENTIDS")[i];
+        		abundance = sample.get("COMPONENTAMOUNTS")[i];
+        		aMap[key] = abundance;
+        	}
+        	
+        	return aMap;
+        }
 	});
 });
