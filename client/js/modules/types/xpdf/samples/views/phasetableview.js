@@ -71,23 +71,15 @@ define(["jquery",
 		},
 
 		doRemove: function(event) {
-			console.log("Removing phase "+this.model.get("PROTEINID")+" from "+this.sample.get("BLSAMPLEID"));
-
-//			var theSample = new Sample();
-//			theSample.set({"BLSAMPLEID": this.sampleId});
 			var removedPhaseId = this.model.get("PROTEINID");
-//			theSample.fetch({
-//				success: function(model, response, options) {
-//					removePhase(theSample, removedPhaseId);
-//				},
-//				error: function(model, response, options){
-//					// Cannot get the sample with that ID? Do nothing
-//				}
-//			
-//			});
-
 			var theSample = this.sample;
 			removePhase(theSample, removedPhaseId);
+		},
+	});
+	
+	var GotoCell = table.TemplateCell.extend({
+		getTemplate: function() {
+			return "<a class=\"button button-notext gotolink\" title=\"Go to Phase\" href=\"/proteins/pid/<%=PROTEINID%>\"><i class=\"fa fa-share\"></i></a>";
 		},
 	});
 	
@@ -116,19 +108,21 @@ define(["jquery",
 //			               {name: "XDENSITY", label: "Crys. Density", cell: "string", editable: false},
 			               {name: "ABUNDANCE", label: "Fraction", cell: AbundanceCell.extend({sampleId: options.sampleId, sample: options.sample}), editable: false},
 			               {name: "REMOVE", label: "Remove", cell: RemoveCell.extend({sampleId: options.sampleId, sample: options.sample,}), editable: false},
+			               {name: "GOTO", label: "Phase Details", cell: GotoCell, editable: false},
 	                  ];
 			TableView.prototype.initialize.apply(this, [options]);
 		},
 		
         // Set the row to be clickable, and for the click to display
         // the phase information page
-        backgrid: {
-        	row: table.ClickableRow.extend({
-        		event: "proteins:view",
-        		argument: "PROTEINID",
-        		cookie: true,
-        	}),
-        },
+//        backgrid: {
+//        	row: table.ClickableRow.extend({
+//        		event: "proteins:view",
+//        		argument: "PROTEINID",
+//        		cookie: true,
+//        	}),
+//        },
+
 		onRender() {
         	TableView.prototype.onRender.apply(this, []);
 			// Set up the editable abundance cell as soon as the DOM can handle it
@@ -139,7 +133,6 @@ define(["jquery",
 				console.log("$.editable"+$.editable);
 				
 				view.$(".abundance").editable(function(value, settings) {
-//					console.log("PROTEINID="+model.get("PROTEINID"));
 					console.log("Value="+value);
 					console.log(settings);
 					return value;
@@ -147,7 +140,6 @@ define(["jquery",
 					type: "text",
 					submit: "OK",
 					tooltip: "Click to edit",
-//					onblur: "submit",
 
 				});
 			});
