@@ -59,9 +59,8 @@ define(["marionette",
 			this.dcs.fetch();
 			
 			this.phaseCollection = new PhaseCollection();
+			this.model.set({"COMPOSITION": "N/A"});
 			
-			// Calculate the total density and composition, and display
-//			this.updateDensityComposition();
 		},
 		
 		onRender: function() {
@@ -97,6 +96,11 @@ define(["marionette",
 		// draw the table of all contained phases
 		drawPhaseTable: function(self) {
 			self.phases.show(new PhaseTableView({ collection: self.phaseCollection, loading: true, sampleId: self.model.get("BLSAMPLEID"), sample: self.model}));
+			// We also want to update the composition once we have the
+			// collection of phases:
+			// Calculate the total density and composition, and display
+			self.updateDensityComposition(false, true);
+
 		},
 
 		// Get all the phases into the phase collection, and then do something.
@@ -110,9 +114,11 @@ define(["marionette",
 			
 			this.model.updateComponentIds();
 			phaseIDs = this.model.get("COMPONENTIDS").slice();
-			
-			// Add the primary phase to the front of the list
+	        // Add the primary phase to the front of the list
 			phaseIDs.unshift(primaryID);
+			
+			// Make the map between PROTEINID and abundance in this sample
+			this.abundanceMap = this.makeAbundanceMap(this.model); 
 			
 			this.phaseCollection = new PhaseCollection();
 			// For each ID, fetch the data, and add to the phase collection
@@ -144,15 +150,47 @@ define(["marionette",
 			app.dialog.show(makeInstanceView);
 		},
 		
+		makeAbundanceMap: function(sample) {
+        	var aMap = {};
+        	var key;
+        	var abundance;
+        	// primary
+        	key = sample.get("PROTEINID");
+        	abundance = sample.get("ABUNDANCE");
+        	aMap[key] = abundance;
+        	
+        	// components
+        	var nComponents = sample.get("COMPONENTIDS").length;
+        	for (i=0; i < nComponents; i++) {
+        		key = sample.get("COMPONENTIDS")[i];
+        		abundance = sample.get("COMPONENTAMOUNTS")[i];
+        		aMap[key] = abundance;
+        	}
+        	
+        	return aMap;
+        },
 		
-		updateDensityComposition: function() {
+		updateDensityComposition: function(doDensity, doComposition) {
+			var isChanged = false;
 			if (this.phaseCollection.length > 0) { 
-				var density = phaseCompositor.densityComposite(this.phaseCollection);
-				var roundedDensity = this.roundXdp(density, 2);
-				this.model.set("XDENSITY", roundedDensity);
-			
-				var composition = phaseCompositor.compositionComposite(this.phaseCollection);
-				this.model.set("COMPOSITION", composition);
+				if (doDensity) {
+					var oldDensity = this.model.get("XDENSITY");
+					var density = phaseCompositor.densityComposite(this.phaseCollection);
+					var roundedDensity = this.roundXdp(density, 2);
+					if (oldDensity != roundedDensity) {
+						this.model.set("XDENSITY", roundedDensity);
+						isChanged = true;
+					}
+				}
+				if (doComposition) {
+					var oldComposition = this.model.get("COMPOSITION");
+					var composition = phaseCompositor.compositionComposite(this.phaseCollection, this.abundanceMap);
+					if (oldComposition != composition) {
+						this.model.set({"COMPOSITION": composition});
+						isChanged = true;
+					}
+				}
+				if (isChanged) this.render();
 			}
 		},
 		
