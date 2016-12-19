@@ -169,6 +169,10 @@ define(["underscore"],
 			return formula;
 		},
 		
+		mapFormula: function(formula) {
+			return mapFormula(formula);
+		},
+		
 		/*
 		 * Calculates the mass of a composition hash, mapping elements to the
 		 * number of atoms
@@ -180,5 +184,7 @@ define(["underscore"],
 				return memo + self.elementMasses[key] * value;
 			}, 0.0);
 		},
+		elementMasses: elementMasses,
+		
 	}
 });
