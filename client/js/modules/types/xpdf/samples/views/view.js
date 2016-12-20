@@ -179,7 +179,7 @@ define(["marionette",
 				if (doDensity) {
 					var oldDensity = this.model.get("XDENSITY");
 					var density = phaseCompositor.densityComposite(this.phaseCollection);
-					var roundedDensity = this.roundXdp(density, 2);
+					var roundedDensity = density.toFixed(2);
 					if (oldDensity != roundedDensity) {
 						this.model.set("XDENSITY", roundedDensity);
 						isChanged = true;
@@ -202,15 +202,5 @@ define(["marionette",
 			var linkPhaseView = new LinkPhaseView({ model: this.model});
 			app.dialog.show(linkPhaseView);
 		},
-		
-		/*
-		 * Naive method of rounding to a set number of decimal places (not 
-		 * significant figures).
-		 */
-		roundXdp: function(value, dp) {
-			var dpp = Math.max(0, dp);
-			var scaling = Math.pow(10, dpp);
-			return Math.round(value*scaling)/scaling;
-		}
 	});
 });
