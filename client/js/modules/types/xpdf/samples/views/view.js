@@ -13,6 +13,7 @@ define(["marionette",
         "modules/types/xpdf/samples/views/newphaseview",
         "modules/types/xpdf/samples/views/phasetableview",
         "modules/types/xpdf/samples/views/createinstance",
+        "modules/types/xpdf/samples/views/linkphaseview",
         "tpl!templates/types/xpdf/samples/sample.html",
         ], function(Marionette,
         		Editable,
@@ -25,6 +26,7 @@ define(["marionette",
         		NewPhaseView,
         		PhaseTableView,
         		CreateInstanceView,
+        		LinkPhaseView,
         		template) {
 	
 	return Marionette.LayoutView.extend({
@@ -41,6 +43,7 @@ define(["marionette",
 		
 		events: {
 			"click a.makeinstance": "showInstance",
+			"click a.linkphase": "linkPhase",
 		},
 		
 		modelEvents: {
@@ -192,6 +195,12 @@ define(["marionette",
 				}
 				if (isChanged) this.render();
 			}
+		},
+		
+		// Link a pre-existing phase to this sample, selected from a modal dialog
+		linkPhase: function() {
+			var linkPhaseView = new LinkPhaseView({ model: this.model});
+			app.dialog.show(linkPhaseView);
 		},
 		
 		/*
