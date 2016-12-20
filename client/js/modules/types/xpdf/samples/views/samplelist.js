@@ -36,23 +36,19 @@ define(["marionette",
 				
 		filters:[],
 				
-		columns: [
-		          { name: "NAME", label: "Name", cell: "string", editable: false},
-		          { name: "ACRONYM", label: "ID", cell: "string", editable: false },
-		          { name: "COMMENTS", label: "Comments", cell: "string", editable: false },
-		          { name: "COMPOSITION", label: "Composition", cell: "string", editable: false },
-		          { name: "DENSITY", label: "Density", cell: "string", editable: false},
-		          ],
-		
-		 hiddenColumns: [],
-		          
          initialize: function(options) {
         	 var self = this;
 
-        	 // This is one hell of a table view
         	 this.sampleTable = new TableView( {
         		 collection: options.collection,
-        		 columns: this.getOption("columns"),
+        		 columns: [
+        			          { name: "NAME", label: "Name", cell: "string", editable: false},
+        			          { name: "ACRONYM", label: "ID", cell: "string", editable: false },
+        			          { name: "COMMENTS", label: "Comments", cell: "string", editable: false },
+        			          { name: "SEQUENCE", label: "Composition", cell: "string", editable: false },
+        			          { name: "DENSITY", label: "Density", cell: "string", editable: false},
+        			          ],
+        		 hiddenColumns: [],
         		 loading: true,
         		 backgrid: {
         			 row: ClickableRow, 
