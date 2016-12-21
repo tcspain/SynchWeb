@@ -8,6 +8,7 @@ define(["marionette",
         "utils/table",
         "models/proposal",
         "modules/types/xpdf/samples/views/newemptysample",
+        "modules/types/xpdf/samples/views/samplelisttableview",
         "tpl!templates/types/xpdf/samples/samplelist.html"
         ], function(Marionette,
         		SampleList,
@@ -15,13 +16,8 @@ define(["marionette",
         		table,
         		Proposal,
         		newEmptySample,
+        		SampleListTableView,
         		template) {
-	
-	  var ClickableRow = table.ClickableRow.extend({
-		    event: 'samples:view',
-		    argument: 'BLSAMPLEID',
-		    cookie: true,
-		  })
 	
 	var module = Marionette.LayoutView.extend({
 		className: "content",
@@ -35,30 +31,24 @@ define(["marionette",
 		},
 				
 		filters:[],
-				
+		
+		/*
+		 * options:
+		 * options.collection: the collection of samples to show in the list
+		 * options.phaseId; An optional argument to selecta phase. This will
+		 * result in the abundance of the given phase in each sample being
+		 * shown.
+		 */				
          initialize: function(options) {
-        	 var self = this;
-
-        	 this.sampleTable = new TableView( {
-        		 collection: options.collection,
-        		 columns: [
-        			          { name: "NAME", label: "Name", cell: "string", editable: false},
-        			          { name: "ACRONYM", label: "ID", cell: "string", editable: false },
-        			          { name: "COMMENTS", label: "Comments", cell: "string", editable: false },
-        			          { name: "SEQUENCE", label: "Composition", cell: "string", editable: false },
-        			          { name: "DENSITY", label: "Density", cell: "string", editable: false},
-        			          ],
-        		 hiddenColumns: [],
-        		 loading: true,
-        		 backgrid: {
-        			 row: ClickableRow, 
-        			 emptyText: function() { return self.collection.fetched ? "No samples found" : "Retrieving samples"}
-        		 },
-        	 });
+        	 this.collection = options.collection;
+        	 if (_.contains(options, "phaseId"))
+        		 this.phaseId = options["phaseId"];
+        	 else
+        		 this.phaseId = "None";
          },
          
          onRender: function() {
-        	 this.wrap.show(this.sampleTable);
+        	 this.wrap.show(new SampleListTableView({collection: this.collection, phaseId: this.phaseId}))
          },
          
          newSample: function() {
@@ -67,7 +57,6 @@ define(["marionette",
         	 prop.fetch({
         		 success: function(model, response, options) {
         			 var visitString = prop.get("PROPOSAL")+"-"+prop.get("VCOUNT");
-        			 console.log("New sample for visit "+visitString);
         			 newEmptySample.run(visitString);
         		 },
         		 error: function(model, response, options) {
