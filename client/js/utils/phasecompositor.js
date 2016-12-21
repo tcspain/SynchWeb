@@ -2,8 +2,8 @@
  * A class providing functions to combine several phases into one sample
  */
 
-define(["underscore"],
-		function(_) {
+define([],
+		function() {
 	
 	var weightedComposition = function(phaseModel, abundance) {
 		// Mass fraction, weighted by formula mass
