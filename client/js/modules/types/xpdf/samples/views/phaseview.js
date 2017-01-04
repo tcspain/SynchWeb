@@ -6,12 +6,14 @@ define(["marionette",
         "collections/samples", // generic sample collection for now
         "modules/types/xpdf/samples/views/molecularmass",
         "modules/types/xpdf/samples/views/copyphaseview",
+        "modules/types/xpdf/samples/views/addcif",
         "tpl!templates/types/xpdf/samples/phase.html",
         ], function(Marionette,
         		Editable,
         		Samples,
         		MolecularMassView,
         		CopyPhaseView,
+        		AddCIFView,
         		template) {
 	return Marionette.LayoutView.extend({
 		className: "content",
@@ -28,6 +30,7 @@ define(["marionette",
 		
 		events: {
             "click a.copyphase": "copyPhase",
+            "click a.addcif": "addCIF",
 
 		},
 		
@@ -74,7 +77,19 @@ define(["marionette",
 			var copyPhaseView = new CopyPhaseView({ model: this.model, onSuccess: this.refreshPhase });
 			app.dialog.show(copyPhaseView);
 		},
-
+		
+		// Open a modal dialog to allow selection of a CIF to associate with
+		// the phase
+		addCIF: function() {
+			var view = new AddCIFView({pid: this.model.get("PROTEINID")});
+			this.listenTo(view, "pdb:success", this.getCIFs);
+			app.dialog.show(view);
+		},
+		
+		getCIFs: function() {
+			this.pdbs.fetch();
+		},
+		
 		// Fetch the model and re-render the view
 		refreshPhase: function() {
 			this.model.fetch();
