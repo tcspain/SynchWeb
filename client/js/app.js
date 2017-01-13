@@ -287,8 +287,7 @@ function(Backbone, Marionette, _, $, HeaderView, SideBarView, DialogRegion, Logi
         var proposal = new Proposal({ PROPOSAL: prop })
         proposal.fetch({
             success: function() {
-//                app.type = proposal.get('TYPE'),
-            	app.type = "xpdf", // FIXME Revert to using the true proposal type
+                app.type = proposal.get('TYPE'),
                 require(['modules/types/'+proposal.get('TYPE')+'/menu'], function(menus) {
                     proposal.set('MENUS', menus)
                     app.prop = prop
