@@ -5,10 +5,12 @@
 define([
         "models/protein",
         "models/sample",
+        "models/container"
         ],
         function(
         		Phase,
-        		Sample
+        		Sample,
+        		Container
         		) {
 	/* The first step is to create the new sample and phase */
 	return newSample = {
@@ -33,37 +35,77 @@ define([
 					url: app.apiurl+"/shipment/dewars/default",
 					data: {visit: visitId},
 					success: function(dewarId) {
-//						this.newSample.set({"CONTAINERID": containerId});
 						console.log("new sample dewar obtained");
-						self.actuallyAssignDefaultContainer(newSample, dewarId);	
+						self.actuallyAssignDefaultContainer(newSample, dewarId, visitId);	
 					},
 					error: function() {
 						app.bc.reset([bc, {title: "Error" }]);
 						app.message({ title: "Error", message: "The default dewar for this visit could not be created."});
 					},
-//					"newSample": newSample,
 				});
 				console.log("Fired default container trigger");
 			},
-			
-			actuallyAssignDefaultContainer : function(newSample, dewarId) {
+
+			// With the default dewar for this proposal, get the default
+			// container for this visit. Also, check default containers exist
+			// for all visits. 
+			actuallyAssignDefaultContainer : function(newSample, dewarId, visitId) {
 				var self = this;
 				
 				Backbone.ajax({
 					url: app.apiurl+"/shipment/containers/did/"+dewarId,
-					success: function(containerIds) {
-						console.log(containerIds.data.length+" default container(s) obtained for dewar "+dewarId);
-						console.log("containerIds.data is "+containerIds.data);
-						console.log("containerIds.data[0] is "+containerIds.data[0]);
-						console.log("containerIds.data[0][\"CONTAINERID\"] is "+containerIds.data[0]["CONTAINERID"]);
-						newSample.set({"CONTAINERID": containerIds.data[0]["CONTAINERID"]});
-						self.assignDefaultLocation(newSample);
+					success: function(containers) {
+						var defaultContainer;
+						console.log(containers.data.length+" default container(s) obtained for dewar "+dewarId);
+						console.log("containers.data is "+containers.data);
+						if (containers.total != 0) {
+							console.log("containers.data[0] is "+containers.data[0]);
+							console.log("containers.data[0][\"CONTAINERID\"] is "+containers.data[0]["CONTAINERID"]);
+
+							// Place the sample in the default container of the
+							// proposal. If this container does not exist, then
+							// create it
+							defaultContainer = _.find(containers.data, function(container) { return container.get("VISIT") == null; });
+
+						}
+						if (defaultContainer == null) {
+							console.log("no default container");
+						
+							// Create a default container
+							defaultContainer = new Container();
+							// set some values for this model
+							var defaultParameters = {"PROPOSALID" : app.prop,
+									"NAME": app.proposal.get("PROPOSALNUMBER")+"_default",
+									"CAPACITY": "1000000",
+									"CONTAINERTYPE": "box",
+									"DEWARID": dewarId,
+//									"CONTAINERID": "999999999",
+							};
+							defaultContainer.set(defaultParameters);
+							defaultContainer.save({},{
+								success: function(model, response, options) {
+									self.setDefaultContainerId(newSample, model);
+								},
+								error: function(model, response, options) {
+									console.log("Error saving default container for proposal "+app.prop);
+								}
+							});
+						} else {
+							self.setDefaultContainerId(newSample, defaultContainer);
+						}
+
 					},
 					error: function() {
 						console.log("Did not get containers for dewar "+dewarId);
 					}
 				});
 				
+			},
+			
+			setDefaultContainerId: function(newSample, defaultContainer) {
+				console.log("Setting sample container to containerId "+defaultContainer.get("CONTAINERID"));
+				newSample.set({"CONTAINERID": defaultContainer.get("CONTAINERID")});
+				this.assignDefaultLocation(newSample);
 			},
 			
 			assignDefaultLocation : function(newSample) {
@@ -86,7 +128,7 @@ define([
 					error: function(model, response, options){
 						console.log("Error setting phase on new XPDF sample");
 					},
-					newSample: newSample, 
+//					newSample: newSample, 
 				})
 			},
 			
