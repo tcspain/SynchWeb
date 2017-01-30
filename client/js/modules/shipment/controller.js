@@ -1,5 +1,7 @@
 define(['marionette',
     
+        "modules/shipment/views/getshipmentview",
+        
         'models/dewar',
         'models/shipment',
         'collections/shipments',
@@ -27,7 +29,8 @@ define(['marionette',
         'collections/dewars',
         'modules/shipment/views/dewaroverview',
     
-], function(Marionette,
+], function(Marionette,	
+	GetView,
     Dewar, Shipment, Shipments, 
     ShipmentsView, ShipmentView, ShipmentAddView,
     Container, Containers, ContainerView, ContainerPlateView, ContainerAddView, ContainersView, QueueContainerView,
@@ -57,7 +60,8 @@ define(['marionette',
         shipment.fetch({
             success: function() {
                 app.bc.reset([bc, { title: shipment.get('SHIPPINGNAME') }])
-                app.content.show(new ShipmentView({ model: shipment }))
+//                app.content.show(new ShipmentView({ model: shipment }))
+                app.content.show(GetView.ShipmentView.get(app.type, {model: shipment}));
             },
             error: function() {
                 app.bc.reset([bc])
@@ -165,7 +169,7 @@ define(['marionette',
       dewars.fetch().done(function() {
         dewars.getPage(page)
         app.bc.reset([bc, { title: 'Registered Dewars', url: '/dewars' }])
-        app.content.show(new DewarRegView({ collection: dewars, params: { s: s } }))
+        app.content.show(GetView.DewarRegView.get(app.type, {collection: dewars, params: {s: s}}));
       })
     },
 

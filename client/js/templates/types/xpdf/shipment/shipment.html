@@ -1,0 +1,56 @@
+<h1> Shipment: <span class="SHIPPINGNAME"><%=SHIPPINGNAME%></span></h1>
+
+<p class="help"> This page shows the details of the collection of samples. Most parameters can be edited by clicking on them</p>
+
+<!-- Shipment labels and contents not displayed -->
+
+<div class="form">
+	<ul>
+		<li>
+			<span class="label">Created</span>
+			<span class="created"><%=CREATED%></span>
+		</li>
+		
+		<li>
+			<span class="label">Status</span>
+			<span class="status"><%=SHIPPINGSTATUS%></span>
+		</li>
+
+		<li>
+			<span class="label">Safety Level</span>
+            <span class="SAFETYLEVEL"><%=SAFETYLEVEL%></span>
+        </li>
+
+		<li class="clearfix reorder">
+            <div class="COMMENTS text"><%=COMMENTS%></div>
+        	<span class="label">Comments</span>
+        </li>
+        
+		
+	</ul>
+</div>
+
+    <h1>Shipment Contents</h1>
+
+    <p class="help">Select a box by clicking on the row in the table below. Box details are then shown below. Click the + icon to add a container to the selected box</p>
+
+    <div class="ra"><a href="#" class="button" id="add_dewar" title="Add a box to this shipment"><i class="fa fa-plus"></i> Add Box</a></div>
+
+    <div class="table"></div>
+
+
+    <h1>
+        Box Details: <span class="dewar_name"></span>
+        <span class="r padded_button add_container"></span>
+    </h1>
+
+    <p class="help">This section shows contents and history for the selected Box. Click the magnifying glass icon to view the contents of the container</p>
+
+    <div class="left dcontent"></div>
+
+
+    <div class="right history table table-no-margin"></div>
+    <div class="right tracking table table-no-margin"></div>
+
+    <div class="clear"></div>
+    
