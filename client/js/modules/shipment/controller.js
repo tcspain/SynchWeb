@@ -100,6 +100,8 @@ define(['marionette',
                 console.log('is plate', is_plate)
                 if (is_plate) app.content.show(new ContainerPlateView({ model: container, params: { iid: iid, sid: sid } }))
                   else app.content.show(new ContainerView({ model: container }))
+//                if (is_plate) app.content.show(GetView.ContainerPlateView(app.type, {model:container, params: {id: iid, sid: sid}}));
+//                else app.content.show(GetView.ContainerView(app.type, {model: container}));
             },
             error: function() {
                 app.bc.reset([bc, { title: 'Error' }])
@@ -115,7 +117,8 @@ define(['marionette',
         dewar.fetch({
             success: function() {
                 app.bc.reset([bc, { title: dewar.get('SHIPPINGNAME'), url: '/shipments/sid/'+dewar.get('SHIPPINGID') }, { title: 'Containers' }, { title: 'Add Container' }])
-                app.content.show(new ContainerAddView({ dewar: dewar, visit: visit }))
+//                app.content.show(new ContainerAddView({ dewar: dewar, visit: visit }))
+                app.content.show(GetView.ContainerAddView.get(app.type, {dewar: dewar, visit: visit}));
             },
             error: function() {
                 app.bc.reset([bc, { title: 'Error' }])
