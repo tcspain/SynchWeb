@@ -5,7 +5,7 @@
 define([
         "marionette",
         "modules/shipment/views/containeradd",
-        'modules/shipment/views/sampletable',
+        "modules/types/xpdf/shipment/views/instancetable",
         'modules/shipment/views/plate',
         'modules/shipment/views/singlesample',
         "modules/types/xpdf/shipment/collections/stagetypes",
@@ -16,7 +16,7 @@ define([
         ], function(
         		Marionette,
         		GenericContainerAdd,
-        	    SampleTableView,
+        		InstanceTableView,
         	    PlateView,
         	    SingleSample,
         	    XpdfStageTypes,
@@ -48,16 +48,16 @@ define([
 			if (this.type.get("capacity") > 1) {
 				this.puck.$el.css("width", app.mobile() ? "100%" : "50%");
 	            this.puck.show(new PlateView({ collection: this.samples, type: this.type, showValid: true }))
-				this.stable = new SampleTableView({ proteins: this.proteins, gproteins: this.gproteins, collection: this.samples, childTemplate: row, template: table, type: 'non-xtal' });
-                this.table.show(this.stable);
-                this.singlesample = new SingleSample({ proteins: this.proteins, gproteins: this.gproteins, platetypes: this.ctypes, samples: this.samples });
-//                this.single.show(this.singlesample);
+	            this.buildCollection();
+  				this.stable = new InstanceTableView({collection: this.samples});
+	            this.table.show(this.stable);
                 this.single.empty();
                 this.ui.pc.show()
 			} else {
 				this.puck.$el.css("width", app.mobile() ? "50%" : "25%");
 				this.puck.empty();
                 this.table.empty();
+                this.buildCollection();
                 if (typeof this.stable != "undefined") this.stable.destroy();
                 this.singlesample = new SingleSample({ proteins: this.proteins, gproteins: this.gproteins, platetypes: this.ctypes, samples: this.samples });
                 this.single.show(this.singlesample);
@@ -68,10 +68,12 @@ define([
 			// define the group before building the collection 
             this.group = new ScreenGroupView({ components: this.screencomponents, editable: false });
             this.grp.empty();
-            this.buildCollection();
             this.$el.find('li.plate').show()
             this.$el.find('li.pcr').hide()
 
+		},
+		
+		selectSample: function() {
 		},
 	});
 });
