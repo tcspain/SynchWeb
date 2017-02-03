@@ -40,17 +40,30 @@ define(["marionette",
 		 * shown.
 		 */				
          initialize: function(options) {
+        	 
         	 this.collection = options.collection;
         	 if (_.contains(options, "phaseId"))
         		 this.phaseId = options["phaseId"];
         	 else
         		 this.phaseId = "None";
+        	 
+        	 if (options["row"] !== undefined) {
+        		 this.row = options["row"];
+        	 } else {
+        		 this.row = table.ClickableRow.extend({
+        				event: 'samples:view',
+        				argument: 'BLSAMPLEID',
+        				cookie: true,
+        			});
+        	 }
+        	 
          },
          
          onRender: function() {
-        	 this.wrap.show(new SampleListTableView({collection: this.collection, phaseId: this.phaseId}))
+        	 this.wrap.show(new SampleListTableView({collection: this.collection, phaseId: this.phaseId, row: this.row}))
+        		 
          },
-         
+       
          newSample: function() {
         	 // This page lists samples from all visits in this proposal. Get the most recent visit.
         	 var prop = new Proposal({PROPOSAL: app.prop});

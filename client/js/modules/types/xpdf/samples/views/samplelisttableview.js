@@ -9,11 +9,6 @@ define([
         		TableView,
         		table
         ) {
-	var ClickableRow = table.ClickableRow.extend({
-		event: 'samples:view',
-		argument: 'BLSAMPLEID',
-		cookie: true,
-	});
 
 	var AbundanceCell = table.TemplateCell.extend({
 		initialize: function(options) {
@@ -33,7 +28,6 @@ define([
 	return TableView.extend( {
 
 		backgrid: {
-			 row: ClickableRow, 
 		 },
 		 loading: true,
 		 
@@ -42,6 +36,7 @@ define([
 		  * options.collection: collection of samples to display
 		  * options.phaseId: phaseId to get the abundances of, or -1 for an
 		  * 	undefined phase
+		  * options.row: The row class to use 
 		  */
 		 initialize: function(options) {
 			 this.collection = options.collection;
@@ -54,9 +49,9 @@ define([
 //			            { name: "COMPOSITION", label: "Composition", cell: "string", editable: false },
 			            { name: "DENSITY", label: "Density", cell: "string", editable: false},
 			            ];
-			 this.hiddenColumns = [],
+			 this.hiddenColumns = [];
 
-			 console.log(options);
+			 if (options["row"] !== undefined) this.backgrid.row = options.row;
 			 
 			 TableView.prototype.initialize.apply(this, [options]);
 			 
