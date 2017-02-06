@@ -59,13 +59,17 @@ define([
 						console.log(containers.data.length+" default container(s) obtained for dewar "+dewarId);
 						console.log("containers.data is "+containers.data);
 						if (containers.total != 0) {
+							// The returned data is not a collection of models,
+							// but an array of objects, since we made an Ajax
+							// call, not a proper Backbone fetch.
 							console.log("containers.data[0] is "+containers.data[0]);
 							console.log("containers.data[0][\"CONTAINERID\"] is "+containers.data[0]["CONTAINERID"]);
+							console.log("containers.data[0][\"VISIT\"] is "+containers.data[0]["VISIT"]);
 
 							// Place the sample in the default container of the
 							// proposal. If this container does not exist, then
 							// create it
-							defaultContainer = _.find(containers.data, function(container) { return container.get("VISIT") == null; });
+							defaultContainer = _.find(containers.data, function(container) { return container["VISIT"] == null; });
 
 						}
 						if (defaultContainer == null) {
@@ -103,8 +107,11 @@ define([
 			},
 			
 			setDefaultContainerId: function(newSample, defaultContainer) {
-				console.log("Setting sample container to containerId "+defaultContainer.get("CONTAINERID"));
-				newSample.set({"CONTAINERID": defaultContainer.get("CONTAINERID")});
+				// The data is not a collection of models, but an array of
+				// objects, since we earlier made an Ajax call, not a proper
+				// Backbone fetch.
+				console.log("Setting sample container to containerId "+defaultContainer["CONTAINERID"]);
+				newSample.set({"CONTAINERID": defaultContainer["CONTAINERID"]});
 				this.assignDefaultLocation(newSample);
 			},
 			
