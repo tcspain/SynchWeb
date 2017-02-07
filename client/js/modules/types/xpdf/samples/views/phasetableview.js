@@ -28,7 +28,7 @@ define(["jquery",
 		
 		var saveParameters = {};
 		
-		// Choose between primery and component phase to be removed
+		// Choose between primary and component phase to be removed
 		if (primaryPhaseId === phaseId) {
 			// Remove the primary phase, and replace by the first component phase 
 		
@@ -37,7 +37,7 @@ define(["jquery",
 			// subsequently removed from the components
 			phaseId = sample.get("COMPONENTIDS")[0];
 			saveParameters.PROTEINID = phaseId;
-			// saveParameters.PRIMARYAMOUNT = theSample.get("COMPONENTAMOUNTS")[0];
+			saveParameters.ABUNDANCE = sample.get("COMPONENTAMOUNTS")[0];
 		}
 			
 		if (_.contains(sampleComponentIds, phaseId.toString())) {
@@ -159,9 +159,22 @@ define(["jquery",
 			// Check for primary phase
         	if (this.sample.get("PROTEINID") === phaseId) {
         		// Assign the new primary phase abundance, after validation
-        		console.log("changing primary phase abundance to "+abundance);
-        		if (!validateAbundance(abundance)) return this.sample.get("ABUNDANCE");
-        		this.sample.save({"ABUNDANCE": abundance}, {patch: true});
+        		if (!validateAbundance(abundance))
+        			return this.sample.get("ABUNDANCE");
+        		
+        		this.sample.set({"ABUNDANCE": abundance});
+        		// Reset the validation error
+        		this.sample.validationError = null; 
+        		
+        		this.sample.save({"ABUNDANCE": abundance}, {patch: true,
+        			success: function(model, response, options) {
+        				console.log("Set abundance on "+model.get("BLSAMPLEID")+" to "+model.get("ABUNDANCE"));
+        			},
+        			error: function(model, response, options) {
+        				console.log("Failed to set abundance on "+model.get("BLSAMPLEID")+" due to "+response);
+        			}
+        		});
+        		
         	} else {
         		
         		// Assign the new abundance to the correct model from the
