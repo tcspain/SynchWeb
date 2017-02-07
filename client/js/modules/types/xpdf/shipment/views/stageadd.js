@@ -75,5 +75,21 @@ define([
 		
 		selectSample: function() {
 		},
+		
+		// The callback for a successful save of the container to the database
+		success: function() {
+			var self = this;
+			
+			// Save the new CONTAINERID and the assigned position in the container
+			this.samples.each(function(s) {
+				s.set({CONTAINERID: this.model.get("CONTAINERID")}, {silent: true}, this);
+				s.save({
+					CONTAINERID: this.model.get("CONTAINERID"),
+					LOCATION: s.get("LOCATION"),
+				}, {patch: true});
+			});
+			
+			
+		}
 	});
 });
