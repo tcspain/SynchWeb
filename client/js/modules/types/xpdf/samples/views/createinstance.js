@@ -107,9 +107,10 @@ define([
 			console.log("instancing sample "+this.model.get("BLSAMPLEID")+" with container "+this.selectedContainer);
 
 			sinkInstance.save({
-				"NAME": "Instance of "+sourceSample.get("NAME"),
+				"NAME": sourceSample.get("NAME")+"-instance",
 				"CRYSTALID": sourceSample.get("CRYSTALID"),
 				"PROTEINID": sourceSample.get("PROTEINID"),
+				"ABUNDANCE": sourceSample.get("ABUNDANCE"),
 				"CONTAINERID": sourceSample.get("CONTAINERID"),
 				"LOCATION": sourceSample.get("LOCATION"),
 				"COMMENTS": sourceSample.get("COMMENTS")+"***INSTANCE in "+this.selectedContainer+"***",
