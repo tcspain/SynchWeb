@@ -7,12 +7,13 @@ define([
         "modules/shipment/views/containeradd",
         "modules/types/xpdf/shipment/views/instancetable",
         'modules/shipment/views/plate',
-        'modules/shipment/views/singlesample',
+//        'modules/shipment/views/singlesample',
+        "modules/types/xpdf/shipment/views/singlesample",
         "modules/types/xpdf/shipment/collections/stagetypes",
         "modules/imaging/views/screencomponentgroup",
         "tpl!templates/types/xpdf/shipment/stageadd.html",
-        'tpl!templates/shipment/sampletablenew.html',
-        'tpl!templates/shipment/sampletablerownew.html'
+//        'tpl!templates/shipment/sampletablenew.html',
+//        'tpl!templates/shipment/sampletablerownew.html'
         ], function(
         		Marionette,
         		GenericContainerAdd,
@@ -21,9 +22,9 @@ define([
         	    SingleSample,
         	    XpdfStageTypes,
         	    ScreenGroupView,
-        	    template,
-        		table,
-        		row
+        	    template//,
+//        		table,
+//        		row
         ) {
 	return GenericContainerAdd.extend({
 		template: template,		
