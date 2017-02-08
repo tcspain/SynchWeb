@@ -4,21 +4,19 @@
 
 define([
         "backgrid",
-        "collections/samples",
-        "modules/types/xpdf/samples/views/samplelist",
+//        "collections/samples",
+//        "modules/types/xpdf/samples/views/samplelist",
         "modules/types/xpdf/shipment/views/instancedialog",
         "views/table",
         "utils/table",
-        "tpl!templates/types/xpdf/samples/copyphase.html"
 
         ], function(
         Backgrid,
-        Instances,
-        InstanceList,
+//        Instances,
+//        InstanceList,
         InstanceDialog,
         TableView,
-        table,
-        template
+        table
         ) {
 
 	var ClickableRow = Backgrid.Row.extend({
@@ -29,21 +27,20 @@ define([
 
 			var locco = this.model.get("LOCATION");
 			console.log("Selecting for pointer at "+locco);
-			var instanceSelectView = new InstanceDialog({onSuccess: this.onSelect});
+			var instanceSelectView = new InstanceDialog({model: this.model, onSuccess: this.onSelect});
 			app.dialog.show(instanceSelectView);
 		},
-		onSelect: function(selectedModel) {
+		onSelect: function(targetModel, selectedModel) {
 			// copy the attributes of the selected instance model to the
 			// one held in the table of contained instances
-
-			this.model.set({
-				"BLSAMPLEID" : this.selectedModel.get("BLSAMPLEID"),
-				"PROTEINID": this.selectedModel.get("PROTEINID"),
-				"ABUNDANCE": this.selectedModel.get("ABUNDANCE"),
-				"NAME": this.selectedModel.get("NAME"),
-				"ACRONYM": this.selectedModel.get("ACRONYM"),
-				"COMMENTS": this.selectedModel.get("COMMENTS"),
-				"components": this.selectedModel.get("components")
+			targetModel.set({
+				"BLSAMPLEID" : selectedModel.get("BLSAMPLEID"),
+				"PROTEINID": selectedModel.get("PROTEINID"),
+				"ABUNDANCE": selectedModel.get("ABUNDANCE"),
+				"NAME": selectedModel.get("NAME"),
+				"ACRONYM": selectedModel.get("ACRONYM"),
+				"COMMENTS": selectedModel.get("COMMENTS"),
+				"components": selectedModel.get("components")
 			});
 
 		}
