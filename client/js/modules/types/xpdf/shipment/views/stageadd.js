@@ -4,6 +4,8 @@
 
 define([
         "marionette",
+        "models/sample",
+        "collections/samples",
         "modules/shipment/views/containeradd",
         "modules/types/xpdf/shipment/views/instancetable",
         'modules/shipment/views/plate',
@@ -16,6 +18,8 @@ define([
 //        'tpl!templates/shipment/sampletablerownew.html'
         ], function(
         		Marionette,
+        		Sample,
+        		Samples,
         		GenericContainerAdd,
         		InstanceTableView,
         	    PlateView,
@@ -78,19 +82,43 @@ define([
 		},
 		
 		// The callback for a successful save of the container to the database
-		success: function() {
+		success: function(model, response, options) {
 			var self = this;
 			
+			var validSamples = new Samples(this.samples.filter(function(sample) {return sample.get("BLSAMPLEID") > 0}));
+			console.log("Ready to put "+validSamples.length+" samples into container "+model.get("CONTAINERID"));
+			
+			console.log("id attribute is "+validSamples.at(0).idAttribute);
+			
 			// Save the new CONTAINERID and the assigned position in the container
-			this.samples.each(function(s) {
-				s.set({CONTAINERID: this.model.get("CONTAINERID")}, {silent: true}, this);
-				s.save({
-					CONTAINERID: this.model.get("CONTAINERID"),
-					LOCATION: s.get("LOCATION"),
-				}, {patch: true});
+			validSamples.each(function(s) {
+				s.set({CONTAINERID: model.get("CONTAINERID")}, {silent: true}, this);
 			});
 			
+			validSamples.each(function(s) {
+				if (s.get("BLSAMPLEID") > 0) {
+					var ss = new Sample();
+					ss.set({
+						BLSAMPLEID: s.get("BLSAMPLEID"),
+						CONTAINERID: model.get("CONTAINERID"),
+						LOCATION: s.get("LOCATION"),
+						});
+					ss.save({
+						CONTAINERID: model.get("CONTAINERID"),
+						LOCATION: s.get("LOCATION"),
+					}, {patch: true,
+						success: function(model, response, options) {
+							console.log("Sample "+model.get("BLSAMPLEID")+"successfully saved to container"+model.get("CONTAINERID")+" at position "+model.get("LOCATION"));
+						},
+						error: function(model, response, options) {
+							console.log("Failed to save sample into container because reasons");
+						}
+					});
+				}
+			});
+//			validSamples.save();
 			
-		}
+			
+		},
 	});
 });
