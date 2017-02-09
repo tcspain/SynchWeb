@@ -167,8 +167,11 @@ define([
 			targetModel.trigger("select:success");
 		},
 		
+		// refresh the page and also set the sample to the list of samples in the stage
 		refreshSample: function() {
 			console.log("Refreshing sample!");
+			this.samples.reset([this.model]);
+			console.log("Now holding "+this.samples.length+" samples");
 			this.render();
 		},
 	});
