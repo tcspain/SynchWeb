@@ -12,6 +12,7 @@ define ([
          "modules/shipment/views/dewarreg",
          
          "modules/types/xpdf/shipment/views/shipment",
+         "modules/types/xpdf/shipment/views/containerview",
          "modules/types/xpdf/shipment/views/stageadd",
          "modules/types/xpdf/shipment/views/dewarreg",
          ], function(
@@ -24,6 +25,8 @@ define ([
         DewarRegView,
         
         XpdfShipmentView,
+        XpdfContainerPlateView,
+        XpdfContainerView,
         XpdfStageAdd,
         XpdfDewarRegView
          ) {
@@ -39,14 +42,17 @@ define ([
 		}),
 		
 		ContainerPlateView: new GetView({
-//			views: {
-//				mx: ContainerPlateView,
-//				xpdf: ContainerPlateView,
-//			},
+			views: {
+				mx: ContainerPlateView,
+				xpdf: XpdfContainerPlateView,
+			},
 			default: ContainerPlateView,
 		}),
 		
 		ContainerView: new GetView({
+			views: {
+				xpdf: XpdfContainerView,
+			},
 			default: ContainerView,
 		}),
 		
