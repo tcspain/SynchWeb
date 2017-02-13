@@ -69,8 +69,13 @@ define([
 							// Place the sample in the default container of the
 							// proposal. If this container does not exist, then
 							// create it
-							defaultContainer = _.find(containers.data, function(container) { return container["VISIT"] == null; });
+							defaultContainerObject = _.find(containers.data, function(container) { return container["VISIT"] == null; });
 
+							// Convert the object (hash of attributes) version
+							// of the default container to the SynchWeb model
+							// of a Container
+							defaultContainer = new Container(defaultContainerObject);
+														
 						}
 						if (defaultContainer == null) {
 							console.log("no default container");
@@ -110,8 +115,9 @@ define([
 				// The data is not a collection of models, but an array of
 				// objects, since we earlier made an Ajax call, not a proper
 				// Backbone fetch.
-				console.log("Setting sample container to containerId "+defaultContainer["CONTAINERID"]);
-				newSample.set({"CONTAINERID": defaultContainer["CONTAINERID"]});
+				var defaultContainerId = defaultContainer.get("CONTAINERID");
+				console.log("Setting sample container to containerId "+defaultContainerId);
+				newSample.set({"CONTAINERID": defaultContainerId});
 				this.assignDefaultLocation(newSample);
 			},
 			
