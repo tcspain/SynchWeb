@@ -6,11 +6,13 @@ define([
         "marionette",
         "views/table",
         "utils/table",
+        "collections/dewars",
         "tpl!templates/types/xpdf/shipment/dewarreg.html"
         ], function(
         		Marionette,
         		TableView,
         		table,
+        		Dewars,
         		template
         		) {
 	// ClickableRow?
@@ -30,11 +32,15 @@ define([
 			               {name: "ADDRESS", label: "Address", cell: "string", editable: false},
 			               ];
 			
-			this.table = new TableView({ collection: options.collection,
+			var searchOptions = (options.params) ? options.params.s : null; 
+			var theCollection = (options.collection) ? options.collection : new Dewars();
+				
+			this.table = new TableView({
+				collection: theCollection,
 				columns: columns,
 				tableClass: "containers",
 				filter: "s",
-				search: options.params.s,
+				search: searchOptions,
 			});
 		},
 		
