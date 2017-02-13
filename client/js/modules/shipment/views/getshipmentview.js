@@ -13,6 +13,7 @@ define ([
          
          "modules/types/xpdf/shipment/views/shipment",
          "modules/types/xpdf/shipment/views/containerview",
+         "modules/types/xpdf/shipment/views/containerplateview",
          "modules/types/xpdf/shipment/views/stageadd",
          "modules/types/xpdf/shipment/views/dewarreg",
          ], function(
