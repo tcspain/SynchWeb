@@ -136,7 +136,7 @@ define([
 					success: function(model, response, options){
 						var newPhaseId = model.get("PROTEINID");
 						newSample.set({PROTEINID: newPhaseId});
-						newSample.set({ABUNDANCE: 0.0});
+						newSample.set({ABUNDANCE: 1.0});
 						self.assignNewSample(newSample);
 					},
 					error: function(model, response, options){
