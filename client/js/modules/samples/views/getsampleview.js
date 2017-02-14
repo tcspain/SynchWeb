@@ -15,6 +15,7 @@ define(['views/getview',
         
         "modules/types/xpdf/samples/views/samplelist",
         "modules/types/xpdf/samples/views/view",
+        "modules/types/xpdf/samples/views/proteinlist",
         "modules/types/xpdf/samples/views/phaseview",
 ], function(GetView,
 	SampleList, SampleView,
@@ -22,7 +23,7 @@ define(['views/getview',
 
 	ProteinList, ProteinView, AddProteinView,
 	GenComponentList, GenComponentAdd, GenComponentView,
-	XpdfSampleList, XpdfSampleView, XpdfPhaseView
+	XpdfSampleList, XpdfSampleView, XpdfPhaseList, XpdfPhaseView
 	){
 
 
@@ -55,6 +56,7 @@ define(['views/getview',
                 mx: ProteinList,
 				saxs: ProteinList,
             	gen: GenComponentList,
+            	xpdf: XpdfPhaseList,
             },
             default: GenComponentList,
         }),
