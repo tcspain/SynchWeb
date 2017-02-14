@@ -106,7 +106,7 @@ define(["jquery",
 			this.columns= [
 			               {name: "PROTEINID", label: "Code", cell: "string", editable: false},
 			               {name: "NAME", label: "Name", cell: "string", editable: false},
-			               {name: "ACRONYM", label: "Identifier", cell: "string", editable: false},
+//			               {name: "ACRONYM", label: "Identifier", cell: "string", editable: false},
 			               {name: "MOLECULARMASS", label: "Molecular Mass", cell: "string", editable: false},
 			               {name: "SEQUENCE", label: "Composition", cell: "string", editable: false},
 //			               {name: "XDENSITY", label: "Crys. Density", cell: "string", editable: false},

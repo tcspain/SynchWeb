@@ -58,7 +58,7 @@ define(["marionette",
 			var self = this;
 			var edit = new Editable({ model: this.model, el: this.$el });
 			edit.create("NAME", "text");
-			edit.create("ACRONYM", "text");
+//			edit.create("ACRONYM", "text");
 			edit.create("SEQUENCE", "text");
 			edit.create("DENSITY", "text");
 		
