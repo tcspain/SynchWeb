@@ -10,6 +10,7 @@ define(["marionette",
         "collections/proteins", /*"collections/phasecollection",*/
 //        "views/table",
         "utils/phasecompositor",
+        "modules/types/xpdf/utils/phasecompositor",
         "modules/types/xpdf/samples/views/newphaseview",
         "modules/types/xpdf/samples/views/phasetableview",
         "modules/types/xpdf/samples/views/createinstance",
@@ -22,6 +23,7 @@ define(["marionette",
         		Phase,
         		PhaseCollection,
 //        		TableView,
+        		oldPhaseCompositor,
         		phaseCompositor,
         		NewPhaseView,
         		PhaseTableView,
@@ -178,7 +180,7 @@ define(["marionette",
 			if (this.phaseCollection.length > 0) { 
 				if (doDensity) {
 					var oldDensity = this.model.get("XDENSITY");
-					var density = phaseCompositor.densityComposite(this.phaseCollection);
+					var density = oldPhaseCompositor.densityComposite(this.phaseCollection);
 					var roundedDensity = density.toFixed(2);
 					if (oldDensity != roundedDensity) {
 						this.model.set("XDENSITY", roundedDensity);
@@ -187,7 +189,9 @@ define(["marionette",
 				}
 				if (doComposition) {
 					var oldComposition = this.model.get("COMPOSITION");
-					var composition = phaseCompositor.compositionComposite(this.phaseCollection, this.abundanceMap);
+//					var composition = oldPhaseCompositor.compositionComposite(this.phaseCollection, this.abundanceMap);
+					var abundanceArray = [this.model.get("ABUNDANCE")].concat(this.model.get("components").pluck("ABUNDANCE"));
+					var composition = phaseCompositor.composeComposition(this.phaseCollection, abundanceArray);
 					if (oldComposition != composition) {
 						this.model.set({"COMPOSITION": composition});
 						isChanged = true;
