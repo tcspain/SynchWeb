@@ -76,10 +76,12 @@ define([],
 			var element = elementRegexp.exec(token)[0];
 			var multiplicity = multiplicityRegexp.exec(token)[0];
 			// add to or assign
-			if (element in memo)
-				memo[element] += Number.parseFloat(multiplicity);
-			else
-				memo[element] = Number.parseFloat(multiplicity);
+			if (multiplicity > 0) {
+				if (element in memo)
+					memo[element] += Number.parseFloat(multiplicity);
+				else
+					memo[element] = Number.parseFloat(multiplicity);
+			}
 			return memo;
 		}, /*memo*/{});
 		
