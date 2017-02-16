@@ -47,7 +47,8 @@ define([],
 			
 		}
 		
-		return hashFromBracketlessComposition(composition);
+		var finalHash = hashFromBracketlessComposition(composition);
+		return finalHash;
 	};
 	
 	
@@ -120,10 +121,17 @@ define([],
 				Object.keys(elementHash).sort(compareHill) :
 					Object.keys(elementHash).sort();
 		return _.reduce(keysOrder, function(memo, key, index, keys) {
-			return memo+key+( (elementHash[key] != 1) ? elementHash[key] : "");
+			return memo+key+( (elementHash[key] != 1) ? formatDecimalTo3(elementHash[key]) : "");
 		}, /*memo*/"");
 		
 	};
+	
+	var formatDecimalTo3 = function(theNumber) {
+		var theString = theNumber.toFixed(3);
+		while (theString.charAt(theString.length-1) === "0" || theString.charAt(theString.length-1) === ".")
+			theString = theString.substring(0, theString.length-1);
+		return theString;
+	}
 	
 	var hillOrder = function(elementSymbol) {
 		var hillOrdered = ["C", "H",
@@ -199,7 +207,10 @@ define([],
 				var compositions = phaseCollection.pluck("SEQUENCE");
 				// Convert the formulae into a element symbol -> multiplicity hash
 				var elementHash = _.reduce(compositions, function(memo, composition, index, compositions) {
-					var result = abundanceWeightedSum(memo.composition, memo.abundance, hashFromComposition(composition), molarFractionArray[index]);
+					var molarFraction = molarFractionArray[index];
+					if (typeof molarFraction === "string") molarFraction = Number.parseFloat(molarFraction);
+					var result = abundanceWeightedSum(memo.composition, memo.abundance, hashFromComposition(composition), molarFraction);
+					console.log(result.composition, result.abundance);
 					return result;
 				}, /*memo*/{abundance:0, composition: {}});
 				overallString = stringifyElementHash(elementHash.composition);
