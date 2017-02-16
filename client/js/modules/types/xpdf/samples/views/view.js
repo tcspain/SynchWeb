@@ -114,13 +114,19 @@ define(["marionette",
 		getAllPhases: function(successFunction) {
 			// Get the IDs of the primary phase and all secondary components
 			var primaryID = this.model.get("PROTEINID");
+			var primaryAbundance = this.model.get("ABUNDANCE");
 			var phaseIDs;
 			var self = this;
-			
+
+			this.abundanceArray = [];
+
 			this.model.updateComponentIds();
-			phaseIDs = this.model.get("COMPONENTIDS").slice();
-	        // Add the primary phase to the front of the list
+//			phaseIDs = this.model.get("COMPONENTIDS").slice();
+			phaseIDs = this.model.get("components").pluck("PROTEINID");
+			this.abundanceArray = this.model.get("components").pluck("ABUNDANCE");
+			// Add the primary phase to the front of the list
 			phaseIDs.unshift(primaryID);
+			this.abundanceArray.unshift(primaryAbundance);
 			
 			// Make the map between PROTEINID and abundance in this sample
 			this.abundanceMap = this.makeAbundanceMap(this.model); 
@@ -190,8 +196,7 @@ define(["marionette",
 				if (doComposition) {
 					var oldComposition = this.model.get("COMPOSITION");
 //					var composition = oldPhaseCompositor.compositionComposite(this.phaseCollection, this.abundanceMap);
-					var abundanceArray = [this.model.get("ABUNDANCE")].concat(this.model.get("components").pluck("ABUNDANCE"));
-					var composition = phaseCompositor.composeComposition(this.phaseCollection, abundanceArray);
+					var composition = phaseCompositor.composeComposition(this.phaseCollection, this.abundanceArray);
 					if (oldComposition != composition) {
 						this.model.set({"COMPOSITION": composition});
 						isChanged = true;
