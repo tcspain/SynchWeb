@@ -121,15 +121,27 @@ define([],
 				Object.keys(elementHash).sort(compareHill) :
 					Object.keys(elementHash).sort();
 		return _.reduce(keysOrder, function(memo, key, index, keys) {
-			return memo+key+( (elementHash[key] != 1) ? formatDecimalTo3(elementHash[key]) : "");
+			var multiplicity = elementHash[key];
+			if (Number.isFinite(multiplicity) && multiplicity != 0) 
+				return memo+key+( (multiplicity != 1) ? formatDecimalTo3(multiplicity) : "");
+			else
+				return memo;
 		}, /*memo*/"");
 		
 	};
 	
 	var formatDecimalTo3 = function(theNumber) {
 		var theString = theNumber.toFixed(3);
-		while (theString.charAt(theString.length-1) === "0" || theString.charAt(theString.length-1) === ".")
-			theString = theString.substring(0, theString.length-1);
+		
+		// truncate trailing zeroes if the number contains a decimal point
+		if (theString.indexOf(".") != -1) {
+			// remove zeroes until there are no more
+			while (theString.charAt(theString.length-1) === "0")
+				theString = theString.substring(0, theString.length-1);
+			// remove a decimal point 
+			if (theString.charAt(theString.length-1) === ".")
+				 theString = theString.substring(0, theString.length-1);
+		}
 		return theString;
 	}
 	
