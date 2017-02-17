@@ -137,7 +137,7 @@ define(["marionette",
 				var phase = new Phase({PROTEINID: element});
 				phase.fetch({
 					success: function() {
-						self.phaseCollection.add(phase);
+						self.phaseCollection.add(phase, {at: index});
 						// if the number of collected phases is equal to the
 						// number desired, fire the success function
 						if (self.phaseCollection.length == list.length) {
