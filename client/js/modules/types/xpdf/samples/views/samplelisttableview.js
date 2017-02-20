@@ -43,7 +43,7 @@ define([
 
 			 this.columns = [
 			            { name: "NAME", label: "Name", cell: "string", editable: false},
-			            { name: "ACRONYM", label: "ID", cell: "string", editable: false },
+//			            { name: "ACRONYM", label: "ID", cell: "string", editable: false },
 			            { name: "COMMENTS", label: "Comments", cell: "string", editable: false },
 			            { name: "ABUNDANCE", label: "Phase Abundance", cell: "string", editable: false},
 //			            { name: "COMPOSITION", label: "Composition", cell: "string", editable: false },

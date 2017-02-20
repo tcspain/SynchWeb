@@ -18,12 +18,10 @@ define(["marionette",
 		
 		columns: [
 			{name: "NAME", label: "Name", cell: "string", editable: false},
-//			{name: "ACRONYM", label: "Identifier", cell: "string", editable: false},
-			{name: "MOLECULARMASS", label: "Molecular Mass", cell: "string", editable: false},
-			{name: "COMPOSITION", label: "Composition", cell: "string", editable: false},
-//			{name: "XDENSITY", label: "Crys. Density", cell: "string", editable: false},
-			{name: "ABUNDANCE", label: "Fraction", cell: "string", editable: false},
-			{name: "COMMENTS", label: "Comments", cell: "string", editable: false},
+//			{name: "MOLECULARMASS", label: "Molecular Mass", cell: "string", editable: false},
+			{name: "SEQUENCE", label: "Composition", cell: "string", editable: false},
+			{name: "DENSITY", label: "Crystallographic Density", cell: "string", editable: false},
+//			{name: "COMMENTS", label: "Comments", cell: "string", editable: false},
 		],
 	
 		hiddenColumns: [],
@@ -51,7 +49,17 @@ define(["marionette",
 			  }
 			
 			var self = this;
-			this.table = new TableView({ collection: options.collection, columns: this.columns/*this.getOption('columns')*/, tableClass: 'proposals', filter: 's', search: options.params && options.params.s, loading: true, 
+			
+			// Add a fake density to each member of the collection
+			// TODO: Remove this when density is implemented
+			// And a fake composition (sequence)
+			// TODO: remove this when sequence is returned
+			var denseCollection = options.collection.clone();
+			denseCollection.forEach(function(model, index, collection) {
+				model.set({"DENSITY": "To do", "SEQUENCE": "Not found"});
+			});
+			
+			this.table = new TableView({ collection: /*options.collection*/denseCollection, columns: this.columns/*this.getOption('columns')*/, tableClass: 'proposals', filter: 's', search: options.params && options.params.s, loading: true, 
 				backgrid: {
 					row: row, 
 					emptyText: function() { 
