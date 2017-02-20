@@ -38,7 +38,7 @@ define([
 				"PROTEINID": selectedModel.get("PROTEINID"),
 				"ABUNDANCE": selectedModel.get("ABUNDANCE"),
 				"NAME": selectedModel.get("NAME"),
-				"ACRONYM": selectedModel.get("ACRONYM"),
+//				"ACRONYM": selectedModel.get("ACRONYM"),
 				"COMMENTS": selectedModel.get("COMMENTS"),
 				"components": selectedModel.get("components")
 			});
@@ -61,9 +61,9 @@ define([
 			this.columns = [
 			                {name: "LOCATION", label: "Location", cell: "string", editable: false},
 			                {name: "NAME", label: "Name", cell: "string", editable: false},
-			                {name: "ACRONYM", label: "Acronym", cell: "string", editable: false},
-//			                {name: "COMPOSITION", label: "Composition", cell: "string", editable: false}
-			                {name: "COMMENTS", label: "Comments", cell: "string", editable: false}
+//			                {name: "ACRONYM", label: "Acronym", cell: "string", editable: false},
+			                {name: "COMPOSITION", label: "Composition", cell: "string", editable: false},
+			                {name: "COMMENTS", label: "Comments", cell: "string", editable: false},
 			                ];
 			
 			TableView.prototype.initialize.apply(this, [options]);
