@@ -8,16 +8,20 @@ define([
         "modules/shipment/views/plate",
         "modules/types/xpdf/shipment/views/instancetable",
         "modules/types/xpdf/shipment/views/singlesample",
-        "modules/types/xpdf/shipment/collections/stagetypes"
+        "modules/types/xpdf/shipment/collections/stagetypes",
+        "tpl!templates/types/xpdf/shipment/samplechangerview.html"
         ], function(
         		Marionette,
         		GenericContainerView,
         		PlateView,
         		InstanceTableView,
         		SingleSample,
-        		PlateTypes
+        		PlateTypes,
+        		template
         		) {
 	return GenericContainerView.extend({
+		template: template,		
+		
         onShow: function() {
             this._ready.done(this.doOnShow.bind(this))
         },
