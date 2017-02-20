@@ -32,7 +32,7 @@ define([
                 this.puck.show(new PlateView({ collection: this.samples, type: this.type }))
             } 
 
-            if (this.type.get("capacity") > 1) {
+            if (this.type.get("capacity") != 1) {
     			this.table.show(new InstanceTableView({collection: this.samples}));
             } else {
             	this.table.show(new SingleSample({sample: this.samples.at(0)}));
