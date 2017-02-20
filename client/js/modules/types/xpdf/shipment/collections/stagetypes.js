@@ -42,6 +42,13 @@ define([
 	                    	  well_drop: -1,
 	                    	  capacity: 1,
 	                      },
+	                      { name: "box", well_per_row:0,
+	                    	  drop_per_well_x: 1, drop_per_well_y: 1,
+	                    	  drop_height:1, drop_width: 1,
+	                    	  drop_offset_x: 0, drop_offset_y: 0,
+	                    	  well_drop: -1,
+	                    	  capacity: 0,
+	                      },
 	                      
 	                      ];
 	

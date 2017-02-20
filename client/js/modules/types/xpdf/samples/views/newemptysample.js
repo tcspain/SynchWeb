@@ -85,7 +85,7 @@ define([
 							// set some values for this model
 							var defaultParameters = {"PROPOSALID" : app.prop,
 									"NAME": app.proposal.get("PROPOSALNUMBER")+"_default",
-									"CAPACITY": "1000000",
+									"CAPACITY": "0",
 									"CONTAINERTYPE": "box",
 									"DEWARID": dewarId,
 //									"CONTAINERID": "999999999",
