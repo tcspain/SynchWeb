@@ -204,13 +204,41 @@ define([],
 		 										   "Th": 232.04, "Pa": 231.04, "U" : 238.03, "Np": 237.05, "Pu": 244.06, "Am": 243.06, "Cm": 247.07, "Bk": 247.07, "Cf": 251.08, "Es": 252.08, "Fm": 257.10,
 	};
 
-
+	//	return the molecular mass of the passed element hash
+	var massOfElementHash = function(hash) {
+		mass = _.reduce(hash, function(memo, multiplicity, element, hash) {
+			return memo += multiplicity*elementmasses[element];
+		}, 0.0);
+		return mass;
+	};
+	
+	
 	// Public API
 	return {
 		composeDensity: function(phaseCollection, molarFractionArray) {
 			// Get the densities of each phase
 			var densities = phaseCollection.pluck("DENSITY");
-			
+			// Get the composition strings
+			var compositions = phaseCollection.pluck("SEQUENCE");
+			// Convert the formulae into a element symbol -> multiplicity hash
+			var sumOfTerms = _.reduce(compositions, function(memo, composition, index, compositions) {
+				var molarFraction = molarFractionArray[index];
+				if (typeof molarFraction === "string") molarFraction = Number.parseFloat(molarFraction);
+				
+				var phaseMolarMass = massOfElementHash(hashFromComposition(composition));
+				var phaseDensity = densities[index];
+				if (typeof phaseDensity === "string") phaseDensity = Number.parseFloat(phaseDensity);
+				
+				// fraction of phase i times molar mass of phase i
+				var fimi = molarFraction*phaseMolarMass;
+				
+				result = {fimi: memo.fimi += fimi,
+						fimi_rhoi: memo.fimi_rhoi += fimi/phaseDensity};
+				
+			}, /*memo*/{fimi:0.0, fimi_rhoi: 0.0});
+
+			var density = sumOfTerms.fimi / sumOfTerms.fimi_rhoi;
+			return formatDecimalTo3(density);
 		},
 		
 		composeComposition: function(phaseCollection, molarFractionArray) {
