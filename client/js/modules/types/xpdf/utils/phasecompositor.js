@@ -207,7 +207,7 @@ define([],
 	//	return the molecular mass of the passed element hash
 	var massOfElementHash = function(hash) {
 		mass = _.reduce(hash, function(memo, multiplicity, element, hash) {
-			return memo += multiplicity*elementmasses[element];
+			return memo += multiplicity*elementMasses[element];
 		}, 0.0);
 		return mass;
 	};
@@ -265,7 +265,8 @@ define([],
 		},
 		
 		molecularMassFromComposition: function(compositionString) {
-			
+			var mass = massOfElementHash(hashFromComposition(compositionString)); 
+			return mass;
 		},
 		
 	};
