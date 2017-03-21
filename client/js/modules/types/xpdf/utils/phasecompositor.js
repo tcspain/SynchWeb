@@ -232,7 +232,7 @@ define([],
 				// fraction of phase i times molar mass of phase i
 				var fimi = molarFraction*phaseMolarMass;
 				
-				result = {fimi: memo.fimi += fimi,
+				return {fimi: memo.fimi += fimi,
 						fimi_rhoi: memo.fimi_rhoi += fimi/phaseDensity};
 				
 			}, /*memo*/{fimi:0.0, fimi_rhoi: 0.0});
