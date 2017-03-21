@@ -4,7 +4,7 @@
 
 define([
         "marionette",
-        "utils/phasecompositor",
+        "modules/types/xpdf/utils/phasecompositor",
         "tpl!templates/types/xpdf/samples/molecularmass.html"
         ], function(
         		Marionette,
@@ -28,7 +28,7 @@ define([
 				// Do nothing
 			} else {
 				/*string*/ var currentMolecularMass = this.model.get("MOLECULARMASS");
-				/*double*/ var molecularMass = phaseCompositor.massOfCompositionHash(phaseCompositor.mapFormula(this.model.get("SEQUENCE")));
+				/*double*/ var molecularMass = phaseCompositor.molecularMassFromComposition(this.model.get("SEQUENCE"));
 				if (currentMolecularMass != molecularMass.toFixed(3))
 					this.model.save({"MOLECULARMASS": molecularMass.toFixed(3)}, {patch:true});
 			}
