@@ -41,6 +41,7 @@ define(["marionette",
 			newphase: ".newphase",
 			makeInstance: ".makeinstance",
 			xpdfContainer: ".xpdfcontainer",
+//			density: ".density",
 		},
 		
 		events: {
@@ -59,7 +60,7 @@ define(["marionette",
 			this.model.initialize(); // Is this a terrible idea?
 			
 			// Data collections for this sample, that is where the sample ID 
-			// (sid) mathches that of this sample
+			// (sid) matches that of this sample
 			this.dcs = new DCCol(null, { queryParams: {sid: this.model.get("BLSAMPLEID"), pp:5} });
 			this.dcs.fetch();
 			
@@ -88,6 +89,13 @@ define(["marionette",
 			// Show the add phases hidden form in the "newphase" region
 			this.newphase.show(new NewPhaseView({"CRYSTALID" : this.model.get("CRYSTALID")}));
 			
+//			var DensityView = Marionette.ItemView.extend({
+//				template:"<span class=\"density\">N/A</span>",
+//			});
+//			
+//			// Display the calculated density
+//			this.density.show(new DensityView);
+			
 			// The instance information
 			var sampleComment = this.model.get("COMMENT"); 
 			if (!(new Boolean(sampleComment)) && sampleComment.includes("INSTANCE")) {
@@ -104,7 +112,7 @@ define(["marionette",
 			// We also want to update the composition once we have the
 			// collection of phases:
 			// Calculate the total density and composition, and display
-			self.updateDensityComposition(false, true);
+			self.updateDensityComposition(true, true);
 
 		},
 
@@ -185,11 +193,13 @@ define(["marionette",
 			var isChanged = false;
 			if (this.phaseCollection.length > 0) { 
 				if (doDensity) {
-					var oldDensity = this.model.get("XDENSITY");
-					var density = oldPhaseCompositor.densityComposite(this.phaseCollection);
-					var roundedDensity = density.toFixed(2);
+					var oldDensity = this.model.get("THEORETICALDENSITY");
+//					var density = oldPhaseCompositor.densityComposite(this.phaseCollection);
+					var density = phaseCompositor.composeDensity(this.phaseCollection, this.abundanceArray);
+					var roundedDensity = density;
 					if (oldDensity != roundedDensity) {
-						this.model.set("XDENSITY", roundedDensity);
+						this.model.set("THEORETICALDENSITY", roundedDensity);
+						this.model.save();
 						isChanged = true;
 					}
 				}

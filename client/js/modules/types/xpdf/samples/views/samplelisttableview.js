@@ -47,7 +47,7 @@ define([
 			            { name: "COMMENTS", label: "Comments", cell: "string", editable: false },
 			            { name: "ABUNDANCE", label: "Phase Abundance", cell: "string", editable: false},
 //			            { name: "COMPOSITION", label: "Composition", cell: "string", editable: false },
-			            { name: "DENSITY", label: "Density", cell: "string", editable: false},
+			            { name: "THEORETICALDENSITY", label: "Density", cell: "string", editable: false},
 			            ];
 			 this.hiddenColumns = [];
 
