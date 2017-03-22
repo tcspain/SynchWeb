@@ -42,7 +42,6 @@ define([
 					url: app.apiurl+"/shipment/dewars/default",
 					data: {visit: sampleOptions.visitId},
 					success: function(dewarId) {
-						console.log("new sample dewar obtained");
 						sampleOptions.dewarId = dewarId;
 						self.actuallyAssignDefaultContainer(newSample, sampleOptions);	
 					},
@@ -51,7 +50,6 @@ define([
 						app.message({ title: "Error", message: "The default dewar for this visit could not be created."});
 					},
 				});
-				console.log("Fired default container trigger");
 			},
 
 			// With the default dewar for this proposal, get the default
@@ -64,15 +62,10 @@ define([
 					url: app.apiurl+"/shipment/containers/did/"+sampleOptions.dewarId,
 					success: function(containers) {
 						var defaultContainer;
-						console.log(containers.data.length+" default container(s) obtained for dewar "+sampleOptions.dewarId);
-						console.log("containers.data is "+containers.data);
 						if (containers.total != 0) {
 							// The returned data is not a collection of models,
 							// but an array of objects, since we made an Ajax
 							// call, not a proper Backbone fetch.
-							console.log("containers.data[0] is "+containers.data[0]);
-							console.log("containers.data[0][\"CONTAINERID\"] is "+containers.data[0]["CONTAINERID"]);
-							console.log("containers.data[0][\"VISIT\"] is "+containers.data[0]["VISIT"]);
 
 							// Place the sample in the default container of the
 							// proposal. If this container does not exist, then
@@ -124,7 +117,6 @@ define([
 				// objects, since we earlier made an Ajax call, not a proper
 				// Backbone fetch.
 				var defaultContainerId = defaultContainer.get("CONTAINERID");
-				console.log("Setting sample container to containerId "+defaultContainerId);
 				newSample.set({"CONTAINERID": defaultContainerId});
 				this.assignDefaultLocation(newSample, sampleOptions);
 			},
@@ -144,7 +136,7 @@ define([
 					self.assignNewSample(newSample)
 				} else {
 					var newPhase = new Phase();
-					newPhase.set({"ACRONYM": ""});
+					newPhase.set({"ACRONYM": "xpdfphase"});
 					newPhase.set({"PROPOSALID": app.prop});
 					newPhase.save({}, {
 						success: function(model, response, options){
