@@ -7,7 +7,7 @@ define(["marionette",
         "views/table",
         "utils/table",
         "models/proposal",
-        "modules/types/xpdf/samples/views/newemptysample",
+        "modules/types/xpdf/samples/views/newsample",
         "modules/types/xpdf/samples/views/samplelisttableview",
         "tpl!templates/types/xpdf/samples/samplelist.html"
         ], function(Marionette,
@@ -75,7 +75,7 @@ define(["marionette",
         	 prop.fetch({
         		 success: function(model, response, options) {
         			 var visitString = prop.get("PROPOSAL")+"-"+prop.get("VCOUNT");
-        			 newEmptySample.run(visitString);
+        			 newEmptySample.run({"visitId": visitString});
         		 },
         		 error: function(model, response, options) {
         			 console.log("Could not get proposal data.");
