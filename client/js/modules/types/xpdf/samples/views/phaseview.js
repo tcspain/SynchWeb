@@ -65,7 +65,7 @@ define(["marionette",
             // Prevent cyclic dependency
             var GetSampleView = require('modules/samples/views/getsampleview')
  
-			this.samplesRegio.show(GetSampleView.SampleList.get(app.type, {collection: this.samples, noPageUrl:true, noFilterUrl: true, noSearchUrl: true}));
+			this.samplesRegio.show(GetSampleView.SampleList.get(app.type, {collection: this.samples, noPageUrl:true, noFilterUrl: true, noSearchUrl: true, noButton: true, }));
 
             this.molecularmass.show(new MolecularMassView({model: this.model}));
             

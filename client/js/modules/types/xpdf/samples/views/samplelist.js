@@ -35,9 +35,10 @@ define(["marionette",
 		/*
 		 * options:
 		 * options.collection: the collection of samples to show in the list
-		 * options.phaseId; An optional argument to selecta phase. This will
+		 * options.phaseId: an optional argument to select a phase. This will
 		 * result in the abundance of the given phase in each sample being
 		 * shown.
+		 * options.noButton: do not display the "+ New Sample" button.
 		 */				
          initialize: function(options) {
         	 
@@ -55,6 +56,10 @@ define(["marionette",
         				argument: 'BLSAMPLEID',
         				cookie: true,
         			});
+        	 }
+        	 
+        	 if (options["noButton"]) {
+        		 this.template = _.template("<h1>Samples</h1>\n<p class=\"help\">This page shows sample associated with the currently selected XPDF proposal</p>\n<div class=\"filter type\"></div>\n<div class=\"wrapper\"></div>");
         	 }
         	 
          },
