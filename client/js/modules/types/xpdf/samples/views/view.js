@@ -68,6 +68,20 @@ define(["marionette",
 			this.model.set({"COMPOSITION": "N/A"});
 			
 		},
+
+		onBeforeRender: function() {
+			/*string*/var truDensity = "";
+			if (this.model.has("THEORETICALDENSITY") && this.model.has("PACKINGFRACTION")) {
+				/*double*/var theoreticalDensity = Number.parseFloat(this.model.get("THEORETICALDENSITY"));
+				/*double*/var packingFraction = Number.parseFloat(this.model.get("PACKINGFRACTION"));
+				
+				if (theoreticalDensity > 0.0 && packingFraction >= 0.0 && packingFraction <= 1.0) {
+					/*double*/nTruDensity = theoreticalDensity*packingFraction;
+					truDensity = nTruDensity.toLocaleString({}, {maximumFractionalDigits: 3});
+				} 
+			}
+			this.model.set({"EXPERIMENTALDENSITY": truDensity});
+		},
 		
 		onRender: function() {
 			var self = this;
@@ -75,10 +89,12 @@ define(["marionette",
 			// Name
 			// Comment
 			// Code
+			// Packing fraction
 			var edit = new Editable( { model: this.model, el: this.$el });
 			edit.create("NAME", "text");
 			edit.create("COMMENTS", "text");
 			edit.create("CODE", "text");
+			edit.create("PACKINGFRACTION", "text");
 			
 			// Show the Data Collections in the history region
 			this.history.show(GetDCView.DCView.get(app.type, { model: this.model, collection: this.dcs, params: { visit: null }, noPageUrl: true, noFilterUrl: true, noSearchUrl: true}));
