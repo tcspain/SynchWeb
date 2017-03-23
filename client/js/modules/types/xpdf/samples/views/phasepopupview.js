@@ -1,5 +1,6 @@
 /*
- * Base class for the modal dialog phase lists. The derived class function ActivateMe should define what happens when the OK button is pressed
+ * Base class for the modal dialog phase lists. The derived class function
+ * onOk should define what happens when the OK button is pressed.
  */
 
 define([
