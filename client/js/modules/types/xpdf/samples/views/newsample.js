@@ -88,7 +88,7 @@ define([
 									"NAME": app.proposal.get("PROPOSALNUMBER")+"_default",
 									"CAPACITY": "0",
 									"CONTAINERTYPE": "box",
-									"DEWARID": dewarId,
+									"DEWARID": sampleOptions.dewarId,
 //									"CONTAINERID": "999999999",
 							};
 							defaultContainer.set(defaultParameters);
