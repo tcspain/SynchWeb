@@ -24,6 +24,12 @@ define([
 			}
 		}
 	});
+	
+	var SampleNameCell = table.TemplateCell.extend({
+		getTemplate: function() {
+			return "<div>"+this.model.get("NAME").replace(/__/g, " ")+"</div>"
+		}
+	});
 	  
 	return TableView.extend( {
 
@@ -42,7 +48,7 @@ define([
 			 this.collection = options.collection;
 
 			 this.columns = [
-			            { name: "NAME", label: "Name", cell: "string", editable: false},
+			            { name: "NAME", label: "Name", cell: SampleNameCell, editable: false},
 //			            { name: "ACRONYM", label: "ID", cell: "string", editable: false },
 			            { name: "COMMENTS", label: "Comments", cell: "string", editable: false },
 //			            { name: "ABUNDANCE", label: "Phase Abundance", cell: "string", editable: false},

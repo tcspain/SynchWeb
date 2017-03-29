@@ -19,6 +19,12 @@ define([
         table
         ) {
 
+	var SampleNameCell = table.TemplateCell.extend({
+		getTemplate: function() {
+			return "<div>"+this.model.get("NAME").replace(/__/g, " ")+"</div>"
+		}
+	});
+	  
 	var ClickableRow = Backgrid.Row.extend({
 		events: {
 			"click": "onClick",
@@ -60,7 +66,7 @@ define([
 			
 			this.columns = [
 			                {name: "LOCATION", label: "Location", cell: "string", editable: false},
-			                {name: "NAME", label: "Name", cell: "string", editable: false},
+			                {name: "NAME", label: "Name", cell: SampleNameCell, editable: false},
 //			                {name: "ACRONYM", label: "Acronym", cell: "string", editable: false},
 			                {name: "COMPOSITION", label: "Composition", cell: "string", editable: false},
 			                {name: "COMMENTS", label: "Comments", cell: "string", editable: false},

@@ -11,6 +11,7 @@ define(["marionette",
 //        "views/table",
         "utils/phasecompositor",
         "modules/types/xpdf/utils/phasecompositor",
+        "modules/types/xpdf/utils/manglingeditable",
         "modules/types/xpdf/samples/views/newphaseview",
         "modules/types/xpdf/samples/views/phasetableview",
         "modules/types/xpdf/samples/views/createinstance",
@@ -25,6 +26,7 @@ define(["marionette",
 //        		TableView,
         		oldPhaseCompositor,
         		phaseCompositor,
+        		Mangler,
         		NewPhaseView,
         		PhaseTableView,
         		CreateInstanceView,
@@ -66,6 +68,7 @@ define(["marionette",
 			
 			this.phaseCollection = new PhaseCollection();
 			this.model.set({"COMPOSITION": "N/A"});
+			this.model.set({"UNMANGLEDNAME": this.model.get("NAME").replace(/__/g, " ")});
 			
 		},
 
@@ -81,6 +84,9 @@ define(["marionette",
 				} 
 			}
 			this.model.set({"EXPERIMENTALDENSITY": truDensity});
+
+			this.model.set({"UNMANGLEDNAME": this.model.get("NAME").replace(/__/g, " ")});
+			
 		},
 		
 		onRender: function() {
@@ -95,6 +101,9 @@ define(["marionette",
 			edit.create("COMMENTS", "text");
 			edit.create("CODE", "text");
 			edit.create("PACKINGFRACTION", "text");
+
+			var mangler = new Mangler({model: this.model, el: this.$el});
+			mangler.create("UNMANGLEDNAME", "NAME", / /g, "__");
 			
 			// Show the Data Collections in the history region
 			this.history.show(GetDCView.DCView.get(app.type, { model: this.model, collection: this.dcs, params: { visit: null }, noPageUrl: true, noFilterUrl: true, noSearchUrl: true}));
@@ -119,7 +128,7 @@ define(["marionette",
 					template:"<span class=\"thecontainer\">xx mm capillary</span>",
 				}));
 			}
-			
+
 		},
 		
 		// draw the table of all contained phases
