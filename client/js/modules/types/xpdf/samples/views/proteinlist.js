@@ -52,12 +52,12 @@ define(["marionette",
 			
 			// And a fake composition (sequence)
 			// TODO: remove this when sequence is returned
-			var denseCollection = options.collection.clone();
-			denseCollection.forEach(function(model, index, collection) {
-				model.set({"SEQUENCE": "Not found"});
-			});
+//			var denseCollection = options.collection.clone();
+//			denseCollection.forEach(function(model, index, collection) {
+//				model.set({"SEQUENCE": "Not found"});
+//			});
 			
-			this.table = new TableView({ collection: /*options.collection*/denseCollection, columns: this.columns/*this.getOption('columns')*/, tableClass: 'proposals', filter: 's', search: options.params && options.params.s, loading: true, 
+			this.table = new TableView({ collection: options.collection/*denseCollection*/, columns: this.columns/*this.getOption('columns')*/, tableClass: 'proposals', filter: 's', search: options.params && options.params.s, loading: true, 
 				backgrid: {
 					row: row, 
 					emptyText: function() { 
