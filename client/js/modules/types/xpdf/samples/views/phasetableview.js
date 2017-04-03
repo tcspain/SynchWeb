@@ -79,7 +79,7 @@ define(["jquery",
 	
 	var GotoCell = table.TemplateCell.extend({
 		getTemplate: function() {
-			return "<a class=\"button button-notext gotolink\" title=\"Go to Phase\" href=\"/proteins/pid/<%=PROTEINID%>\"><i class=\"fa fa-share\"></i></a>";
+			return "<a class=\"button button-notext gotolink\" title=\"Go to Phase\" href=\"/phases/pid/<%=PROTEINID%>\"><i class=\"fa fa-share\"></i></a>";
 		},
 	});
 	

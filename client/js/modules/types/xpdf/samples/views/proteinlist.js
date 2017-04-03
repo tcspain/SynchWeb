@@ -40,7 +40,7 @@ define(["marionette",
 			var row;
 			if (typeof (options.row) == "undefined") {
 				row = table.ClickableRow.extend({
-						event: 'proteins:view',
+						event: 'phases:view',
 						argument: 'PROTEINID',
 						cookie: true,
 			  });

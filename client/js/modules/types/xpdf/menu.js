@@ -13,7 +13,7 @@ define([], function() {
 //			dewars: "Samples Sets",
 			containers: "Sample Changers",
 			samples: "Samples",
-			proteins: "Phases",
+			phases: "Phases",
 		
 		},
 		
