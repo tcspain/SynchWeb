@@ -33,8 +33,6 @@ require.config({
     'jquery.editable': 'vendor/jquery/jquery.jeditable.min',
     'jquery.editable.datepicker': 'vendor/jquery/jquery.jeditable.datepicker',
     
-    "jquery.mockjax": "vendor/jquery/jquery.mockjax",
-    
     caman: 'vendor/caman.min',
     heatmap: 'vendor/hmap',
     
