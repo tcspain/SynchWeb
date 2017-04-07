@@ -21,108 +21,18 @@ define(['marionette', 'views/pages',
             
     
     var ContainerView = Marionette.CompositeView.extend({
-        template: _.template('<span class="r"><a class="button button-notext" title="Click to view container contents" href="/containers/cid/<%=CONTAINERID%>"><i class="fa fa-search"></i> <span>View Container</span></a></span><h1><%=NAME%></h1>'),
+        template: _.template('<span class="r"><a class="button button-notext showcontainer" title="Click to select this sample changer" href="#"><i class="fa fa-chevron-down"></i> <span>Select Container</span></a><a class="button button-notext" title="Click to view container contents" href="/containers/cid/<%=CONTAINERID%>"><i class="fa fa-search"></i> <span>View Container</span></a></span><h1><%=NAME%></h1>'),
         className: function() { return  'container' + (this.getOption('assigned') ? ' assigned' : '') },
         
-        initialize: function(options) {
-            this.getOption('model').view = this
-        },
-        
-        
-        onRender: function() {
-// Remove Drag & Drop functionality
-//            this.$el.draggable({
-//                containment: '#drag_container',
-//                stack: '#unassigned div',
-//                revert: true
-//            })
-        },
-        
         events: {
-//            'drop:assign': 'assignContainer',
-//            'drop:unassign': 'unassignContainer',
+        	"click a.showcontainer": "showContainer",
         },
         
-        // possible circular reference
-        onDestroy: function() {
-            this.model.view = null
+        showContainer: function() {
+        	this.trigger("cv:show");
         },
         
-        
-        // Assign Containers
-//        assignContainer: function(e, options) {
-//            console.log('confirm container on to', options.id, this.model)
-//            utils.confirm({
-//                title: 'Confirm Container Assignment',
-//                content: 'Are you sure you want to assign &quot;'+this.model.get('NAME')+'&quot; to sample changer position &quot;'+options.id+'&quot;?',
-//                callback: this.doAssign.bind(this, options)
-//            })
-//        },
-//        
-//        doAssign: function(options) {
-//            console.log('dropped container on to', options.id, this.model, options.assigned)
-//            
-//            var assigned = options.assigned.where({ SAMPLECHANGERLOCATION: options.id.toString() })
-//            console.log(assigned)
-//            _.each(assigned, function(c) {
-//                c.view.doUnAssign.call(c.view,options)
-//            })
-//
-//            Backbone.ajax({
-//                url: app.apiurl+'/assign/assign',
-//                data: { visit: options.visit, cid: this.model.get('CONTAINERID'), pos: options.id },
-//                success: this.assignUpdateGUI.bind(this, options),
-//                error: function(xhr, message, options) {
-//                    app.alert({ message: 'Something went wrong assigning this container:' })
-//                },
-//            })
-//        },
-//        
-//        assignUpdateGUI: function(options) {
-//            this.trigger('remove:container', this.model)
-//            this.model.set({ SAMPLECHANGERLOCATION: options.id.toString() })
-//            options.assigned.add(this.model)
-//        },
-        
-        
-        // Unassign Containers
-//        unassignContainer: function(e, options) {
-//            console.log('unassign container', this.model)
-//            utils.confirm({
-//                title: 'Confirm Container Unassignment',
-//                content: 'Are you sure you want to unassign &quot;'+this.model.get('NAME')+'&quot; from sample changer position &quot;'+this.model.get('SAMPLECHANGERLOCATION')+'&quot;?',
-//                callback: this.doUnAssign.bind(this, options)
-//            })
-//        },
-//        
-//        doUnAssign: function(options) {
-//            console.log('unassigning', this.model)
-//            Backbone.ajax({
-//                url: app.apiurl+'/assign/unassign',
-//                data: { visit: options.visit, cid: this.model.get('CONTAINERID') },
-//                success: this.unassignUpdateGUI.bind(this, options),
-//                error: function(xhr, message, options) {
-//                    app.alert({ message: 'Something went wrong unassigning this container:' })
-//                    
-//                },
-//            })
-//        },
-//        
-//        unassignUpdateGUI: function(options) {
-//            this.model.set({ SAMPLECHANGERLOCATION: null })
-//            this.trigger('remove:container', this.model)
-//            
-//            var shipments = _.uniq(options.shipments.pluck('SHIPPINGID'))
-//            if (shipments.indexOf(this.model.get('SHIPPINGID')) > -1) {
-//                var s = options.shipments.findWhere({ SHIPPINGID: this.model.get('SHIPPINGID') })
-//                var d = s.get('DEWARS').findWhere({ DEWARID: this.model.get('DEWARID') })
-//                d.get('CONTAINERS').add(this.model)
-//                
-//                console.log('add container to dewar')
-//            }
-//        },
-//        
-    })
+    });
             
             
             
@@ -137,37 +47,6 @@ define(['marionette', 'views/pages',
         },
         
         childView: ContainerView,
-//        childEvents: {
-//            'remove:container': 'removeContainer',
-//        },
-        
-        events: {
-//            'click a.deact': 'deactivateDewar',
-        },
-        
-//        deactivateDewar: function(e) {
-//            e.preventDefault()
-//            var self = this
-//            Backbone.ajax({
-//                url: app.apiurl+'/assign/deact',
-//                data: { did: this.model.get('DEWARID') },
-//                success: function() {
-//                    self.$el.removeClass('active')
-//                    self.trigger('refresh')
-//                },
-//                
-//                error: function() {
-//                    app.alert({ message: 'Something went wrong deactivating this dewar' })
-//                }
-//                
-//            })
-//        },
-        
-//        removeContainer: function(child, model) {
-//            console.log('remove container dewar', model)
-//            this.collection.remove(model)
-//            this.render()
-//        },
         
         initialize: function(options) {
             this.collection = this.model.get('CONTAINERS')
@@ -175,8 +54,14 @@ define(['marionette', 'views/pages',
         
         onRender: function() {
             this.$el.show()
-        }
-    })
+        },
+        
+        onChildviewCvShow: function(container) {
+        	console.log("DewarView: show container " + container.model.get("CONTAINERID"));
+        	this.selectedContainer = container.model.get("CONTAINERID");
+        	this.trigger("dv:showcontainer");
+        },
+    });
             
             
     // List of Shipments
@@ -187,8 +72,14 @@ define(['marionette', 'views/pages',
         
         initialize: function(options) {
             this.collection = this.model.get('DEWARS')
-        }
-    })
+        },
+        
+        onChildviewDvShowcontainer: function(dewar) {
+        	console.log("ShipmentView: show container " + dewar.selectedContainer);
+        	this.selectedContainer = dewar.selectedContainer;
+        	this.trigger("sv:showcontainer");
+        },
+    });
             
             
             
@@ -202,24 +93,6 @@ define(['marionette', 'views/pages',
             assigned: true,
         },
         childViewContainer: '.ac',
-        
-        childEvents: {
-//            'remove:container': 'removeContainer',
-        },
-        
-//        removeContainer: function(child, model) {
-//            console.log('remove container position', model)
-//            this.collection.remove(model)
-//            this.render()
-//        },
-        
-//        collectionEvents: {
-//            'change reset': 'render',
-//        },
-        
-//        events: {
-//            'drop': 'handleDrop',
-//        },
         
         initialize: function(options) {
             this.collection = new Containers()
@@ -235,16 +108,8 @@ define(['marionette', 'views/pages',
         
         onRender: function() {
             this.$el.attr('id', 'blpos'+this.model.get('id'))
-//            this.$el.droppable({
-//                accept: '.container',
-//                hoverClass: 'bl_puck_drag',
-//            })
             
         },
-        
-//        handleDrop: function(e, ui) {
-//            ui.draggable.trigger('drop:assign', { id: this.model.get('id'), assigned: this.assigned, visit: this.getOption('visit') })
-//        }
         
     })
             
@@ -252,29 +117,19 @@ define(['marionette', 'views/pages',
     var SampleChangerView = Marionette.CollectionView.extend({
         className: 'clearfix',
         childView: PositionView,
-//        childViewOptions: function() {
-//            return {
-//                assigned: this.getOption('assigned'),
-//                visit: this.getOption('visit'),
-//            }
-//        }
     })
 
             
             
-    return Marionette.CompositeView.extend({
+    var View = Marionette.CompositeView.extend({
         template: template,
         className: 'content',
         childView: ShipmentView,
         childViewContainer: '#unassigned',
         
-//        events: {
-//            'drop #unassigned': 'handleDrop',
-//        },
-        
-//        handleDrop: function(e, ui) {
-//            ui.draggable.trigger('drop:unassign', { shipments: this.collection, visit: this.getOption('visit').get('VISIT') })
-//        },
+        regions: {
+        	groupdetails: ".groupdetails",
+        },
         
         templateHelpers: function() {
             return {
@@ -299,6 +154,7 @@ define(['marionette', 'views/pages',
                 console.log(self.containers)
             })
             this.listenTo(this.containers, 'sync', this.generateShipments, this)
+            
             this.paginator = new Pages({ collection: this.containers })
         },
         
@@ -335,24 +191,9 @@ define(['marionette', 'views/pages',
         
         
         onShow: function() {
-//            if (this.getOption('visit').get('BL') in app.config.pucks) {
-//                var pucks = app.config.pucks[this.getOption('visit').get('BL')]
-//            } else var pucks = 10
-//            
-//            var positions = new Backbone.Collection(_.map(_.range(1,pucks+1), function(i) { return { id: i } }))
-//            this.scview = new SampleChangerView({
-//                collection: positions,
-//                assigned: this.assigned,
-//                visit: this.getOption('visit').get('VISIT'),
-//                shipments: this.collection,
-//            })
-            this.$el.find('#assigned').append(this.scview.render().$el)
+//            this.$el.find('#assigned').append(this.scview.render().$el)
             this.$el.find('.page_wrap').append(this.paginator.render().$el)
             
-//            this.$el.find('#unassigned').droppable({
-//                accept: '.bl_puck .ac div',
-//                hoverClass: 'unassigned_drag',
-//            })
         },
         
         onDestroy: function() {
@@ -360,6 +201,18 @@ define(['marionette', 'views/pages',
             // hmm no destroy?
             //if (this.paginator) this.paginator.destroy()
         },
+        
+        onChildviewSvShowcontainer: function(shipment) {
+        	console.log("View: showing container "+shipment.selectedContainer);
+        	this.showContainer(shipment.selectedContainer);
+        },        
+        
+        showContainer: function(containerId) {
+        	console.log("Showing experiment group for sample changer " + containerId);
+        },
+        
     })
     
+    
+    return View;
 })
