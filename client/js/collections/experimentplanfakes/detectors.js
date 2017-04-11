@@ -29,7 +29,7 @@ define([
 		 * assigned to this data collection plan
 		 */
 		initialize: function(options) {
-			if (options.dataCollectionId) this.dataCollectionId = options.dataCollectionId;
+			if (options && options.dataCollectionId) this.dataCollectionId = options.dataCollectionId;
 		},
 	});
 	

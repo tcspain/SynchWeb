@@ -30,7 +30,7 @@ define([
 		 * parameters for this data collection plan.
 		 */
 		initialize: function(options) {
-			if (options.dataCollectionPlanId) this.dataCollectionPlanId = options.dataCollectionPlanId;
+			if (options && options.dataCollectionPlanId) this.dataCollectionPlanId = options.dataCollectionPlanId;
 		}
 	});
 	
