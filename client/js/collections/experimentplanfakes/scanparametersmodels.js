@@ -17,12 +17,21 @@ define([
 		dataCollectionPlanId: null,
 		model: ScanParametersModel,
 		url: function() {
-			return "/scanparam" + (this.dataCOllectionPlanId ? "/dcplan/"+this.dataCollectionPlanId : "");
+			return "/scanparam" + (this.dataCollectionPlanId ? "/dcplan/"+this.dataCollectionPlanId : "");
 		},
 		
 		state: {
 			pageSize: 15,
 		},
+		
+		/*
+		 * options
+		 * options.dataCollectionPlanId: The collection will hold the scan
+		 * parameters for this data collection plan.
+		 */
+		initialize: function(options) {
+			if (options.dataCollectionPlanId) this.dataCollectionPlanId = options.dataCollectionPlanId;
+		}
 	});
 	
 	// Parameter Models by DataCollectionPlan

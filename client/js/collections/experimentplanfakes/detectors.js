@@ -22,6 +22,15 @@ define([
 		state: {
 			pageSize: 5,
 		},
+		
+		/*
+		 * options
+		 * options.dataCollectionId: the collection will hold the detectors
+		 * assigned to this data collection plan
+		 */
+		initialize: function(options) {
+			if (options.dataCollectionId) this.dataCollectionId = options.dataCollectionId;
+		},
 	});
 	
 	mockjax({
