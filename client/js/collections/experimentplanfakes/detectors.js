@@ -28,7 +28,8 @@ define([
 		 * options.dataCollectionId: the collection will hold the detectors
 		 * assigned to this data collection plan
 		 */
-		initialize: function(options) {
+		initialize: function(models, options) {
+			if (models) this.models = models;
 			if (options && options.dataCollectionId) this.dataCollectionId = options.dataCollectionId;
 		},
 	});

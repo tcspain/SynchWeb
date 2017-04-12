@@ -23,7 +23,8 @@ define([
 			pageSize: 15,
 		},
 		
-		initialize: function(options) {
+		initialize: function(models, options) {
+			if (models) this.models = models;
 			if (options && options.blSampleId) this.blSampleId = options.blSampleId;
 		},
 	});
