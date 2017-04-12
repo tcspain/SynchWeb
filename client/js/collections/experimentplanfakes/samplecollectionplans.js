@@ -16,7 +16,7 @@ define([
 		blSampleId: null,
 		model: SampleCollectionPlan,
 		url: function() {
-			return "/dcplan/sample/" + blSampleId;
+			return (this.blSampleId) ? "/dcplan/sample/" + blSampleId : null;
 		},
 		
 		state: {
@@ -24,10 +24,7 @@ define([
 		},
 		
 		initialize: function(options) {
-			if (options && options.blSampleId)
-				this.blSampleId = options.blSampleId;
-			else
-				console.log("sampleCollectionPlans.initialize(): Error, no sample ID provided");
+			if (options && options.blSampleId) this.blSampleId = options.blSampleId;
 		},
 	});
 	
