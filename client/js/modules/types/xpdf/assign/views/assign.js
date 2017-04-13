@@ -390,12 +390,20 @@ define([
     		
     		var planEvent = "plan:details";
     		// Show the table of data collection plans
-    		this.plantable.show(new PlanListView({
-    			collection: planCollection, 
-    			showPlanEvent: planEvent,
-    			showPlanArgument: "ORDER"
-    		}));
-    		this.listenTo(app, planEvent, this.showPlanDetails);
+    		if (this.collection.length > 0) {
+    			this.$el.find("div.plantable").show();
+    			this.$el.find("div.planparam").show();
+    		
+    			this.plantable.show(new PlanListView({
+    				collection: planCollection, 
+    				showPlanEvent: planEvent,
+    				showPlanArgument: "ORDER"
+    			}));
+    			this.listenTo(app, planEvent, this.showPlanDetails);
+    		} else {
+    			this.$el.find("div.plantable").hide();
+    			this.$el.find("div.planparam").hide();
+    		}
     	},
     	
     	showPlanDetails: function(planOrdinal) {
@@ -440,7 +448,7 @@ define([
     // View for the data collection plans in a sample holder
     var PlanListView = Marionette.LayoutView.extend({
     	
-    	template: _.template("<h2>Data Collection Plans</h2>" +
+    	template: _.template("<h2 class=\"tabletitle\">Data Collection Plans</h2>" +
     			"<div class=\"thetable\"></div>"),
     	
     	regions: {
@@ -460,11 +468,18 @@ define([
     	},
     	
     	onShow: function() {
-    		this.thetable.show(new PlanListTableView({
-    			collection: this.collection,
-    			showPlanEvent: this.showPlanEvent,
-    			showPlanArgument: this.showPlanArgument
-    		}));
+    		if (this.collection.length > 0) {
+//    			this.$el.find("h2.tabletitle").show();
+//    			this.$el.find("div.thetable").show();
+    			this.thetable.show(new PlanListTableView({
+    				collection: this.collection,
+    				showPlanEvent: this.showPlanEvent,
+    				showPlanArgument: this.showPlanArgument
+    			}));
+    		} else {
+//    			this.$el.find("h2.tabletitle").hide();
+//    			this.$el.find("div.thetable").hide();
+    		}
     	},
     });
     
