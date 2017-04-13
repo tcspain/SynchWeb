@@ -13,7 +13,7 @@ define([
 			ScanParametersService
 	) {
 		var Services = PageableCollection.extend({
-			model:ScanParametersService,
+			model: ScanParametersService,
 			url: "/scanparam/service",
 			state: {
 				pageSize: 5,
@@ -31,9 +31,9 @@ define([
 					SCANPARAMETERSSERVICEID: "2",
 					NAME: "Cryostat",
 					DESCRIPTION: "A cooler capable of operating between 77 K and 20 K below room temperature.",
-				}
-			]
-		})
+				},
+			],
+		});
 		
 		return Services;
 });

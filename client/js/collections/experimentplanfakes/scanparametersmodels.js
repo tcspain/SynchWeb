@@ -6,7 +6,7 @@ define([
 	"backbone.paginator",
 	"jquery.mockjax",
 	
-	"models/experimentplansfakes/scanparametersmodel",
+	"models/experimentplanfakes/scanparametersmodel",
 	], function(
 			PageableCollection,
 			mockjax,
@@ -42,7 +42,7 @@ define([
 			responseText: [
 				{
 					SCANPARAMETERSMODELID: "1",
-					SCANPARAMTERSSERVICEID: "1",
+					SCANPARAMETERSSERVICEID: "1",
 					DATACOLLECTIONPLANID: "1",
 					MODELNUMBER: "1",
 					START: "400",
@@ -60,7 +60,7 @@ define([
 			responseText: [
 				{
 					SCANPARAMETERSMODELID: "2",
-					SCANPARAMTERSSERVICEID: "1",
+					SCANPARAMETERSSERVICEID: "1",
 					DATACOLLECTIONPLANID: "3",
 					MODELNUMBER: "1",
 					START: "400",
@@ -69,7 +69,7 @@ define([
 					ARRAY: "400 K to 650 K in 50 K steps",
 				}, {
 					SCANPARAMETERSMODELID: "3",
-					SCANPARAMTERSSERVICEID: "2",
+					SCANPARAMETERSSERVICEID: "2",
 					DATACOLLECTIONPLANID: "3",
 					MODELNUMBER: "2",
 					START: "80",
@@ -83,7 +83,7 @@ define([
 			responseText: [
 				{
 					SCANPARAMETERSMODELID: "4",
-					SCANPARAMTERSSERVICEID: "1",
+					SCANPARAMETERSSERVICEID: "1",
 					DATACOLLECTIONPLANID: "4",
 					MODELNUMBER: "1",
 					START: "400",
@@ -102,7 +102,7 @@ define([
 		responseText: [
 			{
 				SCANPARAMETERSMODELID: "1",
-				SCANPARAMTERSSERVICEID: "1",
+				SCANPARAMETERSSERVICEID: "1",
 				DATACOLLECTIONPLANID: "1",
 				MODELNUMBER: "1",
 				START: "400",
@@ -111,7 +111,7 @@ define([
 				ARRAY: "400 K to 600 K in 25 K steps",
 			}, {
 				SCANPARAMETERSMODELID: "2",
-				SCANPARAMTERSSERVICEID: "1",
+				SCANPARAMETERSSERVICEID: "1",
 				DATACOLLECTIONPLANID: "3",
 				MODELNUMBER: "1",
 				START: "400",
@@ -120,7 +120,7 @@ define([
 				ARRAY: "400 K to 650 K in 50 K steps",
 			}, {
 				SCANPARAMETERSMODELID: "3",
-				SCANPARAMTERSSERVICEID: "2",
+				SCANPARAMETERSSERVICEID: "2",
 				DATACOLLECTIONPLANID: "3",
 				MODELNUMBER: "2",
 				START: "80",
@@ -129,7 +129,7 @@ define([
 				ARRAY: "Why run the cryo and the blower at the same time?",
 			}, {
 				SCANPARAMETERSMODELID: "4",
-				SCANPARAMTERSSERVICEID: "1",
+				SCANPARAMETERSSERVICEID: "1",
 				DATACOLLECTIONPLANID: "4",
 				MODELNUMBER: "1",
 				START: "400",
