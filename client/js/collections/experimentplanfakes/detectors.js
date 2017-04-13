@@ -42,10 +42,11 @@ define([
 				TYPE: "PDF",
 				MANUFACTURER: "Perkin-Elemer",
 				MODEL: "4K",
-				DISTANCEMIN: "0.3",
-				DISTANCEMAX: "3.0",
+				DISTANCE: "0.5",
 				DENSITY: "4.5",
 				COMPOSITION: "CsI",
+				EXPOSURETIME: "60",
+				ORIENTATION: "0",
 			},
 		]
 	});
