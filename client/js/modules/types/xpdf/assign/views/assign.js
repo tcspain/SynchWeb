@@ -227,7 +227,7 @@ define([
     var OverView = Marionette.LayoutView.extend({
         
     	template: template,
-    	classname: "content",
+    	className: "content",
     	
     	regions: {
     		shipments: ".shipments",
@@ -554,21 +554,23 @@ define([
     });
     
     var PlanDetailsView = Marionette.LayoutView.extend({
+    	className: "content",
+    	
     	regions: {
     		detectortable: ".detectortable",
     		axistable: ".axistable",
     	},
     	
-    	template: _.template("<h2>Plan Details</h2>" + 
+    	template: _.template("<h1>Plan Details</h1>" + 
     	        "<ul>" + 
     	        "<li><span class=\"label\">Instance</span><span><%=SAMPLENAME%></span></li>" +
     	        "<li><span class=\"label\">Wavelength (Å)</span><span><%=WAVELENGTH%></span></li>" +
     	        "<li><span class=\"label\">Mono. bandwidth</span><span><%=MONOBANDWIDTH%></span></li>" +
     	        "<li><span class=\"label\">Beam size (mm)</span><span><%=PREFERREDBEAMSIZEX%></span><span>×</span><span><%=PREFERREDBEAMSIZEY%></span></li>" +
     	        "</ul>" +
-    	        "<h3>Detectors</h3>" +
+    	        "<h2>Detectors</h2>" +
     	        "<div class=\"detectortable\"></div>" +
-    	        "<h3 class=\"scantitle\">Scan axes</h3>"+
+    	        "<h2 class=\"scantitle\">Scan axes</h2>"+
     	        "<div class=\"axistable\"></div>"
     	        
     	 ),
