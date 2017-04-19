@@ -40,7 +40,7 @@ define([
 			{				
 				DETECTORID: "1",
 				TYPE: "PDF",
-				MANUFACTURER: "Perkin-Elemer",
+				MANUFACTURER: "Perkin-Elmer",
 				MODEL: "4K",
 				DISTANCE: "500",
 				DENSITY: "4.5",
@@ -57,7 +57,7 @@ define([
 			{				
 				DETECTORID: "1",
 				TYPE: "PDF",
-				MANUFACTURER: "Perkin-Elemer",
+				MANUFACTURER: "Perkin-Elmer",
 				MODEL: "4K",
 				DISTANCEMIN: "300",
 				DISTANCEMAX: "3000",
@@ -67,7 +67,7 @@ define([
 			{				
 				DETECTORID: "2",
 				TYPE: "Bragg",
-				MANUFACTURER: "Perkin-Elemer",
+				MANUFACTURER: "Perkin-Elmer",
 				MODEL: "4K",
 				DISTANCEMIN: "300",
 				DISTANCEMAX: "3000",
