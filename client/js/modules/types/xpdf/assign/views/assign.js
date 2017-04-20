@@ -329,43 +329,51 @@ define([
     		if (planIndex >= this.planCollection.length)
     			this.assignAxisServices();
     		else {
-    			// Fetch the details for the plan at planIndex
-    			// Starting with the detectors
-    			var planId = this.planCollection.at(planIndex).get("DIFFRACTIONPLANID");
-    			var detectors = new Detectors({}, {dataCollectionId: planId});
-    		var self = this;
-    		detectors.fetch({
-    			success: function(detectors, response, options) {
-    				console.log("assign.js:OverView.fetchPlanDetails(): Added " + detectors.length + " detectors");
-    				self.planCollection.at(planIndex).set({"DETECTORS": detectors});
-    				self.fetchPlanAxes(planIndex);
-    			},
-    			error: function(detectors, response, options) {
-    				console.log("assign.js:OverView.fetchPlanDetails(): Error fetching detectors for data collection plan "+planId);
-    				self.planCollection.at(planIndex).set({"DETECTORS": []});
-    				self.fetchPlanAxes(planCollection, planIndex, passHash);
-    			},
-    		});
+    			if (this.planCollection.at(planIndex).has("DETECTORS")) {
+    				this.fetchPlanAxes(planIndex);
+    			} else {
+    				// Fetch the details for the plan at planIndex
+    				// Starting with the detectors
+    				var planId = this.planCollection.at(planIndex).get("DIFFRACTIONPLANID");
+    				var detectors = new Detectors({}, {dataCollectionId: planId});
+    				var self = this;
+    				detectors.fetch({
+    					success: function(detectors, response, options) {
+    						console.log("assign.js:OverView.fetchPlanDetails(): Added " + detectors.length + " detectors");
+    						self.planCollection.at(planIndex).set({"DETECTORS": detectors});
+    						self.fetchPlanAxes(planIndex);
+    					},
+    					error: function(detectors, response, options) {
+    						console.log("assign.js:OverView.fetchPlanDetails(): Error fetching detectors for data collection plan "+planId);
+    						self.planCollection.at(planIndex).set({"DETECTORS": []});
+    						self.fetchPlanAxes(planIndex);
+    					},
+    				});
+    			}
     		}
     	},    	
 
     	fetchPlanAxes: function(planIndex) {
-    		var planId = this.planCollection.at(planIndex).get("DIFFRACTIONPLANID");
-    		var axes = new Axes({}, {dataCollectionPlanId: planId});
-    		axes.comparator = "MODELNUMBER";
-    		var self = this;
-    		axes.fetch({
-    			success: function(axes, response, options) {
-    				console.log("assign.js:OverView.fetchPlanAxes(): Added " + axes.length + " scan axes");
-    				self.planCollection.at(planIndex).set({"SCANMODELS": axes});
-    				self.fetchPlanDetails(planIndex+1);
-    			},
-    			error: function(axes, response, options) {
-    				console.log("assign.js:OverView.fetchPlanAxes(): Error fetching scan parameter models for data collection plan "+planId);
-    				self.planCollection.at(planIndex).set({"SCANMODELS": []});
-    				self.fetchPlanDetails(planIndex+1);
-    			},
-    		});
+    		if (this.planCollection.at(planIndex).has("SCANMODELS")) {
+    			this.fetchPlanDetails(planIndex+1);
+    		} else {
+    			var planId = this.planCollection.at(planIndex).get("DIFFRACTIONPLANID");
+    			var axes = new Axes({}, {dataCollectionPlanId: planId});
+    			axes.comparator = "MODELNUMBER";
+    			var self = this;
+    			axes.fetch({
+    				success: function(axes, response, options) {
+    					console.log("assign.js:OverView.fetchPlanAxes(): Added " + axes.length + " scan axes");
+    					self.planCollection.at(planIndex).set({"SCANMODELS": axes});
+    					self.fetchPlanDetails(planIndex+1);
+    				},
+    				error: function(axes, response, options) {
+    					console.log("assign.js:OverView.fetchPlanAxes(): Error fetching scan parameter models for data collection plan "+planId);
+    					self.planCollection.at(planIndex).set({"SCANMODELS": []});
+    					self.fetchPlanDetails(planIndex+1);
+    				},
+    			});
+    		}
     	},
 
     	// Get the name of the scan service, stored on the scan parameter
@@ -410,7 +418,8 @@ define([
     			this.plantable.show(new PlanListView({
     				collection: this.planCollection, 
     				showPlanEvent: planEvent,
-    				showPlanArgument: "ORDER"
+    				showPlanArgument: "ORDER",
+    				collectionView: this,
     			}));
     			this.listenTo(app, planEvent, this.showPlanDetails);
     		} else {
@@ -432,6 +441,65 @@ define([
                 VISIT: this.getOption('visit').toJSON(),
             }
         },
+        
+        // Plan manipulation functions
+        move: function(ordinalIn, moveBy) {
+        	// Ensure ordinal is numeric
+        	var ordinal = (typeof ordinalIn === 'number') ? ordinalIn : Number.parseFloat(ordinalIn);
+        	// Since moveBy is not ultimately read from JSON, it is assumed numeric
+        	
+        	// Make sure nothing moves beyond the end of the array. Ordinal is
+        	// 1-indexed!
+        	if (ordinal + moveBy < 1)
+        		moveBy = 1 - ordinal;
+        	if (ordinal + moveBy > this.planCollection.length)
+        		moveBy = this.planCollection.length - ordinal;
+
+        	// The models that are to be moved run from ordinal to ordinal+moveBy
+        	var endPoint = ordinal + moveBy;
+        	
+        	var direction = Math.sign(moveBy);
+        	var upper = Math.max(ordinal, endPoint);
+        	var lower = Math.min(ordinal, endPoint);
+        	// all the models to be moved
+        	var moveModels = this.planCollection.filter(function(plan) {return plan.get("ORDER") >= lower && plan.get("ORDER") <= upper});
+        	var movedModel;
+        	var contraModels;
+        	if (direction == +1) {
+        		movedModel = _.first(moveModels);
+        		contraModels = _.rest(moveModels);
+        	} else if (direction == -1) {
+        		movedModel = _.last(moveModels);
+        		contraModels = _.initial(moveModels);
+        	} else {
+        		// moveBy is zero
+        		return;
+        	}
+        	// Move the model
+        	movedModel.set({"ORDER": endPoint.toLocaleString()});
+        	// Move everything it jumps over in the opposite direction
+        	_.each(contraModels, function(plan) {
+        		plan.set({"ORDER": (Number.parseInt(plan.get("ORDER"))-direction).toLocaleString()});
+        	});
+        	
+        	this.makePlanCollection();
+        	
+        },
+        
+        remove: function(ordinal) {
+        	
+        },
+        
+        // another instance of the same data collection plan
+        copy: function(ordinal) {
+        	
+        },
+        
+        // a new data collection plan, with the same parameter values
+        clone: function(ordinal) {
+        	
+        },
+        
 
     });
     
@@ -474,11 +542,16 @@ define([
     	 * options.collection: the collection of plans to be displayed
     	 * options.showPlanEvent: the event fired when an event is to be shown
     	 * options.showPlanArgument: the identifier for the selected plan
+    	 * options.collectionView: the view holding the collection for the
+    	 * 			table, which provides move(order, by), remove(order),
+    	 * 			copy(order) and clone(order) functions.
+
     	 */
     	initialize: function(options) {
     		if (options && options.collection) this.collection = options.collection;
     		if (options && options.showPlanEvent) this.showPlanEvent = options.showPlanEvent;
     		if (options && options.showPlanArgument) this.showPlanArgument = options.showPlanArgument;
+    		if (options && options.collectionView) this.collectionView = options.collectionView;
     	},
     	
     	onShow: function() {
@@ -488,7 +561,8 @@ define([
     			this.thetable.show(new PlanListTableView({
     				collection: this.collection,
     				showPlanEvent: this.showPlanEvent,
-    				showPlanArgument: this.showPlanArgument
+    				showPlanArgument: this.showPlanArgument,
+    				collectionView: this.collectionView,
     			}));
     		} else {
 //    			this.$el.find("h2.tabletitle").hide();
@@ -570,7 +644,7 @@ define([
         		"<button type=\"button\" class=\"button button-notext remove\" title=\"Remove plan\"><i class=\"fa fa-remove\"></i></button>";
         	},
         	doCopy: function(event) {
-        		this.parentTable.doCopy(this.model, this);
+        		this.parentTable.doCopy(this.model.get("ORDER"));
         	},
         	doMoveUp: function(event) {
         		this.parentTable.moveUp(this.model.get("ORDER"));
@@ -579,50 +653,37 @@ define([
         		this.parentTable.moveDown(this.model.get("ORDER"));
         	},
         	doDelete: function(event) {
-        		this.parentTable.doRemove(this.model, this.decrementNPlans);
-        	},
-        	incrementNPlans: function() {
-        		this.nPlans += 1;
-        	},
-        	decrementNPlans: function() {
-        		this.nPlans -= 1;
+        		this.parentTable.doRemove(this.model.get("ORDER"));
         	},
         }),
         // Callback functions for the above cell
-        doCopy: function(model, cell) {
-    		console.log("Copying plan " + model.get("ORDER") + " from ", cell);
+        doCopy: function(order) {
+    		console.log("Copying plan " + order);
         	
         },
         moveUp: function(order) {
-        	if (order != 1) {
-        		this.movePlan(order, -1);
+        	if (order > 1) {
+        		this.collectionView.move(order, -1);
         	}
         },
         moveDown: function(order) {
-        	if (order != this.collection.length) {
-        		this.movePlan(order, +1);
+        	if (order < this.collection.length) {
+        		this.collectionView.move(order, +1);
         	}
         },
-        doRemove: function(model, cell) {
-    		console.log("Deleting plan " + model.get("ORDER") + " at ", cell);
+        doRemove: function(order) {
+    		console.log("Deleting plan " + order);
     		// Remove the DataCollectionPlan from the set associated with the sample
 
-        },
-        movePlan: function(order, moveBy) {
-        	// swap the plans with order order and order+moveBy
-        	var otherOrder = (parseInt(order, 10) + parseInt(moveBy, 10)).toLocaleString();
-        	var model1 = this.collection.findWhere({"ORDER": order});
-        	var model2 = this.collection.findWhere({"ORDER": otherOrder});
-        	model2.set({"ORDER": order});
-        	model1.set({"ORDER": otherOrder});
-        	
-        	this.collection.sort();
         },
         
         /*
     	 * options
     	 * options.showPlanEvent: the event fired when an event is to be shown
     	 * options.showPlanArgument: the identifier for the selected plan
+    	 * options.collectionView: the view holding the collection that
+    	 * 			provides move(order, by), remove(order), copy(order) and
+    	 * 			clone(order) functions.
     	 */
     	initialize: function(options) {
     		
@@ -646,6 +707,8 @@ define([
     			event: options.showPlanEvent,
     			argument: options.showPlanArgument,
     		});
+    		
+    		this.collectionView = options.collectionView;
     		
 			TableView.prototype.initialize.apply(this, [options]);
     	},
