@@ -241,126 +241,138 @@ define([
     		var childView = new View({visit: this.getOption("visit")});
     		this.listenTo(childView, "v:showcontainer", this.showContainer);
     		this.shipments.show(childView);
+    		// fetch the available scan parameter services, since this will not
+    		// change during the lifetime of the view
+    		this.services = new ParamServices();
+    		this.services.fetch({
+    			error: function(services, response, options) {
+    				console.log("assign.js:OverView.fetchAxisServices(): Error getting scan parameter services");
+    			},
+    		});
     	},
 
     	// Show the details of a given container
     	showContainer: function(containerId) {
+    		this.containerId = containerId;
     		// Get the data for the view
-    		var samples = new Samples({}, {containerID: containerId});
+    		this.samples = new Samples({}, {containerID: this.containerId});
+    		// An array of SampleCollectionPlans collections, in order of the sample on the sample changer
+    		this.plansBySample = [];
     		var self = this;
-    		samples.fetch({
+    		this.samples.fetch({
     			success: function(samples, response, options) {
-    				console.log("assign.js:OverView.showContainer(): success fetching samples for container " + containerId);
-    	    		self.sampletable.show(new SampleListView({collection: samples, containerId: containerId}));
-    	    		self.showPlans(containerId, {ids: samples.pluck("BLSAMPLEID"), names: samples.pluck("NAME")});
+    				console.log("assign.js:OverView.showContainer(): success fetching samples for container " + self.containerId);
+    	    		self.sampletable.show(new SampleListView({collection: self.samples, containerId: self.containerId}));
+    	    		self.fetchPlans(0)
     			},
     			error: function(samples, response, options) {
-    				console.log("assign.js:OverView.showContainer(): error fetching samples for container " + containerId);
+    				console.log("assign.js:OverView.showContainer(): error fetching samples for container " + self.containerId);
     			}
     		});
     		
     	},
     	
-    	// Show all the data collection plans for a given sample changer
-    	showPlans: function(containerId, sampleDetails) {
-    		var plans = new SampleCollectionPlans();
-    		plans.comparator = "ORDER";
-    		this.fetchPlans(containerId, sampleDetails, 0, plans);
-    	},
-    	
-    	// Fetch the plans for a sample in the changer, and add the models to
-    	// the overall Collection
-    	fetchPlans: function(containerId, sampleDetails, sampleIndex, planCollection) {
+    	// Fetch the plans for a sample in the changer, and add the collections
+    	// to the per-sample array of collections
+    	fetchPlans: function(sampleIndex) {
     		console.log("assign.js:OverView.fetchPlans(): sampleIndex = "+sampleIndex);
-    		if (sampleIndex >= sampleDetails.ids.length)
-				this.fetchPlanDetails(planCollection, 0, {containerId: containerId, sampleIds: sampleDetails.ids});
+    		if (sampleIndex >= this.samples.length)
+				this.makePlanCollection();
     		else {
 
-    			var currentId = sampleDetails.ids[sampleIndex];
-    			var currentName = sampleDetails.names[sampleIndex];
+    			var currentId = this.samples.at(sampleIndex).get("BLSAMPLEID");
+    			var currentName = this.samples.at(sampleIndex).get("NAME");
 
-    			var plans = new SampleCollectionPlans({}, {sampleId: currentId});
+    			this.plansBySample[sampleIndex] = new SampleCollectionPlans({}, {sampleId: currentId});
     			var self=this;
-    			plans.fetch({
+    			this.plansBySample[sampleIndex].fetch({
     				success: function(plans, response, options) {
-    					plans.each(function(model, index, collection) {
-    						model.set({"SAMPLENAME": currentName.replace(/__/g, " ")});
-    					});
-    					planCollection.add(plans.models);
-    					self.fetchPlans(containerId, sampleDetails, sampleIndex+1, planCollection);
+    					// Add the fetched plan collection to the array of plans by sample 
+    					self.fetchPlans(sampleIndex+1);
     				},
     				error: function(plans, response, options) {
     					console.log("assign.js:OverView.fetchPlans(): Error getting data collection plans for sample "+currentId + ", " + currentName);
-    					self.fetchPlans(containerId, sampleDetails, sampleIndex+1, planCollection);
+    					self.fetchPlans(sampleIndex+1);
     				},
     			});
     		}
     	},
     	
+    	// Make the per-changer collection of plans from the per-instance array
+    	// of collections of plans
+    	makePlanCollection: function() {
+    		// The Collection of all plans for this sample changer
+    		this.planCollection = new SampleCollectionPlans();
+    		this.planCollection.comparator = "ORDER";
+
+    		var self = this;
+    		// iterate over each sample's collection of plans
+    		_.each(this.plansBySample, function(plans, sampleIndex, plansBySample) {
+    			var currentId = self.samples.at(sampleIndex).get("BLSAMPLEID");
+    			var currentName = self.samples.at(sampleIndex).get("NAME");
+    			
+    			// iterate over the Collection of plans 
+    			plans.each(function(plan, planIndex, plans) {
+    				plan.set({"SAMPLENAME": currentName.replace(/__/g, " ")});
+    				// Add the plan to the overall collection, where is will be
+    				// added in the sorted order
+    				self.planCollection.add(plan);
+    			});
+    		});
+    		
+    		this.fetchPlanDetails(0);
+    	},
+    	
     	// Fetch the detectors and axes for all the plans
-    	fetchPlanDetails: function(planCollection, planIndex, passHash) {
+    	fetchPlanDetails: function(planIndex) {
     		// Check if the fetching is done
-    		if (planIndex >= planCollection.length)
-    			this.fetchAxisServices(planCollection, passHash);
+    		if (planIndex >= this.planCollection.length)
+    			this.assignAxisServices();
     		else {
     			// Fetch the details for the plan at planIndex
     			// Starting with the detectors
-    			var planId = planCollection.at(planIndex).get("DIFFRACTIONPLANID");
+    			var planId = this.planCollection.at(planIndex).get("DIFFRACTIONPLANID");
     			var detectors = new Detectors({}, {dataCollectionId: planId});
     		var self = this;
     		detectors.fetch({
     			success: function(detectors, response, options) {
     				console.log("assign.js:OverView.fetchPlanDetails(): Added " + detectors.length + " detectors");
-    				planCollection.at(planIndex).set({"DETECTORS": detectors});
-    				self.fetchPlanAxes(planCollection, planIndex, passHash);
+    				self.planCollection.at(planIndex).set({"DETECTORS": detectors});
+    				self.fetchPlanAxes(planIndex);
     			},
     			error: function(detectors, response, options) {
     				console.log("assign.js:OverView.fetchPlanDetails(): Error fetching detectors for data collection plan "+planId);
-    				planCollection.at(planIndex).set({"DETECTORS": []});
+    				self.planCollection.at(planIndex).set({"DETECTORS": []});
     				self.fetchPlanAxes(planCollection, planIndex, passHash);
     			},
     		});
     		}
     	},    	
 
-    	fetchPlanAxes: function(planCollection, planIndex, passHash) {
-    		var planId = planCollection.at(planIndex).get("DIFFRACTIONPLANID");
+    	fetchPlanAxes: function(planIndex) {
+    		var planId = this.planCollection.at(planIndex).get("DIFFRACTIONPLANID");
     		var axes = new Axes({}, {dataCollectionPlanId: planId});
     		axes.comparator = "MODELNUMBER";
     		var self = this;
     		axes.fetch({
     			success: function(axes, response, options) {
     				console.log("assign.js:OverView.fetchPlanAxes(): Added " + axes.length + " scan axes");
-    				planCollection.at(planIndex).set({"SCANMODELS": axes});
-    				self.fetchPlanDetails(planCollection, planIndex+1, passHash);
+    				self.planCollection.at(planIndex).set({"SCANMODELS": axes});
+    				self.fetchPlanDetails(planIndex+1);
     			},
     			error: function(axes, response, options) {
     				console.log("assign.js:OverView.fetchPlanAxes(): Error fetching scan parameter models for data collection plan "+planId);
-    				planCollection.at(planIndex).set({"SCANMODELS": []});
-    				self.fetchPlanDetails(planCollection, planIndex+1, passHash);
+    				self.planCollection.at(planIndex).set({"SCANMODELS": []});
+    				self.fetchPlanDetails(planIndex+1);
     			},
     		});
     	},
 
-    	// Get the details of the service
-    	fetchAxisServices: function(planCollection, passHash) {
-    		var services = new ParamServices();
-    		var self = this
-    		services.fetch({
-    			success: function(services, response, options) {
-    				self.assignAxisServices(services, planCollection, passHash);
-    			},
-    			error: function(services, response, options) {
-    				console.log("assign.js:OverView.fetchAxisServices(): Error getting scan parameter services");
-    				self.showPlansFinale(passHash.containerId, passHash.sampleIds, planCollection);
-    			},
-    		});
-    	},
-    	
     	// Get the name of the scan service, stored on the scan parameter
     	// model as SERVICENAME
-    	assignAxisServices: function(services, planCollection, passHash) {
-    		planCollection.forEach(function(plan, index, plans) {
+    	assignAxisServices: function() {
+    		var services = this.services;
+    		this.planCollection.forEach(function(plan, index, plans) {
     			var axes = plan.get("SCANMODELS");
     			axes.forEach(function(scanModel, scanIndex, scanModels) {
     				var service = services.find(function(checkService) {
@@ -373,30 +385,30 @@ define([
     			});
     		});
     		
-    		this.showPlansFinale(passHash.containerId, passHash.sampleIds, planCollection);
+    		this.showPlansFinale();
     	},
     	
     	// Having collected all the plans, show them
-    	showPlansFinale: function(containerId, sampleIds, planCollection) {
+    	showPlansFinale: function() {
 //    		console.log("Assign:OverView.showPlansFinale: Found "+planCollection.length+" plans:", planCollection.pluck("DIFFRACTIONPLANID"), planCollection.pluck("SAMPLENAME"), planCollection.pluck("ORDER"));
     		// Set the  field which lists similar data collections (TODO)
-    		planCollection.forEach(function(plan, index, plans) {
+    		this.planCollection.forEach(function(plan, index, plans) {
 
 //    			console.log(plan);
     		});
     		
     		// Store the collection of plans for future reference
-    		this.collection = planCollection;
+//    		this.collection = planCollection;
     		
     		var planEvent = "plan:details";
     		// Show the table of data collection plans
-    		if (this.collection.length > 0) {
+    		if (this.planCollection.length > 0) {
     			this.$el.find("div.plantable").show();
     			this.$el.find("div.planparam").show();
     			this.$el.find("div.plandetails").hide();
     		
     			this.plantable.show(new PlanListView({
-    				collection: planCollection, 
+    				collection: this.planCollection, 
     				showPlanEvent: planEvent,
     				showPlanArgument: "ORDER"
     			}));
@@ -409,7 +421,7 @@ define([
     	
     	showPlanDetails: function(planOrdinal) {
     		console.log("assign.js:OverView.showPlanDetails(): show details for plan " + planOrdinal + " on ", this);
-    		var plan = this.collection.find(function(plan) {return plan.get("ORDER") == planOrdinal});
+    		var plan = this.planCollection.find(function(plan) {return plan.get("ORDER") == planOrdinal});
     		console.log(plan);
 			this.$el.find("div.plandetails").show();
     		this.planparam.show(new PlanDetailsView({model: plan}));
@@ -593,6 +605,7 @@ define([
         },
         doRemove: function(model, cell) {
     		console.log("Deleting plan " + model.get("ORDER") + " at ", cell);
+    		// Remove the DataCollectionPlan from the set associated with the sample
 
         },
         movePlan: function(order, moveBy) {
