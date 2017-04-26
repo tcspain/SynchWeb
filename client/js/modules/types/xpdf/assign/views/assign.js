@@ -18,7 +18,11 @@ define([
     "modules/types/xpdf/samples/views/samplelisttableview",
     'utils',
     "utils/table",
+    "modules/types/xpdf/utils/optioneditable",
     'tpl!templates/types/xpdf/assign/assign.html',
+    "backbone",
+    "backgrid",
+    "backbone-validation",
     'jquery-ui',
     ], function(
     		Marionette,
@@ -40,7 +44,10 @@ define([
     		SampleListTableView,
     		utils,
     		table,
-    		template
+    		Editable,
+    		template,
+    		Backbone,
+    		Backgrid
     		) {
 
             
@@ -805,9 +812,9 @@ define([
     	template: _.template("<h1>Plan Details</h1>" + 
     	        "<ul>" + 
     	        "<li><span class=\"label\">Instance</span><span><%=SAMPLENAME%></span></li>" +
-    	        "<li><span class=\"label\">Wavelength (Å)</span><span><%=WAVELENGTH%></span></li>" +
-    	        "<li><span class=\"label\">Mono. bandwidth</span><span><%=MONOBANDWIDTH%></span></li>" +
-    	        "<li><span class=\"label\">Beam size (mm)</span><span><%=PREFERREDBEAMSIZEX%></span><span>×</span><span><%=PREFERREDBEAMSIZEY%></span></li>" +
+    	        "<li><span class=\"label\">Wavelength (Å)</span><span class=\"WAVELENGTH\"><%=WAVELENGTH%></span></li>" +
+    	        "<li><span class=\"label\">Mono. bandwidth</span><span class=\"MONOBANDWIDTH\"><%=MONOBANDWIDTH%></span></li>" +
+    	        "<li><span class=\"label\">Beam size (mm)</span><span class=\"PREFERREDBEAMSIZEX\"><%=PREFERREDBEAMSIZEX%></span><span>×</span><span class=\"PREFERREDBEAMSIZEY\"><%=PREFERREDBEAMSIZEY%></span></li>" +
     	        "</ul>" +
     	        "<h2>Detectors</h2>" +
     	        "<div class=\"detectortable\"></div>" +
@@ -817,34 +824,60 @@ define([
     	 ),
     	 
     	 initialize: function(options) {
+    		 Backbone.Validation.bind(this);
+    		 
     		 this.model = options.model;
     	 },
     	 
     	 onRender: function() {
-    		this.detectortable.show(new DetectorView({collection: this.model.get("DETECTORS"), pages: false}));
-    		if (this.model.get("SCANMODELS").length > 0) {
-    			this.$el.find("h3.scantitle").show();
-    			this.$el.find("div.axistable").show();
-    			this.axistable.show(new AxisView({collection: this.model.get("SCANMODELS"), pages:false}));
-    		} else {
-    			this.$el.find("h3.scantitle").hide();
-    			this.$el.find("div.axistable").hide();
-    		}
+    		 // editable fields
+    		 var edit = new Editable( {model: this.model, el: this.$el, nosave: true});
+    		 edit.create("WAVELENGTH", "text");
+    		 edit.create("MONOBANDWIDTH", "text");
+    		 edit.create("PREFERREDBEAMSIZEX", "text");
+    		 edit.create("PREFERREDBEAMSIZEY", "text");
+    		 
+    		 
+    		 this.detectortable.show(new DetectorView({collection: this.model.get("DETECTORS"), pages: false}));
+    		 if (this.model.get("SCANMODELS").length > 0) {
+    			 this.$el.find("h3.scantitle").show();
+    			 this.$el.find("div.axistable").show();
+    			 this.axistable.show(new AxisView({collection: this.model.get("SCANMODELS"), pages:false}));
+    		 } else {
+    			 this.$el.find("h3.scantitle").hide();
+    			 this.$el.find("div.axistable").hide();
+    		 }
 
     	 },
     	
     });
     
     var DetectorView = TableView.extend({
-    	columns: [
-    		{name: "TYPE", label: "Type", cell: "string", editable: false},
-    		{name: "MANUFACTURER", label: "Manufacturer", cell: "string", editable: false},
-    		{name: "MODEL", label: "Model", cell: "string", editable: false},
-    		{name: "DISTANCE", label: "Distance (mm)", cell: "string", editable: true},
-    		{name: "EXPOSURETIME", label: "Exposure time (s)", cell: "string", editable: true},
-    		{name: "ORIENTATION", label: "Orientation (0, 45°)", cell: "string", editable: true},
-    	],
+    	initialize: function(options) {
+
+    		this.columns =  [
+    			{name: "TYPE", label: "Type", cell: TypeSelectorCell.extend({detectorList: "Bragg"}), editable: true},
+    			{name: "MANUFACTURER", label: "Manufacturer", cell: "string", editable: false},
+    			{name: "MODEL", label: "Model", cell: "string", editable: false},
+    			{name: "DISTANCE", label: "Distance (mm)", cell: "string", editable: true},
+    			{name: "EXPOSURETIME", label: "Exposure time (s)", cell: "string", editable: true},
+    			{name: "ORIENTATION", label: "Orientation (0, 45°)", cell: "string", editable: true},
+    		];
+    		
+        	TableView.prototype.initialize.apply(this, [options]);
+
+    	},
     	
+    	
+    });
+
+    var TypeSelectorCell = Backgrid.SelectCell.extend({
+    	optionValues: function() {
+    		return [
+    			["PDF", "PDF"],
+    			["Bragg", "Bragg"],
+    			]
+    	},
     });
     
     var AxisView = TableView.extend({
