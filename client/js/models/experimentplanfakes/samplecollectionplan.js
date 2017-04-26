@@ -12,6 +12,30 @@ define([
 	) {
 	var SamplePlan = Backbone.Model.extend({
 		idAttribute: "ORDER",
+
+		validation: {
+			WAVELENGTH: {
+				required: false,
+				pattern: "number",
+			},
+			PREFERREDBEAMSIZEX: {
+				required: false,
+				pattern: "number",
+			},
+			PREFERREDBEAMSIZEY: {
+				required: false,
+				pattern: "number",
+			},
+			MONOBANDWIDTH: {
+				required: false,
+				pattern: "number",
+			},
+			DIFFRACTIONPLANID: {
+				required: true,
+				pattern: "digits",
+			},
+		},
+		
 	});
 	
 	// No mockjax
