@@ -250,6 +250,10 @@ define([
     		planparam: ".planparam",
     	},
     	
+    	events: {
+    		"click button.savechanger": "doSaveChanger",
+    	},
+    	
     	onRender: function() {
     		var childView = new View({visit: this.getOption("visit")});
     		this.listenTo(childView, "v:showcontainer", this.showContainer);
@@ -360,11 +364,19 @@ define([
     	
     	// Fetch the detectors and axes for all the plans
     	fetchPlanDetails: function(planIndex) {
+    		
     		// Check if the fetching is done
     		if (planIndex >= this.planCollection.length)
     			this.assignAxisServices();
     		else {
-    			if (this.planCollection.at(planIndex).has("DETECTORS")) {
+        		// Check for new plans without a DiffractionPlanId, and assign empty collections
+        		if (this.planCollection.at(planIndex).get("DIFFRACTIONPLANID") === "") {
+        			this.planCollection.at(planIndex).set({
+        				"DETECTORS": new Detectors(),
+        				"SCANMODELS": new Axes(),
+        			});
+        			this.fetchPlanDetails(planIndex + 1);
+        		} else if (this.planCollection.at(planIndex).has("DETECTORS")) {
     				this.fetchPlanAxes(planIndex);
     			} else {
     				// Fetch the details for the plan at planIndex
@@ -557,32 +569,27 @@ define([
         // add a new, empty data collection plan
         create: function() {
         	console.log("Create new plan");
-        	
-        	var dataPlan = new DataCollectionPlan();
-        	var self = this;
+
         	var nextOrder = this.planCollection.length+1;
-        	dataPlan.save({}, {
-        		success: function(model, response, options) {
-        			dataPlan.set({"DIFFRACTIONPLANID": model.get("DIFFRACTIONPLANID")});
-                	// Create a new SampleCollectionPlan from the DataCollectionPlan
-                	var samplePlan = new SampleCollectionPlan();
-                	samplePlan.set({
-                		"DIFFRACTIONPLANID": dataPlan.get("DIFFRACTIONPLANID"),
-                		"ORDER": nextOrder,
-        				"WAVELENGTH": "",
-        				"PREFERREDBEAMSIZEX": "",
-        				"PREFERREDBEAMSIZEY": "",
-        				"MONOBANDWIDTH": "",
-                	});
-                	// Add the new sample collection plan to this list of sample-less plans
-                	self.plansWithoutSample.add(samplePlan);
-        			self.makePlanCollection();
-        		},
-        		error: function(model, response, options) {
-        			console.log("Could not save new data collection plan", response);
-        			self.makePlanCollection();
-        		},
+
+        	// New plan without touching the database
+        	var samplePlan = new SampleCollectionPlan();
+        	samplePlan.set({
+        		"ORDER": nextOrder,
+        		"DIFFRACTIONPLANID": "",
+				"WAVELENGTH": "",
+				"PREFERREDBEAMSIZEX": "",
+				"PREFERREDBEAMSIZEY": "",
+				"MONOBANDWIDTH": "",
         	});
+        	this.plansWithoutSample.add(samplePlan);
+        	this.makePlanCollection();
+        	
+        },
+        
+        
+        doSaveChanger: function() {
+        	
         },
 
     });
@@ -905,30 +912,19 @@ define([
     	 },
     	 
     	 addAxis: function(event) {
-    		 console.log("Add an axis!");
+    		 // Add an axis without (yet) touching the DB
     		 var nyScanParams = new ScanParametersModel();
-    		 var self = this;
-    		 nyScanParams.save({}, {
-    			success: function(params, response, options) {
-    				console.log("assign.js:PlanDetailsView(): Success creating new scan parameters model", params, response);
-    				params.set({
-    					"SCANPARAMETERSSERVICEID": "",
-    					"DATACOLLECTIONPLANID": self.model.get("DATACOLLECTIONPLANID"),
-    					"MODELNUMBER": self.model.get("SCANMODELS").length + 1,
-    					"START": "",
-    					"STOP": "",
-    					"STEP": "",
-    					"ARRAY": [],
-    				});
-    				self.model.get("SCANMODELS").push(params);
-    				
-    			},
-    			error: function(params, response, options) {
-    				console.log("assign.js:PlanDetailsView(): Error creating new scan parameters model");
-    			},
-    			
-    		 });
-    		 
+    		 nyScanParams.set({
+					"SCANPARAMETERSSERVICEID": "",
+					"DATACOLLECTIONPLANID": this.model.get("DATACOLLECTIONPLANID"),
+					"MODELNUMBER": this.model.get("SCANMODELS").length + 1,
+					"START": "",
+					"STOP": "",
+					"STEP": "",
+					"ARRAY": [],
+				});
+				this.model.get("SCANMODELS").push(nyScanParams);
+
     	 },
     	
     });
