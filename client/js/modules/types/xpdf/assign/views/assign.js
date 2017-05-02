@@ -1,6 +1,7 @@
 define([
 	'marionette',
 	'views/pages',
+	"views/dialog",
     'collections/shipments',
     'collections/containers',
     'collections/dewars',
@@ -28,6 +29,7 @@ define([
     ], function(
     		Marionette,
     		Pages,
+    		DialogView,
     		Shipments,
     		Containers,
     		Dewars,
@@ -613,9 +615,92 @@ define([
         },
         
         doSaveChanger: function() {
-        	console.log("One day this will save the plans to the database for container " + this.containerId);
+        	var self = this;
+        	
+        	var toFetch = 0, fetched = 0;
+        	
+        	// Get new ids for newly created models
+        	_.each(this.plansBySample, function(planCollection, sampleIndex, plansBySample) {
+        		planCollection.each(function(plan, planIndex, plans) {
+        			if (plan.get("DIFFRACTIONPLANID") === "") {
+        				var nyDataCollectionPlan = new DataCollectionPlan();
+        				toFetch++;
+        				nyDataCollectionPlan.save({}, {
+        					success: function(model, response, options) {
+        						plan.set({"DIFFRACTIONPLANID": model.get("DIFFRACTIONPLANID")});
+        						fetched++;
+        						if (fetched == toFetch)
+        							self.doSaveToBacking();
+        					},
+        					error: function(model, response, options) {
+        						self.saveFailed("Error saving new data collection plan");
+        					},
+        				});
+        			}
+        			var scanParamModels = plan.get("SCANMODELS");
+        			scanParamModels.each(function(scanModel, modelIndex, models) {
+        				if (scanModel.get("SCANPARAMETERSMODELID") === "") {
+        					var nyScanAxes = new ScanParametersModel();
+        					toFetch++;
+        					nyScanAxes.save({}, {
+        						success: function(model, response, options) {
+        							scanModel.set({"SCANPARAMETERSMODELID": model.get("SCANPARAMETERSMODELID")});
+        							fetched++;
+            						if (fetched == toFetch)
+            							self.doSaveToBacking();
+        						},
+        						error: function(model, response, options) {
+        							self.saveFailed("Error saving new scan parameters model");
+        						},
+        					});
+        				}
+        			});
+        			
+        		});
+        	});
+        	if (toFetch == 0)
+        		this.doSaveToBacking();
         },
-
+        
+        doSaveToBacking: function() {
+        	console.log("One day this will save the plans to the database for container " + this.containerId);
+        	var self = this;
+        	var saveData = "";
+        	// Generate the data to be saved
+        	_.each(this.plansBySample, function(planCollection, sampleIndex, plansBySample) {
+    			saveData += "<p>PUT to <code>/api/dcplan/sample/"+self.samples.at(sampleIndex).get("BLSAMPLEID")+"</code></p>\n";
+    			saveData += "<p><code>" + JSON.stringify(planCollection) + "</code></p>\n";
+    			
+    			planCollection.each(function(plan, planIndex, plans) {
+        			saveData += "<p>PUT to <code>/api/detector/dcplan/"+plan.get("DIFFRACTIONPLANID")+"</code>:</p>\n";
+        			saveData += "<p><code>"+JSON.stringify(plan.get("DETECTORS"))+"</code></p>\n";
+        			if (plan.get("SCANMODELS").length > 0) {
+        				saveData += "<p>PUT to <code>/api/scanparam/dcplan/"+plan.get("DIFFRACTIONPLANID")+"</code>:</p>\n";
+        				saveData += "<p><code>" + JSON.stringify(plan.get("SCANMODELS"))+"</code></p>\n";
+        			}
+        		});
+    			saveData += "<hr />";
+        	});
+        	var dataDialog = new SaveDataView({template: _.template(saveData),	});
+        	app.dialog.show(dataDialog);
+        },
+        
+        saveFailed: function(message) {
+        	console.log("Unable to save changed sample changer details: " + message);
+        },
+        
+    });
+    
+    var SaveDataView = DialogView.extend({
+    	className: "plans",
+    	title: "Save data",
+    	buttons: {
+    		"Close": "closeDialog",
+    	},
+    	
+    	initialize: function(options) {
+    		this.template = options.template;
+    	},
     });
     
     var SampleListView = Marionette.LayoutView.extend({
@@ -968,15 +1053,16 @@ define([
     		 // Add an axis without (yet) touching the DB
     		 var nyScanParams = new ScanParametersModel();
     		 nyScanParams.set({
-					"SCANPARAMETERSSERVICEID": "",
-					"DATACOLLECTIONPLANID": this.model.get("DATACOLLECTIONPLANID"),
-					"MODELNUMBER": this.model.get("SCANMODELS").length + 1,
-					"START": "",
-					"STOP": "",
-					"STEP": "",
-					"ARRAY": [],
-				});
-				this.model.get("SCANMODELS").push(nyScanParams);
+    			 "SCANPARAMETERSMODELID" : "",
+    			 "SCANPARAMETERSSERVICEID": "",
+    			 "DATACOLLECTIONPLANID": this.model.get("DATACOLLECTIONPLANID"),
+    			 "MODELNUMBER": this.model.get("SCANMODELS").length + 1,
+    			 "START": "",
+    			 "STOP": "",
+    			 "STEP": "",
+    			 "ARRAY": [],
+    		 });
+    		 this.model.get("SCANMODELS").push(nyScanParams);
 
     	 },
     	 
