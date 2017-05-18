@@ -5,10 +5,12 @@ define(['views/getview',
     'modules/types/em/dc/datacollections',
     'modules/types/pow/dc/datacollections',
     'modules/types/saxs/dc/datacollections',
+    "modules/types/xpdf/dc/datacollections",
     
 ], function(GetView,
 	DCList,
 	GenericDCList, TomoDCList, EMDCList, POWDCList, SAXSDCList
+	, XpdfDCList
 	){
 
 
@@ -23,6 +25,7 @@ define(['views/getview',
                 em: EMDCList,
                 pow: POWDCList,
                 saxs: SAXSDCList,
+                xpdf: XpdfDCList,
             },
         	default: GenericDCList,
         })

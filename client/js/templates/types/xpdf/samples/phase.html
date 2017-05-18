@@ -1,0 +1,38 @@
+<h1>View Phase</h1>
+<p class="help">This page shows the details of a phase of one or more XPDF samples</p>
+
+<div class="form">
+	<ul>
+		<li>
+			<span class="label">Name</span>
+            <span class="NAME"><%=NAME%></span>
+        </li>
+        
+<!--         <li>
+            <span class="label">Acronym</span>
+            <span class="ACRONYM"><%=ACRONYM%></span>
+        </li>
+ -->        
+        <li>
+            <span class="label">Molecular Mass</span>
+<!--             <span class="MOLECULARMASS"><%=MOLECULARMASS%> a.m.u.</span> -->
+			<span class="molecularmass"></span>
+        </li>
+
+		<li>
+			<span class="label">Composition</span>
+			<span class="SEQUENCE"><%=SEQUENCE%></span>
+        </li>
+        
+        <li>
+        	<span class="label">Crystallographic density</span>
+        	<span class="DENSITY"><%=DENSITY%></span>
+	</ul>
+</div> 
+<div> 
+       <a class="button copyphase"  href="#" title="Copy Existing Phase"><i class="fa fa-copy"></i> <span>Copy Phase</span></a>
+</div>
+<div>
+       <a class="button addcif" href="#" title="Add CIF file"><i class="fa fa-plus"></i> <span>Add CIF file</span></a>
+</div>
+<div class="samples"></div>

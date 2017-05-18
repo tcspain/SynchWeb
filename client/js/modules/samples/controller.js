@@ -28,7 +28,17 @@ define(['marionette',
     
   var sbc =  { title: 'Samples', url: '/samples' }
   var pbc =  { title: 'Proteins', url: '/proteins' }
-    
+  var phbc = { title: "Phases", url: "/phases" }
+
+  var hasPhases = function() {
+	  var phaseTypes = ["xpdf"];
+	  return (phaseTypes.indexOf(app.type) != -1);
+  }
+  
+  var phpbc = function() {
+	  return (hasPhases()) ? phbc : pbc;
+  }
+  
   var controller = {
     // Samples
     list: function(s, page) {
@@ -61,9 +71,11 @@ define(['marionette',
     // Proteins
     proteinlist: function(s, page) {
         app.loading()
-        app.bc.reset([pbc])
+        app.bc.reset([phpbc()])
         page = page ? parseInt(page) : 1
-        var proteins = new Proteins(null, { state: { currentPage: page }, queryParams: { s : s } })
+        var proteinQueryParams = { s : s }
+        if (app.type == "xpdf") proteinQueryParams["seq"] = 1
+        var proteins = new Proteins(null, { state: { currentPage: page }, queryParams: proteinQueryParams })
         proteins.fetch().done(function() {
             app.content.show(GetView.ProteinList.get(app.type, { collection: proteins, params: { s: s } }))
         })
@@ -74,18 +86,19 @@ define(['marionette',
         var protein = new Protein({ PROTEINID: pid })
         protein.fetch({
             success: function() {
-                app.bc.reset([pbc, { title: protein.get('NAME') }])
+                app.bc.reset([phpbc(), { title: protein.get('NAME') }])
                 app.content.show(GetView.ProteinView.get(app.type, { model: protein }))
             },
             error: function() {
-                app.bc.reset([pbc])
+                app.bc.reset([phpbc()])
                 app.message({ title: 'No such protein', message: 'The specified protein could not be found'})      
             },
         })
     },
       
     proteinadd: function() {
-        app.bc.reset([pbc, { title: 'Add Protein' }])
+    	var componentName = phpbc().title.substring(0, phpbc().title.length-1)
+        app.bc.reset([phpbc(), { title: 'Add '+componentName }])
         app.content.show(GetView.ProteinAdd.get(app.type))
     },
 
@@ -112,6 +125,11 @@ define(['marionette',
       app.navigate('proteins/pid/'+pid)
       controller.proteinview(pid)
     })
+
+    app.on('phases:view', function(pid) {
+        app.navigate('phases/pid/'+pid)
+        controller.proteinview(pid)
+      })
   })
        
   return controller

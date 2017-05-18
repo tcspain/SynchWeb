@@ -1,5 +1,7 @@
 define(['marionette',
     
+        "modules/shipment/views/getshipmentview",
+        
         'models/dewar',
         'models/shipment',
         'collections/shipments',
@@ -32,7 +34,8 @@ define(['marionette',
         'collections/dewars',
         'modules/shipment/views/dewaroverview',
     
-], function(Marionette,
+], function(Marionette,	
+	GetView,
     Dewar, Shipment, Shipments, 
     ShipmentsView, ShipmentView, ShipmentAddView,
     Container, Containers, ContainerView, ContainerPlateView, ContainerAddView, ContainersView, QueueContainerView,
@@ -61,7 +64,8 @@ define(['marionette',
         shipment.fetch({
             success: function() {
                 app.bc.reset([bc, { title: shipment.get('SHIPPINGNAME') }])
-                app.content.show(new ShipmentView({ model: shipment }))
+//                app.content.show(new ShipmentView({ model: shipment }))
+                app.content.show(GetView.ShipmentView.get(app.type, {model: shipment}));
             },
             error: function() {
                 app.bc.reset([bc])
@@ -98,8 +102,10 @@ define(['marionette',
                 app.bc.reset([bc, { title: container.get('SHIPMENT'), url: '/shipments/sid/'+container.get('SHIPPINGID') }, { title: 'Containers' }, { title: container.get('NAME') }])
                 var is_plate = !(['Puck', 'PCRStrip', null].indexOf(container.get('CONTAINERTYPE')) > -1)
                 console.log('is plate', is_plate)
-                if (is_plate) app.content.show(new ContainerPlateView({ model: container, params: { iid: iid, sid: sid } }))
-                  else app.content.show(new ContainerView({ model: container }))
+//                if (is_plate) app.content.show(new ContainerPlateView({ model: container, params: { iid: iid, sid: sid } }))
+//                  else app.content.show(new ContainerView({ model: container }))
+                if (is_plate) app.content.show(GetView.ContainerPlateView.get(app.type, {model:container, params: {id: iid, sid: sid}}));
+                else app.content.show(GetView.ContainerView.get(app.type, {model: container}));
             },
             error: function() {
                 app.bc.reset([bc, { title: 'Error' }])
@@ -115,7 +121,8 @@ define(['marionette',
         dewar.fetch({
             success: function() {
                 app.bc.reset([bc, { title: dewar.get('SHIPPINGNAME'), url: '/shipments/sid/'+dewar.get('SHIPPINGID') }, { title: 'Containers' }, { title: 'Add Container' }])
-                app.content.show(new ContainerAddView({ dewar: dewar, visit: visit }))
+//                app.content.show(new ContainerAddView({ dewar: dewar, visit: visit }))
+                app.content.show(GetView.ContainerAddView.get(app.type, {dewar: dewar, visit: visit}));
             },
             error: function() {
                 app.bc.reset([bc, { title: 'Error' }])
@@ -199,7 +206,7 @@ define(['marionette',
       dewars.state.currentPage = page ? parseInt(page) : 1
       dewars.fetch().done(function() {
         app.bc.reset([bc, { title: 'Registered Dewars', url: '/dewars' }])
-        app.content.show(new DewarRegView({ collection: dewars, params: { s: s } }))
+        app.content.show(GetView.DewarRegView.get(app.type, {collection: dewars, params: {s: s}}));
       })
     },
 

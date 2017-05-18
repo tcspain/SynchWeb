@@ -1,0 +1,61 @@
+<h1>Sample Details</h1>
+
+<p class="help"> This page will show the sample details and history for XPDF samples</p>
+<div class="form">
+	<ul>
+		<li>
+			<span class="label">Name</span>
+			<span class="UNMANGLEDNAME"><%=UNMANGLEDNAME%></span>
+		</li>
+		
+		<li>
+			<span class="label">Phases</span>
+			<!-- <div class="ra"><a class="button" href="proteins/add"><i class="fa fa-plus"></i>Add Phase</a></div>
+			<form action="/api/sample/proteins" method="post" enctype="multipart/form-data">
+			<input type="hidden" name="ACRONYM" value="xpdfnewphase">
+			<button name="submit" value="1" type="submit" class="button submit"><i class="fa fa-plus"></i>Add Phase</button>
+			</form> -->
+			<span class="phases"></span>
+			<span class="newphase"></span>
+			<a class="button linkphase" href="#" title="Add Existing Phase"><i class="fa fa-link"></i><span>Add Existing Phase</span></a>
+		</li>
+		
+		<li>
+			<a class="button makeinstance" href="#" title="Make new instance"><i class="fa fa-copy"></i><span>New Instance</span></a>
+		</li>
+		
+		<li>
+			<span class="xpdfcontainer"></span>
+		</li>
+
+		<li>
+			<span class="label">Crystallographic density</span>
+			<span class="density"><%=THEORETICALDENSITY%></span>
+		</li>
+		
+		<li>
+			<span class="label">Packing fraction</span>
+			<span class="PACKINGFRACTION"><%=PACKINGFRACTION%></span>
+		</li>
+		
+		<li>
+			<span class="label">Experimental Density</span>
+			<span class="EXPERIMENTALDENSITY"><%=EXPERIMENTALDENSITY%></span>
+
+		<li>
+			<span class="label">Overall Composition</span>
+            <span class="composition"><%=COMPOSITION%></span>
+		</li>
+		<li>
+			<span class="label">Comment</span>
+			<span class="COMMENTS"><%=COMMENTS%></span>
+		</li>
+		
+		<li>
+			<span class="label">QR code</span>
+			<span class="CODE"><%=CODE%></span>
+		</li>
+	</ul>
+</div>
+
+<div class="history"></div>

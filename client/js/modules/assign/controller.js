@@ -2,25 +2,42 @@ define(['marionette',
     'models/visit',
     'collections/visits',
     
-    'modules/assign/views/selectvisit',
-    'modules/assign/views/assign',
-    ], function(Marionette, Visit, Visits, SelectVisitView, AssignView) {
+//    'modules/assign/views/selectvisit',
+//    'modules/assign/views/assign',
+    
+    "modules/assign/views/getassignview",
+    ], function(Marionette,
+    		Visit,
+    		Visits,
+    		
+//    		SelectVisitView,
+//    		AssignView,
+    		GetView) {
     
     var bc = { title: 'Assign Containers', url: '/assign' }
+    var xpbc = {title: "Plan Experiments", url: "/assign" }
+    
+    var getBC = function() {
+    	var xpTypes = ["xpdf"];
+    	return (xpTypes.indexOf(app.type) != -1) ? xpbc : bc;
+    }
     
     var controller = {
         
         // Select visit to assign
         selectVisit: function(visit) {
             app.loading()
-            var visits = new Visits(null, { queryParams: { next: 1 } })
+            var qParams = {}
+            if (app.type != "xpdf") qParams["next"] = 1;
+            var visits = new Visits(null, { queryParams: qParams })
             visits.fetch({
                 success: function() {
-                    app.bc.reset([bc]),
-                    app.content.show(new SelectVisitView({ collection: visits }))
+                    app.bc.reset([getBC()]),
+//                    app.content.show(new SelectVisitView({ collection: visits }))
+                    app.content.show(GetView.SelectVisitView.get(app.type, { collection: visits }))
                 },
                 error: function() {
-                    app.bc.reset([bc, { title: 'Error' }])
+                    app.bc.reset([getBC(), { title: 'Error' }])
                     app.message({ title: 'Couldnt load visit list', message: 'Couldnt load visit list please try again' })
                 }
             })
@@ -34,13 +51,14 @@ define(['marionette',
             
             visit.fetch({
                 success: function() {
-                    app.bc.reset([bc,
+                    app.bc.reset([getBC(),
                         {title: vis, url: '/dc/visit/'+vis }]),
                     page = page ? parseInt(page) : 1
-                    app.content.show(new AssignView({ visit: visit, page: page }))
+//                    app.content.show(new AssignView({ visit: visit, page: page }))
+                    app.content.show(GetView.AssignView.get(app.type, { visit: visit, page: page }))
                 },
                 error: function() {
-                    app.bc.reset([bc, { title: 'Error' }])
+                    app.bc.reset([getBC(), { title: 'Error' }])
                     app.message({ title: 'No such visit', message: 'The specified visit doesnt exist' })
                 }
             })
