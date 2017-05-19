@@ -33,6 +33,9 @@ define(['marionette',
 
         'collections/dewars',
         'modules/shipment/views/dewaroverview',
+        
+        'modules/types/xpdf/views/plan',
+
     
 ], function(Marionette,	
 	GetView,
@@ -41,7 +44,8 @@ define(['marionette',
     Container, Containers, ContainerView, ContainerPlateView, ContainerAddView, ContainersView, QueueContainerView,
     ContainerRegistry, ContainersRegistry, ContainerRegistryView, RegisteredContainer,
     RegisteredDewar, DewarRegistry, DewarRegView, RegDewarView, RegDewarAddView,
-    DispatchView, TransferView, Dewars, DewarOverview) {
+    DispatchView, TransferView, Dewars, DewarOverview,
+    PlanView) {
     
     var bc = { title: 'Shipments', url: '/shipments' }
         
@@ -188,6 +192,21 @@ define(['marionette',
             success: function() {
                 app.bc.reset([bc, { title: container.get('BARCODE') }])
                 app.content.show(new RegisteredContainer({ model: container }))
+            },
+            error: function() {
+                app.bc.reset([bc, { title: 'Error' }])
+                app.message({ title: 'No such container', message: 'The specified container could not be found'})
+            },
+        })
+    },
+
+
+    plan_container: function(cid) {
+        var container = new Container({ CONTAINERID: cid })
+        container.fetch({
+            success: function() {
+                app.bc.reset([bc, { title: container.get('SHIPMENT'), url: '/shipments/sid/'+container.get('SHIPPINGID') }, { title: 'Containers' }, { title: container.get('NAME') }, { title: 'Plan Experiment' }])
+                app.content.show(new PlanView({ model: container }))
             },
             error: function() {
                 app.bc.reset([bc, { title: 'Error' }])

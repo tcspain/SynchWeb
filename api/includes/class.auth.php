@@ -173,7 +173,7 @@
 			$this->app->response->setStatus($code);
 
 			// Cant call $app->halt as app not yet running, just end process
-			header(':', true, $code);
+			header('', true, $code);
        		header('Content-Type: application/json');
 			print json_encode($message);
 			exit();
