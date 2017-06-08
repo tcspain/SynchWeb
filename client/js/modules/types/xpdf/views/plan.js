@@ -169,7 +169,12 @@ define(['marionette',
 
 
     var DCPlanCell = ValidatedCell.extend({
-        render: function() {
+
+    	initialize: function(options) {
+        	DCPlanCell.__super__.initialize.apply(this, [options]);
+        },
+    	
+    	render: function() {
             this.$el.empty()
             this.$el.html(planparams(this.model.toJSON()))
             this.bindModel()
@@ -195,6 +200,10 @@ define(['marionette',
             'click a.add': 'addAxis',
         },
 
+        initialize: function(options) {
+        	AxesCell.__super__.initialize.apply(this, [options]);
+        },
+        
         addAxis: function(e) {
             e.preventDefault()
 
@@ -265,6 +274,10 @@ define(['marionette',
             'click a.add': 'addDetector',
         },
 
+        initialize: function(options) {
+        	DetectorsCell.__super__.initialize.apply(this, [options]);
+        },
+        
         addDetector: function(e) {
             e.preventDefault()
 
@@ -317,7 +330,45 @@ define(['marionette',
         },
     })
 
+    var CollapseExpandCell = table.TemplateCell.extend({
+    	events: {
+    		"click a.collapsar": "toggleExpansion",
+    	},
+    	
+    	initialize: function(options) {
+    		CollapseExpandCell.__super__.initialize.apply(this, [options]);
+    		this.model.listenTo(this, "control:collapse", function() {this.trigger("row:collapse");});
+    		this.listenTo(this.model, "row:collapse", this.doCollapse);
 
+    		this.model.listenTo(this, "control:expand", function() {this.trigger("row:expand");});
+    		this.listenTo(this.model, "row:expand", this.doExpand);
+    		
+    		this.collapsed = false;
+    	},
+    	
+    	toggleExpansion: function(e) {
+    		e.preventDefault();
+    		
+    		if (this.collapsed) {
+    			this.collapsed = false;
+    			this.trigger("control:expand");
+    		} else {
+    			this.collapsed = true;
+    			this.trigger("control:collapse");
+    		}
+    	},
+    	
+    	doCollapse: function() {
+    		console.log("Collapsing E/C cell");
+    		this.$el.find("i.expcol").removeClass("fa-chevron-right").addClass("fa-chevron-down");
+    	},
+    	
+    	doExpand: function() {
+    		console.log("Expanding E/C cell");
+    		this.$el.find("i.expcol").removeClass("fa-chevron-down").addClass("fa-chevron-right");
+    	},
+
+    });
 
     return Marionette.LayoutView.extend({
         className: 'content',
@@ -383,6 +434,7 @@ define(['marionette',
 
 
             var columns = [
+            	{ label: "", cell: CollapseExpandCell, editable: false, template: "<a class=\"button collapsar\" href=\"#\"><i class=\"expcol fa fa-chevron-right\"></i></a>"},
                 // { label: '#', cell: table.TemplateCell, editable: false, template: '<%=ORDER%>' },
                 { label: 'Instance', cell: table.TemplateCell, editable: false, template: '<%=SAMPLE%>' },
                 { label: 'Parameters', cell: DCPlanCell, editable: false },
