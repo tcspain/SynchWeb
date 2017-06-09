@@ -19,8 +19,11 @@ define(['marionette',
 
     'tpl!templates/types/xpdf/plan.html',
     'tpl!templates/types/xpdf/planparams.html',
+    "tpl!templates/types/xpdf/planparamsstatic.html",
     'tpl!templates/types/xpdf/planaxis.html',
-    'tpl!templates/types/xpdf/plandetector.html'
+    "tpl!templates/types/xpdf/planaxisstatic.html",
+    'tpl!templates/types/xpdf/plandetector.html',
+    "tpl!templates/types/xpdf/plandetectorstatic.html"
 
     ], function(Marionette,
         Detectors,
@@ -41,7 +44,13 @@ define(['marionette',
         SortableTableView,
         table,
 
-        template, planparams, planaxis, plandetector
+        template,
+        planparams,
+        planparamsstatic,
+        planaxis,
+        planaxisstatic,
+        plandetector,
+        plandetectorstatic
     ) {
 
 
@@ -172,14 +181,31 @@ define(['marionette',
 
     	initialize: function(options) {
         	DCPlanCell.__super__.initialize.apply(this, [options]);
-        },
+
+        	this.listenTo(this.model, "row:collapse", this.doCollapse);
+    		this.listenTo(this.model, "row:expand", this.doExpand);
+    	},
     	
     	render: function() {
             this.$el.empty()
-            this.$el.html(planparams(this.model.toJSON()))
+//            this.$el.html(planparamsstatic(this.model.toJSON()))
             this.bindModel()
+            
+            this.doCollapse();
+            
             return this
-        }
+        },
+
+        doCollapse: function() {
+    		console.log("Collapsing DCPlan cell");
+    		this.$el.html(planparamsstatic(this.model.toJSON()));
+    	},
+    	
+    	doExpand: function() {
+    		console.log("Expanding DCPlan cell");
+            this.$el.html(planparams(this.model.toJSON()));
+    	},
+
     })
 
 
@@ -193,8 +219,16 @@ define(['marionette',
         }
     })
 
+    var StaticAxisCell = Backgrid.Cell.extend({
+    	render: function() {
+            this.$el.empty();
+            this.$el.html(planaxisstatic(this.model.toJSON()));
+            return this;
+        },
+    });
+
     var AxesCell = Backgrid.Cell.extend({
-        template: _.template('<select name="services"></select><a href="#" class="button add"><i class="fa fa-plus"></i></a><div class="axes"></div>'),
+        template: _.template('<select name="services"></select><a href="#" class="button add"><i class="fa fa-plus"></i></a><div class="axes"></div><div class="axesstatic"></div>'),
 
         events: {
             'click a.add': 'addAxis',
@@ -202,6 +236,9 @@ define(['marionette',
 
         initialize: function(options) {
         	AxesCell.__super__.initialize.apply(this, [options]);
+
+    		this.listenTo(this.model, "row:collapse", this.doCollapse);
+    		this.listenTo(this.model, "row:expand", this.doExpand);
         },
         
         addAxis: function(e) {
@@ -236,7 +273,7 @@ define(['marionette',
                { label: '', cell: DeleteCell, editable: false },
             ]
 
-            var atable = new TableView({ 
+            this.atable = new TableView({ 
                 collection: this.model.get('SCANPARAMETERSMODELS'), 
                 columns: columns, 
                 tableClass: 'axes', 
@@ -245,14 +282,48 @@ define(['marionette',
                 backgrid: { emptyText: 'No axes found' },
             })
 
+            var staticColumns = [
+            	{ label: 'Axis', cell: table.TemplateCell, editable: false, template: '<%=SCANPARAMETERSSERVICE%>' },
+            	{ label: 'Parameters', cell: StaticAxisCell, editable: false },
+            ];
+
+            this.stable = new TableView({ 
+                collection: this.model.get("SCANPARAMETERSMODELS"), 
+                columns: staticColumns, 
+                tableClass: "axesstatic", 
+                loading: false,
+                pages: false,
+                backgrid: { emptyText: "No axes found" },
+            });
+           
             this.$el.empty()
             this.$el.html(this.template)
-            this.$el.find('.axes').html(atable.render().$el)
+            this.$el.find('.axes').html(this.atable.render().$el)
+            this.$el.find(".axesstatic").html(this.stable.render().$el);
             // this.$el.append(atable.render().$el)
             this.$el.find('select[name=services]').html(this.column.get('scanservices').opts())
 
+            this.doCollapse();
+            
             return this
         },
+
+        doCollapse: function() {
+    		console.log("Collapsing Axes cell");
+    		this.$el.find("a.add").hide();
+    		this.$el.find("select[name=services]").hide();
+            this.$el.find(".axes").hide();
+            this.$el.find(".axesstatic").show();
+
+    	},
+    	
+    	doExpand: function() {
+    		console.log("Expanding Axes cell");
+    		this.$el.find("a.add").show();
+    		this.$el.find("select[name=services]").show();
+            this.$el.find(".axes").show();
+            this.$el.find(".axesstatic").hide();
+    	},
 
     })
 
@@ -266,9 +337,17 @@ define(['marionette',
             return this
         }
     })
+    
+    var StaticDetectorCell = Backgrid.Cell.extend({
+    	render: function() {
+    		this.$el.empty();
+    		this.$el.html(plandetectorstatic(this.model.toJSON()));
+    		return this;
+    	},
+    });
 
     var DetectorsCell = Backgrid.Cell.extend({
-        template: _.template('<select name="detectors"></select><a href="#" class="button add"><i class="fa fa-plus"></i></a><div class="detectors"></div>'),
+        template: _.template('<select name="detectors"></select><a href="#" class="button add"><i class="fa fa-plus"></i></a><div class="detectors"></div><div class="detectorsstatic"></div>'),
 
         events: {
             'click a.add': 'addDetector',
@@ -276,6 +355,10 @@ define(['marionette',
 
         initialize: function(options) {
         	DetectorsCell.__super__.initialize.apply(this, [options]);
+        	
+    		this.listenTo(this.model, "row:collapse", this.doCollapse);
+    		this.listenTo(this.model, "row:expand", this.doExpand);
+
         },
         
         addDetector: function(e) {
@@ -312,7 +395,7 @@ define(['marionette',
                { label: '', cell: DeleteCell, editable: false },
             ]
 
-            var dtable = new TableView({ 
+            this.dtable = new TableView({ 
                 collection: this.model.get('DETECTORS'), 
                 columns: columns, 
                 tableClass: 'detectors', 
@@ -321,13 +404,47 @@ define(['marionette',
                 backgrid: { emptyText: 'No detectors found' },
             })
 
+            var staticColumns = [
+                { label: 'Detector', cell: table.TemplateCell, editable: false, template: '<%=DETECTORTYPE%><br /><%=DETECTORMANUFACTURER%><br /><%=DETECTORMODEL%><br />' },
+                { label: 'Parameters', cell: StaticDetectorCell, editable: false },
+            ]
+            
+            this.stable = new TableView({
+            	collection: this.model.get("DETECTORS"),
+            	columns: staticColumns,
+            	tableClass: "detectorsstatic",
+            	loading: false,
+            	pages: false,
+                backgrid: { emptyText: 'No detectors found' },
+            });
+            
             this.$el.empty()
             this.$el.html(this.template)
-            this.$el.find('.detectors').html(dtable.render().$el)
+            this.$el.find('.detectors').html(this.dtable.render().$el)
+            this.$el.find(".detectorsstatic").html(this.stable.render().$el);
             this.$el.find('select[name=detectors]').html(this.column.get('detectors').opts())
-
+            
+            this.doCollapse();
+            
             return this
         },
+
+        doCollapse: function() {
+    		console.log("Collapsing Detectors cell");
+    		this.$el.find("a.add").hide();
+    		this.$el.find("select[name=detectors]").hide();
+            this.$el.find(".detectorsstatic").show();
+            this.$el.find(".detectors").hide();
+    		
+        },
+    	
+    	doExpand: function() {
+    		console.log("Expanding Detectors cell");
+    		this.$el.find("a.add").show();
+    		this.$el.find("select[name=detectors]").show();
+            this.$el.find(".detectorsstatic").hide();
+            this.$el.find(".detectors").show();
+    	},
     })
 
     var CollapseExpandCell = table.TemplateCell.extend({
@@ -343,7 +460,7 @@ define(['marionette',
     		this.model.listenTo(this, "control:expand", function() {this.trigger("row:expand");});
     		this.listenTo(this.model, "row:expand", this.doExpand);
     		
-    		this.collapsed = false;
+    		this.collapsed = true;
     	},
     	
     	toggleExpansion: function(e) {
@@ -360,12 +477,12 @@ define(['marionette',
     	
     	doCollapse: function() {
     		console.log("Collapsing E/C cell");
-    		this.$el.find("i.expcol").removeClass("fa-chevron-right").addClass("fa-chevron-down");
+    		this.$el.find("i.expcol").removeClass("fa-chevron-down").addClass("fa-chevron-right");
     	},
     	
     	doExpand: function() {
     		console.log("Expanding E/C cell");
-    		this.$el.find("i.expcol").removeClass("fa-chevron-down").addClass("fa-chevron-right");
+    		this.$el.find("i.expcol").removeClass("fa-chevron-right").addClass("fa-chevron-down");
     	},
 
     });
