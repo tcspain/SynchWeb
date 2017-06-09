@@ -197,12 +197,10 @@ define(['marionette',
         },
 
         doCollapse: function() {
-    		console.log("Collapsing DCPlan cell");
     		this.$el.html(planparamsstatic(this.model.toJSON()));
     	},
     	
     	doExpand: function() {
-    		console.log("Expanding DCPlan cell");
             this.$el.html(planparams(this.model.toJSON()));
     	},
 
@@ -309,7 +307,6 @@ define(['marionette',
         },
 
         doCollapse: function() {
-    		console.log("Collapsing Axes cell");
     		this.$el.find("a.add").hide();
     		this.$el.find("select[name=services]").hide();
             this.$el.find(".axes").hide();
@@ -318,7 +315,6 @@ define(['marionette',
     	},
     	
     	doExpand: function() {
-    		console.log("Expanding Axes cell");
     		this.$el.find("a.add").show();
     		this.$el.find("select[name=services]").show();
             this.$el.find(".axes").show();
@@ -430,7 +426,6 @@ define(['marionette',
         },
 
         doCollapse: function() {
-    		console.log("Collapsing Detectors cell");
     		this.$el.find("a.add").hide();
     		this.$el.find("select[name=detectors]").hide();
             this.$el.find(".detectorsstatic").show();
@@ -439,7 +434,6 @@ define(['marionette',
         },
     	
     	doExpand: function() {
-    		console.log("Expanding Detectors cell");
     		this.$el.find("a.add").show();
     		this.$el.find("select[name=detectors]").show();
             this.$el.find(".detectorsstatic").hide();
@@ -476,12 +470,10 @@ define(['marionette',
     	},
     	
     	doCollapse: function() {
-    		console.log("Collapsing E/C cell");
     		this.$el.find("i.expcol").removeClass("fa-chevron-down").addClass("fa-chevron-right");
     	},
     	
     	doExpand: function() {
-    		console.log("Expanding E/C cell");
     		this.$el.find("i.expcol").removeClass("fa-chevron-right").addClass("fa-chevron-down");
     	},
 
