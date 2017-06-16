@@ -35,8 +35,6 @@ require.config({
 
     'jquery.color': 'vendor/jquery/jquery.color',
     
-    "jquery.mockjax": "vendor/jquery/jquery.mockjax",
-    
     caman: 'vendor/caman.min',
     heatmap: 'vendor/hmap',
     
