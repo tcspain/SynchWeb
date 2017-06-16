@@ -32,18 +32,23 @@ require.config({
     
     'jquery.editable': 'vendor/jquery/jquery.jeditable.min',
     'jquery.editable.datepicker': 'vendor/jquery/jquery.jeditable.datepicker',
+
+    'jquery.color': 'vendor/jquery/jquery.color',
     
     "jquery.mockjax": "vendor/jquery/jquery.mockjax",
     
     caman: 'vendor/caman.min',
     heatmap: 'vendor/hmap',
     
-    three: 'vendor/Three49custom',
-    ms: 'vendor/MarchingSquares',
+    // three: 'vendor/Three49custom',
+    // ms: 'vendor/MarchingSquares',
     gzip: 'vendor/gunzip.min',
-    glmol: 'vendor/GLmol',
+    // glmol: 'vendor/GLmol',
     
     markdown: 'vendor/markdown',
+
+    three: 'vendor/three.min',
+    uglymol: 'vendor/uglymol',
     
   },
     
@@ -98,6 +103,10 @@ require.config({
     
 
     // jQuery
+    'jquery.color': {
+        deps: ['jquery'],
+    },
+    
     'jquery.editable': {
         deps: ['jquery'],
     },
@@ -173,10 +182,10 @@ require.config({
         exports: 'Zlib',
     },
     
-    glmol: {
-        deps: ['three', 'ms'],
-        exports: 'GLmol',
-    },
+    // glmol: {
+    //     deps: ['three', 'ms'],
+    //     exports: 'GLmol',
+    // },
     
     
     markdown: {

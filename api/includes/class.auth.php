@@ -5,6 +5,7 @@
 	require_once(dirname(__FILE__).'/../lib/jwt/JWT.php');
 	require_once(dirname(__FILE__).'/../lib/jwt/ExpiredException.php');
 	require_once(dirname(__FILE__).'/../lib/jwt/SignatureInvalidException.php');
+	require_once(dirname(__FILE__).'/../lib/getallheaders.php');
     use \Firebase\JWT\JWT;
 
 	class Authenticate {
@@ -173,7 +174,7 @@
 			$this->app->response->setStatus($code);
 
 			// Cant call $app->halt as app not yet running, just end process
-			header('', true, $code);
+			header('X-PHP-Response-Code: '.$code, true, $code);
        		header('Content-Type: application/json');
 			print json_encode($message);
 			exit();
