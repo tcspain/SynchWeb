@@ -84,11 +84,11 @@ define(['marionette', 'views/form',
             var today = (d.getDate() < 10 ? '0'+d.getDate() : d.getDate()) + '-' + (d.getMonth() < 9 ? '0'+(d.getMonth()+1) : d.getMonth()+1) + '-' + d.getFullYear()
             this.$el.find('input[name=DELIVERYAGENT_SHIPPINGDATE]').val(today)
 
-            if (this.model.get('FACILITYCODE')) {
-                this.ui.courier.html('<select name="DELIVERYAGENT_AGENTNAME"><option value="Diamond DHL">Diamond DHL (UK ONLY)</option><option value="Diamond Fedex">Diamond Fedex (International ONLY)</option></select>')
-            } else {
+            // if (this.model.get('FACILITYCODE')) {
+                // this.ui.courier.html('<select name="DELIVERYAGENT_AGENTNAME"><option value="Diamond DHL">Diamond DHL (UK ONLY)</option><option value="Diamond Fedex">Diamond Fedex (International ONLY)</option></select>')
+            // } else {
                 this.ui.courier.html('<input type="text" name="DELIVERYAGENT_AGENTNAME" />')
-            }
+            // }
             
         },
 
@@ -135,7 +135,7 @@ define(['marionette', 'views/form',
                 this.ui.fn.val(lc.get('FAMILYNAME'))
                 this.ui.em.val(lc.get('EMAILADDRESS'))
                 this.ui.ph.val(lc.get('PHONENUMBER'))
-                this.ui.addr.val(lc.get('ADDRESS'))
+                this.ui.addr.val([lc.get('ADDRESS'),lc.get('CITY'),lc.get('POSTCODE'),lc.get('COUNTRY')].join("\n"))
                 this.ui.lab.val(lc.get('LABNAME'))
             }
         },

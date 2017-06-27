@@ -41,6 +41,7 @@ define(['marionette',
         templateHelpers: {
             APIURL: app.apiurl,
             PROP: app.prop,
+            DHL_ENABLE: app.options.get('dhl_enable'),
         },
 
         events: {
@@ -141,6 +142,10 @@ define(['marionette',
             edit.create('DELIVERYAGENT_AGENTCODE', 'text')
             edit.create('DELIVERYAGENT_SHIPPINGDATE', 'date')
             edit.create('DELIVERYAGENT_DELIVERYDATE', 'date')
+            edit.create('DELIVERYAGENT_FLIGHTCODE', 'text')
+            edit.create('PHYSICALLOCATION', 'text')
+            edit.create('READYBYTIME', 'time')
+            edit.create('CLOSETIME', 'time')
             
             var self = this
             this.contacts = new LabContacts(null, { state: { pageSize: 9999 } })

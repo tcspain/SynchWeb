@@ -27,14 +27,38 @@ define(['backbone'], function(Backbone) {
       },
       
       DELIVERYAGENT_AGENTCODE: {
-        required: true,
+        required: false,
         pattern: 'wwdash'
       },
       
       DELIVERYAGENT_AGENTNAME: {
-        required: true,
+        required: false,
         pattern: 'wwsdash'
       },
+
+
+      DELIVERYAGENT_SHIPPINGDATE: {
+        required: false,
+        pattern: 'edate'
+      },
+
+      READYBYTIME: {
+        required: false,
+        pattern: 'time'
+      },
+
+      CLOSETIME: {
+        required: false,
+        pattern: 'time'
+      },
+
+      PHYSICALLOCATION: {
+        required: false,
+        pattern: 'wwsdash',
+        maxLength: 50,
+      },
+
+
     },
       
   })

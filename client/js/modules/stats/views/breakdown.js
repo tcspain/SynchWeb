@@ -1,11 +1,12 @@
 define(['marionette', 'tpl!templates/stats/breakdown.html',
     'utils',
+    'moment',
     'jquery',
     'jquery.flot',
     'jquery.flot.time',
     'jquery.flot.selection',
     'jquery.flot.tooltip',
-    ], function(Marionette, template, utils, $) {
+    ], function(Marionette, template, utils, moment, $) {
 
     return Marionette.ItemView.extend({
         template: template,
@@ -20,8 +21,43 @@ define(['marionette', 'tpl!templates/stats/breakdown.html',
             'plotclick #avg_time': 'showDC',
             'plotselected #overview': 'zoomOverview',
             'click a[name=reset]': 'resetPlots',
+            'click a.next': 'nextTimeSpan',
+            'click a.prev': 'prevTimeSpan',
         },
         
+        ui: {
+            span: '.span',
+        },
+
+        nextTimeSpan: function(e) {
+            e.preventDefault()
+            this.gotoTimeSpan()
+        },
+
+        prevTimeSpan: function(e) {
+            e.preventDefault()
+            this.gotoTimeSpan(true)
+        },
+
+        gotoTimeSpan: function(prev) {
+            var opts = this.main.getOptions()
+            var range = opts.xaxes[0].max - opts.xaxes[0].min
+            if (prev) range = -range
+
+            this.zoomTime(null, {
+                xaxis: { 
+                    from: opts.xaxes[0].min + range,
+                    to: opts.xaxes[0].max + range
+                }
+            })
+
+        },
+
+        initialize: function(options) {
+            this.first = true
+            this.params = options.params
+        },
+
         onRender: function() {
             if (this.getOption('large')) this.$el.find('#avg_time').addClass('large')
         },
@@ -43,7 +79,29 @@ define(['marionette', 'tpl!templates/stats/breakdown.html',
                 p.clearSelection()
             })
 
-            this.overview.setSelection(ranges, true);
+            this.showSpan()
+            this.overview.setSelection(ranges, true)
+
+            if (ranges.xaxis.from && ranges.xaxis.to) {
+                var url = window.location.pathname.replace(new RegExp('\\/from\\/(\\w|-)+\\/to\\/(\\w|-)+'), '')
+                if (ranges.xaxis.from != this.model.get('info').start)
+                    url += '/from/'+parseInt(ranges.xaxis.from)
+                if (ranges.xaxis.to != this.model.get('info').end)
+                    url += '/to/'+parseInt(ranges.xaxis.to)
+                    
+                window.history.pushState({}, '', url)
+            }
+        },
+
+
+        showSpan: function() {
+            var opts = this.main.getOptions()
+
+            var from = moment(opts.xaxes[0].min).format('MMMM Do YYYY')
+            var to = moment(opts.xaxes[0].max).format('MMMM Do YYYY')
+
+            if (from != to) this.ui.span.html(from+' - '+to)
+            else this.ui.span.html(from)
         },
         
         zoomOverview: function(e, ranges) {
@@ -63,7 +121,8 @@ define(['marionette', 'tpl!templates/stats/breakdown.html',
             }
         },
         
-        onDomRefresh: function() {
+        onDomRefresh: function(e) {
+            if (!e) return
             if (this.model.get('data')) {
                 this.options = {
                   grid: {
@@ -82,6 +141,7 @@ define(['marionette', 'tpl!templates/stats/breakdown.html',
               
                   xaxis: {
                         mode: 'time',
+                        // timeformat: '%m %b %H:%M',
                         timezone: 'Europe/London',
                         min: this.model.get('info').start,
                         max: this.model.get('info').end,
@@ -99,11 +159,17 @@ define(['marionette', 'tpl!templates/stats/breakdown.html',
                 this.options2.tooltipOpts = { content: this.getToolTip.bind(this) }
 
                 var dc = _.where(this.model.get('data'), { type: 'dc' })
-                var pids = _.unique(_.pluck(this.model.get('data'), 'pid'))
-                var cols = utils.getColors(pids.length)
-
+                var pids = _.unique(_.pluck(dc, 'pid'))
+                var cols = utils.shuffle(utils.getColors(pids.length))
                 _.each(dc, function(d) {
-                    d.color = cols[pids.indexOf(d.pid)]
+                    if (d.pid) d.color = cols[pids.indexOf(d.pid)]
+                })
+
+                var vis = _.where(this.model.get('data'), { type: 'visit_ns' })
+                var vids = _.unique(_.pluck(vis, 'visit'))
+                var cols = utils.shuffle(utils.getColors(vids.length))
+                _.each(vis, function(v) {
+                    v.color = cols[vids.indexOf(v.visit)]
                 })
 
                 // var markings = []
@@ -141,8 +207,19 @@ define(['marionette', 'tpl!templates/stats/breakdown.html',
 
                     yaxes: [{ position: 'right' }, { position: 'right' }, { position: 'right' }],
                 }
-                this.extra = $.plot(this.$el.find('#dc_hist'), this.model.get('lines'), this.options3);
+                this.extra = $.plot(this.$el.find('#dc_hist'), this.model.get('lines'), this.options3)
+                this.showSpan()
 
+                console.log('rend bd', this.params, this.first)
+                if (this.params && this.first) {
+                    this.first = false
+                    if (this.params.from && this.params.to) this.zoomTime(null, {
+                        xaxis: {
+                            from: this.params.from, 
+                            to: this.params.to
+                        }
+                    })
+                }
             }
             
         },
@@ -157,7 +234,8 @@ define(['marionette', 'tpl!templates/stats/breakdown.html',
                 fault: 'Fault',
                 nobeam: 'Beam Dump',
                 cent: 'Centring',
-                visit: 'Visit',
+                visit: 'Visit (Scheduled)',
+                visit_ns: 'Visit (Queued)',
             }
             
             var len = (item.datapoint[0] - item.datapoint[2]) / 1000

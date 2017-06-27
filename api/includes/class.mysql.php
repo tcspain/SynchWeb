@@ -242,6 +242,12 @@
                             
                             'DataCollectionFileAttachment',
 
+                            // Fl maps
+                            'XRFFluorescenceMapping',
+                            'XRFFluorescenceMappingROI',
+
+                            'Particle',
+
                             '',
 
                 );

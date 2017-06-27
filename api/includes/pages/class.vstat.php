@@ -9,7 +9,10 @@
             'runid' => '\d+',
             'group_by' => '\w+',
             'proposalcode' => '\w+',
+            'proposal' => '\w+',
+            'scheduled' => '\d',
             'bl' => '[\w-]+',
+            'download' => '\d',
         );
 
 
@@ -56,7 +59,7 @@
                 LEFT OUTER JOIN blsample smp ON smp.blsampleid = dc.blsampleid
                 LEFT OUTER JOIN crystal c ON c.crystalid = smp.crystalid
                 LEFT OUTER JOIN protein pr ON pr.proteinid = c.proteinid
-                WHERE 1=1 $where ORDER BY dc.starttime DESC", $args);
+                WHERE 1=1 $where ORDER BY dc.starttime", $args);
             
             $dcf = $this->db->pq("SELECT COUNT(dc.datacollectionid) as count 
                 FROM datacollection dc 
@@ -126,7 +129,7 @@
                 $ai = array();
                 $cent = array();
 
-                $sched = $this->db->pq("SELECT CONCAT(CONCAT(CONCAT(p.proposalcode, p.proposalnumber), '-'), s.visit_number) as visit, TO_CHAR(s.enddate, 'DD-MM-YYYY HH24:MI:SS') as en, TO_CHAR(s.startdate, 'DD-MM-YYYY HH24:MI:SS') as st, p.title
+                $sched = $this->db->pq("SELECT CONCAT(CONCAT(CONCAT(p.proposalcode, p.proposalnumber), '-'), s.visit_number) as visit, TO_CHAR(s.enddate, 'DD-MM-YYYY HH24:MI:SS') as en, TO_CHAR(s.startdate, 'DD-MM-YYYY HH24:MI:SS') as st, p.title, s.scheduled, p.proposalcode
                     FROM blsession s
                     INNER JOIN proposal p ON p.proposalid = s.proposalid
                     INNER JOIN v_run vr ON s.startdate BETWEEN vr.startdate AND vr.enddate
@@ -165,7 +168,37 @@
             $lines = array();
             foreach ($linecols as $c) array_push($lines, array('data' => array()));
 
+
+            $queued = 0;
+            $vis_map = array();
+            foreach ($sched as $s) {
+                if ($s['SCHEDULED'] != '1' || $s['PROPOSALCODE'] == 'lb' || $s['PROPOSALCODE'] == 'nr') {
+                    $vis_map[$s['VISIT']] = $s;
+                    $queued++;
+                    continue;
+                }
+                array_push($data, array('data' => array(
+                    array($this->jst($s['ST']), 6, $this->jst($s['ST'])),
+                    array($this->jst($s['EN']), 6, $this->jst($s['ST']))), 'color' => 'purple', 'type' => 'visit', 'status' => $s['VISIT'].': '.$s['TITLE'], 'visit' => $s['VISIT']));
+            }
+
+            $lastend = null;
+            $lastvisit = null;
+            $startvisit = null;
             foreach ($dc as $d) {
+                
+                if ($lastvisit && ($d['VISIT'] != $lastvisit)) {
+                    if (array_key_exists($lastvisit, $vis_map)) {
+                        $s = $vis_map[$lastvisit];
+                        // print_r(array($startvisit, $lastend, $s));
+                        array_push($data, array('data' => array(
+                        array($this->jst($startvisit), 7, $this->jst($startvisit)),
+                        array($this->jst($lastend), 7, $this->jst($startvisit))), 'color' => 'purple', 'type' => 'visit_ns', 'status' => $s['VISIT'].': '.$s['TITLE'], 'visit' => $s['VISIT']));
+                    }
+
+                    $startvisit = null;
+                }
+
                 if (strpos($d['RUNSTATUS'], 'Successful') === false) $info['DC_STOPPED']++;
                                     
                 if ($d['ST'] && $d['EN']) {
@@ -181,8 +214,21 @@
                         array_push($lines[$i]['data'], array($this->jst($d['ST']), floatval(round($d[$f],4))));
                     }
                 }
+
+                $lastvisit = $d['VISIT'];
+                if (!$startvisit) $startvisit = $d['ST'];
+                $lastend = $d['EN'] ? $d['EN'] : $d['ST'];
+            }
+
+            if (array_key_exists($lastvisit, $vis_map)) {
+                $s = $vis_map[$lastvisit];
+                // print_r(array($startvisit, $lastend, $s));
+                array_push($data, array('data' => array(
+                array($this->jst($startvisit), 7, $this->jst($startvisit)),
+                array($this->jst($lastend), 7, $this->jst($startvisit))), 'color' => 'purple', 'type' => 'visit_ns', 'status' => $s['VISIT'].': '.$s['TITLE'], 'visit' => $s['VISIT']));
             }
             
+            // return;
             foreach ($robot as $r) {
                 array_push($data, array('data' => array(
                         array($this->jst($r['ST']), 2, $this->jst($r['ST'])),
@@ -205,17 +251,6 @@
                 array_push($data, array('data' => array(
                     array($this->jst($f['ST']), 4, $this->jst($f['ST'])),
                     array($this->jst($f['EN']), 4, $this->jst($f['ST']))), 'color' => 'grey', 'type' => 'fault', 'status' => ' Fault: '.$f['TITLE']));
-            }
-
-            $lbc = 6;
-            $ntc = 0;
-            foreach ($sched as $s) {
-                $offset = strpos($s['VISIT'], 'lb') !== false ? 
-                    (++$lbc) : 
-                    ((strpos($s['VISIT'], 'nt') !== false || strpos($s['VISIT'], 'nr') !== false) ? (++$ntc+$lbc) : 6);
-                array_push($data, array('data' => array(
-                    array($this->jst($s['ST']), $offset, $this->jst($s['ST'])),
-                    array($this->jst($s['EN']), $offset, $this->jst($s['ST']))), 'color' => 'purple', 'type' => 'visit', 'status' => $s['VISIT'].': '.$s['TITLE'], 'visit' => $s['VISIT']));
             }
                                     
             foreach ($ai as $d) {
@@ -536,6 +571,7 @@
             $args = array();
 
             if ($this->has_arg('ty')) {
+                if ($this->arg('ty') == 'yearly') $where .= " AND TIMESTAMPDIFF('MONTH', s.startdate, CURRENT_TIMESTAMP) <= 12";
                 if ($this->arg('ty') == 'monthly') $where .= " AND TIMESTAMPDIFF('DAY', s.startdate, CURRENT_TIMESTAMP) <= 28";
                 if ($this->arg('ty') == 'weekly') $where .= " AND TIMESTAMPDIFF('DAY', s.startdate, CURRENT_TIMESTAMP) <= 7";
             }
@@ -545,9 +581,23 @@
                 array_push($args, $this->arg('runid'));
             }
 
+            if ($this->has_arg('scheduled')) {
+                $where .= " AND s.scheduled=1";
+            }
+
             if ($this->has_arg('proposalcode')) {
                 $where .= " AND p.proposalcode=:".(sizeof($args)+1);
                 array_push($args, $this->arg('proposalcode'));
+            }
+
+            if ($this->has_arg('proposal')) {
+                $where .= " AND CONCAT(p.proposalcode,p.proposalnumber) LIKE :".(sizeof($args)+1);
+                array_push($args, $this->arg('proposal'));
+            }
+
+            if ($this->has_arg('bl')) {
+                $where .= " AND s.beamlinename=:".(sizeof($args)+1);
+                array_push($args, $this->arg('bl'));
             }
 
             if ($this->has_arg('s')) {
@@ -558,6 +608,11 @@
 
             $match = 'PROP';
             if ($this->has_arg('group_by')) {
+                if ($this->arg('group_by') == 'run') {
+                    $group = 'GROUP BY run';
+                    $match = 'RUN';
+                }
+
                 if ($this->arg('group_by') == 'beamline') {
                     $group = 'GROUP BY beamlinename';
                     $match = 'BEAMLINENAME';
@@ -577,8 +632,8 @@
 
 
             $dc = $this->db->pq("
-                SELECT COUNT(visit_number) as visits, prop, SUM(rem) as rem, SUM(len) as len, ((SUM(len) - SUM(rem)) / SUM(len))*100 as used, beamlinename, 1 as total, typename FROM (
-                    SELECT GREATEST(TIMESTAMPDIFF('SECOND', MAX(dc.endtime), MAX(s.enddate))/3600,0) as rem, TIMESTAMPDIFF('SECOND', MAX(s.startdate), MAX(s.enddate))/3600 as len, CONCAT(p.proposalcode, p.proposalnumber) as prop, s.visit_number, s.beamlinename, IF(st.typename IS NOT NULL, st.typename, 'Normal') as typename
+                SELECT COUNT(visit_number) as visits, prop, SUM(rem) as rem, SUM(len) as len, ((SUM(len) - SUM(rem)) / SUM(len))*100 as used, beamlinename, 1 as total, typename, run, runid FROM (
+                    SELECT GREATEST(TIMESTAMPDIFF('SECOND', MAX(dc.endtime), MAX(s.enddate))/3600,0) as rem, TIMESTAMPDIFF('SECOND', MAX(s.startdate), MAX(s.enddate))/3600 as len, CONCAT(p.proposalcode, p.proposalnumber) as prop, s.visit_number, s.beamlinename, IF(st.typename IS NOT NULL, st.typename, 'Normal') as typename, vr.run, vr.runid
                     FROM blsession s INNER JOIN proposal p ON (p.proposalid = s.proposalid)
                     LEFT OUTER JOIN sessiontype st ON st.sessionid = s.sessionid 
                     LEFT OUTER JOIN datacollection dc ON dc.sessionid = s.sessionid
@@ -586,11 +641,12 @@
                     WHERE 1=1 $where 
                     GROUP BY p.proposalid, s.visit_number
                     ) inq
-                $group", $args);
+                $group
+                ORDER BY runid DESC", $args);
 
 
-            $dch = $this->db->pq("SELECT MAX(datacollections) as mdch, AVG(datacollections) as dch, SUM(datacollections) as dc, MAX(screenings) as msch, AVG(screenings) as sch, SUM(screenings) as sc, prop, beamlinename, 1 as total, typename FROM (
-                    SELECT SUM(IF(dc.axisrange > 0 AND dc.overlap = 0, 1, 0)) as datacollections, SUM(IF(dc.overlap != 0, 1, 0)) as screenings, CONCAT(p.proposalcode, p.proposalnumber) as prop, s.beamlinename, IF(st.typename IS NOT NULL, st.typename, 'Normal') as typename
+            $dch = $this->db->pq("SELECT MAX(datacollections) as mdch, AVG(datacollections) as dch, SUM(datacollections) as dc, MAX(screenings) as msch, AVG(screenings) as sch, SUM(screenings) as sc, prop, beamlinename, 1 as total, typename, run, runid FROM (
+                    SELECT SUM(IF(dc.axisrange > 0 AND dc.overlap = 0, 1, 0)) as datacollections, SUM(IF(dc.overlap != 0, 1, 0)) as screenings, CONCAT(p.proposalcode, p.proposalnumber) as prop, s.beamlinename, IF(st.typename IS NOT NULL, st.typename, 'Normal') as typename, vr.run, vr.runid
                     FROM datacollection dc
                     INNER JOIN blsession s ON s.sessionid = dc.sessionid
                     LEFT OUTER JOIN sessiontype st ON st.sessionid = s.sessionid 
@@ -599,10 +655,11 @@
                     WHERE 1=1 $where
                     GROUP BY TO_CHAR(dc.starttime, 'DDHH24'), s.visit_number, p.proposalid
                 ) inq 
-                $group", $args);
+                $group
+                ORDER BY runid DESC", $args);
                                     
-            $slh = $this->db->pq("SELECT MAX(samples) as mslh, AVG(samples) as slh, SUM(samples) as sl, prop, beamlinename, 1 as total, typename FROM (
-                    SELECT count(r.robotactionid) as samples, CONCAT(p.proposalcode, p.proposalnumber) as prop, s.beamlinename, IF(st.typename IS NOT NULL, st.typename, 'Normal') as typename
+            $slh = $this->db->pq("SELECT MAX(samples) as mslh, AVG(samples) as slh, SUM(samples) as sl, prop, beamlinename, 1 as total, typename, run, runid FROM (
+                    SELECT count(r.robotactionid) as samples, CONCAT(p.proposalcode, p.proposalnumber) as prop, s.beamlinename, IF(st.typename IS NOT NULL, st.typename, 'Normal') as typename, vr.run, vr.runid
                     FROM robotaction r
                     INNER JOIN blsession s ON s.sessionid = r.blsessionid
                     LEFT OUTER JOIN sessiontype st ON st.sessionid = s.sessionid 
@@ -611,7 +668,8 @@
                     WHERE r.actiontype='LOAD' $where
                     GROUP BY TO_CHAR(r.starttimestamp, 'DDHH24'), s.visit_number, p.proposalid
                 ) inq
-                $group", $args);
+                $group
+                ORDER BY runid DESC", $args);
 
 
             foreach ($dc as &$d) {
@@ -631,7 +689,20 @@
                 foreach(array('USED', 'REM', 'LEN', 'DCH', 'MDCH', 'DC', 'SCH', 'MSCH', 'SC', 'MSLH', 'SLH', 'SL') as $t) if ($d[$t]) $d[$t] = round(floatval($d[$t]), 1);
             }
 
-            $this->_output($dc);
+            if ($this->has_arg('download')) {
+                $data = array();
+                array_push($data, array_keys($dc[0]));
+                foreach ($dc as $d) {
+                    array_push($data, array_values($d));
+                }
+                $group = $this->has_arg('group_by') ? $this->arg('group_by') : 'prop';
+                $run = $this->has_arg('runid') ? ('_runid_'.$this->arg('runid')) : '';
+                $bl = $this->has_arg('bl') ? ('_'.$this->arg('bl')) : '';
+                $prop = $this->has_arg('proposal') ? ('_'.$this->arg('proposal')) : '';
+
+                $this->_write_csv($data, 'groupby_'.$group.$bl.$prop.$run);
+
+            } else $this->_output($dc);
         }
     
 
@@ -717,6 +788,16 @@
                 WHERE startdate < CURRENT_TIMESTAMP
                 ORDER BY startdate DESC");
             $this->_output($runs);
+        }
+
+
+
+        function _write_csv($data, $filename) {
+            header('Content-Type:application/csv'); 
+            header("Content-Disposition:attachment;filename=$filename.csv"); 
+            foreach($data as $d) {
+                print implode(',', $d)."\n";
+            }
         }
 
     }

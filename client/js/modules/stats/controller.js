@@ -9,16 +9,18 @@ define(['marionette',
     'modules/types/gen/stats/views/visit',
 
     'modules/stats/views/overview',
+    'modules/stats/views/overview2',
+    'modules/stats/views/bloverview',
     'modules/stats/views/beamline'
     
-    ], function(Marionette, Visit, BreakDown, Pies, VisitView, ProposalView, GenericVisitView, BAGOverviewView, BeamlineOverview) {
+    ], function(Marionette, Visit, BreakDown, Pies, VisitView, ProposalView, GenericVisitView, BAGOverviewView, BLSOverviewView, BeamlineHLOverview, BeamlineOverview) {
     
     var bc = { title: 'Visit Statistics', url: '/stats' }
     
     var controller = {
         
         // Visit Stats
-        visit:  function(visit) {
+        visit:  function(visit, from, to) {
             var prop = visit.replace(/-\d+/,'')
             app.cookie(prop)
             
@@ -37,7 +39,7 @@ define(['marionette',
                             else view = GenericVisitView
                             
                             app.bc.reset([bc, { title: app.prop, url: '/stats' }, { title: visit, url : '/dc/visit/'+visit }]),
-                            app.content.show(new view({ model: vis, breakdown: breakdown }))
+                            app.content.show(new view({ model: vis, breakdown: breakdown, params: { from: parseInt(from), to: parseInt(to) } }))
                         },
                         error: function() {
                             app.bc.reset([bc, { title: 'No Data' }])
@@ -69,17 +71,41 @@ define(['marionette',
         },
 
         overview: function(s,page) {
-            if (!app.user_can('all_prop_stats')) app.message({ title: 'Access Denied', message: 'You do not have access to that page' })
+            if (!app.user_can('all_prop_stats')) {
+                app.message({ title: 'Access Denied', message: 'You do not have access to that page' })
+                return
+            }
             if (!page) page = 1
             app.bc.reset([bc, { title: 'BAG Overview' }]),
             app.content.show(new BAGOverviewView({ params: { s: s } }))
         },
 
+        bls_overview: function(s) {
+            if (!app.user_can('all_prop_stats')) {
+                app.message({ title: 'Access Denied', message: 'You do not have access to that page' })
+                return
+            }
+            app.bc.reset([bc, { title: 'Beamlines Overview' }]),
+            app.content.show(new BLSOverviewView({ params: { s: s } }))
+        },
 
-        beamline: function(bl) {
-            if (!app.user_can('all_breakdown')) app.message({ title: 'Access Denied', message: 'You do not have access to that page' })
-            app.bc.reset([bc, { title: 'Beamline Overview' }]),
-            app.content.show(new BeamlineOverview({ bl: bl }))  
+        bl_overview: function(bl,s,page) {
+            if (!app.user_can('all_prop_stats')) {
+                app.message({ title: 'Access Denied', message: 'You do not have access to that page' })
+                return
+            }
+            app.bc.reset([bc, { title: bl+' Overview' }]),
+            app.content.show(new BeamlineHLOverview({ bl: bl, params: { s: s } }))
+        },
+
+
+        beamline: function(bl, run, from, to) {
+            if (!app.user_can('all_breakdown')) {
+                app.message({ title: 'Access Denied', message: 'You do not have access to that page' })
+                return
+            }
+            app.bc.reset([bc, { title: 'Beamline Run Overview' }, { title: bl }]),
+            app.content.show(new BeamlineOverview({ bl: bl, params: { run: run, from: parseInt(from), to: parseInt(to) } }))  
         } 
     }
         
@@ -93,6 +119,11 @@ define(['marionette',
         app.on('pstats:show', function() {
             app.navigate('stats')
             controller.proposal()
+        })
+
+        app.on('bloverview:show', function(bl) {
+            app.navigate('stats/overview/bl/'+bl)
+            controller.bl_overview(bl)
         })
     })
        

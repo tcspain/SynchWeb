@@ -1,11 +1,21 @@
-define(['marionette', 'collections/users'], function(Marionette, Users) {
+define(['marionette', 'collections/dewars'], function(Marionette, Dewars) {
 
     
-    var UserItem = Marionette.ItemView.extend({
+    var DewarItem = Marionette.ItemView.extend({
         tagName: 'li',
-        template: _.template("<%=FULLNAME%> - <% if (LAST) { %><%=VISITS%> Visits (Last Visit: <%=LAST%>)<% } else { %>*NEW*<% } %> [<%=REMOTE=='1' ? 'Remote' : 'On-site'%>]"),
+        template: _.template('<a class="show" href="#"><%=SHIPPINGNAME%></a>: <%=CODE%> <%=FACILITYCODE%> - <%=DEWARSTATUS%>'),
         className: function() {
             return this.model.get('VISITS') == 0 ? 'new' : ''
+        },
+
+        events: {
+            'click a.show': 'showShipment',
+        },
+
+        showShipment: function(e) {
+            e.preventDefault()
+            app.cookie(this.model.get('PROP'))
+            app.trigger('shipment:show', this.model.get('SHIPPINGID'))
         },
     })
     
@@ -16,14 +26,12 @@ define(['marionette', 'collections/users'], function(Marionette, Users) {
 
     var EmptyView = Marionette.ItemView.extend({
         tagName: 'li',
-        template: _.template('No users registered yet')
+        template: _.template('No dewars registered yet')
     })
     
     return Marionette.CollectionView.extend({
-        //template: _.template('<h1>Users</h1><ul class="users"></ul>'),
-        //childViewContainer: '.users',
         tagName: 'ul',
-        childView: UserItem,
+        childView: DewarItem,
         emptyView: LoadingView,
         className: 'visit_users',
 
@@ -33,7 +41,8 @@ define(['marionette', 'collections/users'], function(Marionette, Users) {
         },
         
         initialize: function(options) {
-            this.collection = new Users()
+            this.collection = new Dewars()
+            this.collection.queryParams.all = 1
             this.collection.queryParams.visit = options.visit
             var self = this
             this.collection.fetch().done(function() {
