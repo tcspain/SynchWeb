@@ -21,7 +21,7 @@ define([
 			responseText: {
 				DETECTORID: "1",
 				TYPE: "PDF",
-				MANUFACTURER: "Perkin-Elmer",
+				MANUFACTURER: "Perkin-Elemer",
 				MODEL: "4K",
 				DISTANCEMIN: "0.3",
 				DISTANCEMAX: "3.0",
@@ -33,7 +33,7 @@ define([
 			responseText: {
 				DETECTORID: "2",
 				TYPE: "Bragg",
-				MANUFACTURER: "Perkin-Elmer",
+				MANUFACTURER: "Perkin-Elemer",
 				MODEL: "4K",
 				DISTANCEMIN: "0.3",
 				DISTANCEMAX: "3.0",
