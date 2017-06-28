@@ -300,7 +300,7 @@ define([
     	
     	// Make the per-changer collection of plans from the per-instance array
     	// of collections of plans
-    	makePlanCollection: function(normalize) {
+    	makePlanCollection: function() {
     		// The Collection of all plans for this sample changer
     		this.planCollection = new SampleCollectionPlans();
     		this.planCollection.comparator = "ORDER";
@@ -319,12 +319,6 @@ define([
     				self.planCollection.add(plan);
     			});
     		});
-    		
-    		// Normalize the order, if required
-    		if (normalize)
-    			this.planCollection.each( function(plan, planIndex, planCollection) {
-    				plan.set({"ORDER": planIndex+1});
-    			});
     		
     		this.fetchPlanDetails(0);
     	},
@@ -481,10 +475,14 @@ define([
         		// moveBy is zero
         		return;
         	}
-        	// Move the model, slipping in between the other plans
-        	movedModel.set({"ORDER": (endPoint+0.5*direction).toLocaleString()});
+        	// Move the model
+        	movedModel.set({"ORDER": endPoint.toLocaleString()});
+        	// Move everything it jumps over in the opposite direction
+        	_.each(contraModels, function(plan) {
+        		plan.set({"ORDER": (Number.parseInt(plan.get("ORDER"))-direction).toLocaleString()});
+        	});
         	
-        	this.makePlanCollection(true);
+        	this.makePlanCollection();
         	
         },
         
@@ -493,33 +491,29 @@ define([
         remove: function(sOrdinal) {
         	// Ensure ordinal is numeric
         	/*int*/ var ordinal = (typeof sOrdinal === 'number') ? sOrdinal : Number.parseInt(sOrdinal);
-        	console.log("Romoving plan " + ordinal + ", " + sOrdinal);
+        	
         	// remove the plan with ORDER = ordinal from the per-sample and
         	// per-changer collections of data collection plans
         	_.each(this.plansBySample, function(samplePlans, index, plansBySample) {
         		samplePlans.remove({"ORDER": sOrdinal});
-        		console.log("Remaining per-sample plans (n= " + samplePlans.where({"ORDER": sOrdinal}).length + "): " + samplePlans.pluck("ORDER"));
-        		console.log(samplePlans.reject(function (plan) {return plan.get("ORDER") == sOrdinal}));
         	});
         	this.planCollection.remove({"ORDER": sOrdinal});
-    		console.log("Remaining per-changer plans = " + this.planCollection.where({"ORDER": sOrdinal}).length);
         	
-        	this.makePlanCollection(true);
+        	// decrease by one the order of every remaining plan after the
+        	// removed plan
+        	this.planCollection.each(function(plan, index, planCollection) {
+        		/*int*/ var planOrder = Number.parseInt(plan.get("ORDER"));
+        		
+        		if (planOrder > ordinal)
+        			plan.set({"ORDER": (planOrder - 1).toLocaleString()});
+        	});
+        	
+        	this.makePlanCollection();
         },
         
         // another instance of the same data collection plan
         copy: function(ordinal) {
-        	/*string*/ var newOrder = (this.planCollection.length + 1).toLocaleString();
-        	_.each(this.plansBySample, function(samplePlans, sampleIndex, plansBySample) {
-        		var sourcePlan = samplePlans.findWhere({"ORDER": ordinal});
-        		if (sourcePlan) {
-        			var newPlan = sourcePlan.clone();
-        			newPlan.set({"ORDER": newOrder});
-        			samplePlans.add(newPlan);
-        		}
-        	});
         	
-        	this.makePlanCollection();
         },
         
         // a new data collection plan, with the same parameter values
@@ -685,23 +679,21 @@ define([
         }),
         // Callback functions for the above cell
         doCopy: function(order) {
-        	console.log("Copying plan " + order);
-        	this.collectionView.copy(order);
+    		console.log("Copying plan " + order);
+        	
         },
         moveUp: function(order) {
-        	console.log("Moving up plan " + order);
         	if (order > 1) {
         		this.collectionView.move(order, -1);
         	}
         },
         moveDown: function(order) {
-        	console.log("Moving down plan " + order);
         	if (order < this.collection.length) {
         		this.collectionView.move(order, +1);
         	}
         },
         doRemove: function(order) {
-        	console.log("Removing plan " + order);
+    		// Remove the DataCollectionPlan from the set associated with the sample
         	this.collectionView.remove(order);
         },
         
