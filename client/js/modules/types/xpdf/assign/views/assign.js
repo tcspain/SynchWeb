@@ -1,43 +1,22 @@
-define([
-	'marionette',
-	'views/pages',
+define(['marionette', 'views/pages',
     'collections/shipments',
     'collections/containers',
     'collections/dewars',
     'models/shipment',
     'models/dewar',
-    "views/table",
-    "collections/samples",
-    "collections/experimentplanfakes/datacollectionplans",
-    "collections/experimentplanfakes/samplecollectionplans",
-    "collections/experimentplanfakes/detectors",
-    "collections/experimentplanfakes/scanparametersmodels",
-    "collections/experimentplanfakes/scanparametersservices",
-    "modules/types/xpdf/samples/views/samplelisttableview",
+    
     'utils',
-    "utils/table",
     'tpl!templates/types/xpdf/assign/assign.html',
     'jquery-ui',
-    ], function(
-    		Marionette,
-    		Pages,
-    		Shipments,
-    		Containers,
-    		Dewars,
-    		Shipment,
-    		Dewar,
-    		TableView,
-    		Samples,
-    		DataCollectionPlans,
-    		SampleCollectionPlans,
-    		Detectors,
-    		Axes,
-    		ParamServices,
-    		SampleListTableView,
-    		utils,
-    		table,
-    		template
-    		) {
+    ], function(Marionette, Pages,
+        Shipments,
+        Containers,
+        Dewars,
+        Shipment,
+        Dewar,
+    
+        utils,
+        template) {
 
             
     
@@ -78,6 +57,7 @@ define([
         },
         
         onChildviewCvShow: function(container) {
+        	console.log("DewarView: show container " + container.model.get("CONTAINERID"));
         	this.selectedContainer = container.model.get("CONTAINERID");
         	this.trigger("dv:showcontainer");
         },
@@ -95,6 +75,7 @@ define([
         },
         
         onChildviewDvShowcontainer: function(dewar) {
+        	console.log("ShipmentView: show container " + dewar.selectedContainer);
         	this.selectedContainer = dewar.selectedContainer;
         	this.trigger("sv:showcontainer");
         },
@@ -141,10 +122,14 @@ define([
             
             
     var View = Marionette.CompositeView.extend({
-        template: _.template("<div id=\"unassigned\"></div>"),
+        template: template,
         className: 'content',
         childView: ShipmentView,
         childViewContainer: '#unassigned',
+        
+        regions: {
+        	groupdetails: ".groupdetails",
+        },
         
         templateHelpers: function() {
             return {
@@ -218,384 +203,16 @@ define([
         },
         
         onChildviewSvShowcontainer: function(shipment) {
-        	this.selectedContainer = shipment.selectedContainer;
-        	this.triggerMethod("v:showcontainer", shipment.selectedContainer);
+        	console.log("View: showing container "+shipment.selectedContainer);
+        	this.showContainer(shipment.selectedContainer);
+        },        
+        
+        showContainer: function(containerId) {
+        	console.log("Showing experiment group for sample changer " + containerId);
         },
         
-    });
+    })
     
-    var OverView = Marionette.LayoutView.extend({
-        
-    	template: template,
-    	classname: "content",
-    	
-    	regions: {
-    		shipments: ".shipments",
-    		plans: ".plans",
-    		sampletable: ".sampletable",
-    		plantable: ".plantable",
-    		planparam: ".planparam",
-    	},
-    	
-    	onRender: function() {
-    		var childView = new View({visit: this.getOption("visit")});
-    		this.listenTo(childView, "v:showcontainer", this.showContainer);
-    		this.shipments.show(childView);
-    	},
-
-    	// Show the details of a given container
-    	showContainer: function(containerId) {
-    		// Get the data for the view
-    		var samples = new Samples({}, {containerID: containerId});
-    		var self = this;
-    		samples.fetch({
-    			success: function(samples, response, options) {
-    				console.log("assign.js:OverView.showContainer(): success fetching samples for container " + containerId);
-    	    		self.sampletable.show(new SampleListView({collection: samples, containerId: containerId}));
-    	    		self.showPlans(containerId, {ids: samples.pluck("BLSAMPLEID"), names: samples.pluck("NAME")});
-    			},
-    			error: function(samples, response, options) {
-    				console.log("assign.js:OverView.showContainer(): error fetching samples for container " + containerId);
-    			}
-    		});
-    		
-    	},
-    	
-    	// Show all the data collection plans for a given sample changer
-    	showPlans: function(containerId, sampleDetails) {
-    		var plans = new SampleCollectionPlans();
-    		plans.comparator = "ORDER";
-    		this.fetchPlans(containerId, sampleDetails, 0, plans);
-    	},
-    	
-    	// Fetch the plans for a sample in the changer, and add the models to
-    	// the overall Collection
-    	fetchPlans: function(containerId, sampleDetails, sampleIndex, planCollection) {
-    		console.log("assign.js:OverView.fetchPlans(): sampleIndex = "+sampleIndex);
-    		if (sampleIndex >= sampleDetails.ids.length)
-				this.fetchPlanDetails(planCollection, 0, {containerId: containerId, sampleIds: sampleDetails.ids});
-    		else {
-
-    			var currentId = sampleDetails.ids[sampleIndex];
-    			var currentName = sampleDetails.names[sampleIndex];
-
-    			var plans = new SampleCollectionPlans({}, {sampleId: currentId});
-    			var self=this;
-    			plans.fetch({
-    				success: function(plans, response, options) {
-    					plans.each(function(model, index, collection) {
-    						model.set({"SAMPLENAME": currentName.replace(/__/g, " ")});
-    					});
-    					planCollection.add(plans.models);
-    					self.fetchPlans(containerId, sampleDetails, sampleIndex+1, planCollection);
-    				},
-    				error: function(plans, response, options) {
-    					console.log("assign.js:OverView.fetchPlans(): Error getting data collection plans for sample "+currentId + ", " + currentName);
-    					self.fetchPlans(containerId, sampleDetails, sampleIndex+1, planCollection);
-    				},
-    			});
-    		}
-    	},
-    	
-    	// Fetch the detectors and axes for all the plans
-    	fetchPlanDetails: function(planCollection, planIndex, passHash) {
-    		// Check if the fetching is done
-    		if (planIndex >= planCollection.length)
-    			this.fetchAxisServices(planCollection, passHash);
-    		else {
-    			// Fetch the details for the plan at planIndex
-    			// Starting with the detectors
-    			var planId = planCollection.at(planIndex).get("DIFFRACTIONPLANID");
-    			var detectors = new Detectors({}, {dataCollectionId: planId});
-    		var self = this;
-    		detectors.fetch({
-    			success: function(detectors, response, options) {
-    				console.log("assign.js:OverView.fetchPlanDetails(): Added " + detectors.length + " detectors");
-    				planCollection.at(planIndex).set({"DETECTORS": detectors});
-    				self.fetchPlanAxes(planCollection, planIndex, passHash);
-    			},
-    			error: function(detectors, response, options) {
-    				console.log("assign.js:OverView.fetchPlanDetails(): Error fetching detectors for data collection plan "+planId);
-    				planCollection.at(planIndex).set({"DETECTORS": []});
-    				self.fetchPlanAxes(planCollection, planIndex, passHash);
-    			},
-    		});
-    		}
-    	},    	
-
-    	fetchPlanAxes: function(planCollection, planIndex, passHash) {
-    		var planId = planCollection.at(planIndex).get("DIFFRACTIONPLANID");
-    		var axes = new Axes({}, {dataCollectionPlanId: planId});
-    		axes.comparator = "MODELNUMBER";
-    		var self = this;
-    		axes.fetch({
-    			success: function(axes, response, options) {
-    				console.log("assign.js:OverView.fetchPlanAxes(): Added " + axes.length + " scan axes");
-    				planCollection.at(planIndex).set({"SCANMODELS": axes});
-    				self.fetchPlanDetails(planCollection, planIndex+1, passHash);
-    			},
-    			error: function(axes, response, options) {
-    				console.log("assign.js:OverView.fetchPlanAxes(): Error fetching scan parameter models for data collection plan "+planId);
-    				planCollection.at(planIndex).set({"SCANMODELS": []});
-    				self.fetchPlanDetails(planCollection, planIndex+1, passHash);
-    			},
-    		});
-    	},
-
-    	// Get the details of the service
-    	fetchAxisServices: function(planCollection, passHash) {
-    		var services = new ParamServices();
-    		var self = this
-    		services.fetch({
-    			success: function(services, response, options) {
-    				self.assignAxisServices(services, planCollection, passHash);
-    			},
-    			error: function(services, response, options) {
-    				console.log("assign.js:OverView.fetchAxisServices(): Error getting scan parameter services");
-    				self.showPlansFinale(passHash.containerId, passHash.sampleIds, planCollection);
-    			},
-    		});
-    	},
-    	
-    	// Get the name of the scan service, stored on the scan parameter
-    	// model as SERVICENAME
-    	assignAxisServices: function(services, planCollection, passHash) {
-    		planCollection.forEach(function(plan, index, plans) {
-    			var axes = plan.get("SCANMODELS");
-    			axes.forEach(function(scanModel, scanIndex, scanModels) {
-    				var service = services.find(function(checkService) {
-    					
-    					var serviceId = checkService.get("SCANPARAMETERSSERVICEID");
-    					var modelId = scanModel.get("SCANPARAMETERSSERVICEID")
-    					return serviceId == modelId; 
-    				});
-    				scanModel.set({"SERVICENAME": service.get("NAME")});
-    			});
-    		});
-    		
-    		this.showPlansFinale(passHash.containerId, passHash.sampleIds, planCollection);
-    	},
-    	
-    	// Having collected all the plans, show them
-    	showPlansFinale: function(containerId, sampleIds, planCollection) {
-    		console.log("Assign:OverView.showPlansFinale: Found "+planCollection.length+" plans:", planCollection.pluck("DIFFRACTIONPLANID"), planCollection.pluck("SAMPLENAME"), planCollection.pluck("ORDER"));
-    		// Set the  field which lists similar data collections (TODO)
-    		planCollection.forEach(function(plan, index, plans) {
-
-    			console.log(plan);
-    		});
-    		
-    		// Store the collection of plans for future reference
-    		this.collection = planCollection;
-    		
-    		var planEvent = "plan:details";
-    		// Show the table of data collection plans
-    		this.plantable.show(new PlanListView({
-    			collection: planCollection, 
-    			showPlanEvent: planEvent,
-    			showPlanArgument: "ORDER"
-    		}));
-    		this.listenTo(app, planEvent, this.showPlanDetails);
-    	},
-    	
-    	showPlanDetails: function(planOrdinal) {
-    		console.log("assign.js:OverView.showPlanDetails(): show details for plan " + planOrdinal + " on ", this);
-    		var plan = this.collection.find(function(plan) {return plan.get("ORDER") == planOrdinal});
-    		console.log(plan);
-    		this.planparam.show(new PlanDetailsView({model: plan}));
-    	},
-    	
-        templateHelpers: function() {
-            return {
-                VISIT: this.getOption('visit').toJSON(),
-            }
-        },
-
-    });
     
-    var SampleListView = Marionette.LayoutView.extend({
-    	
-    	regions: {
-    		thetable: ".thetable",
-    	},
-    	
-    	/*
-    	 * options
-    	 * options.collection: the collection of samples to be displayed
-    	 * options.containerId: the id of the container to be displayed
-    	 */
-    	initialize: function(options) {
-    		this.template = _.template("<h2>Sample Changer "+ options.containerId + "</h2>" +
-    				"<a class=\"button button-notext\" href=\"/containers/cid/" + options.containerId + "\"><i class=\"fa fa-search\"></i></a>" + 
-    				"<div class=\"thetable\"></div>");
-    		if (options && options.collection) this.collection = options.collection;
-    	},
-    	
-    	onShow: function() {
-    		this.thetable.show(new SampleListTableView({collection: this.collection}));
-    		
-    	},
-    });
-    
-    // View for the data collection plans in a sample holder
-    var PlanListView = Marionette.LayoutView.extend({
-    	
-    	template: _.template("<h2>Data Collection Plans</h2>" +
-    			"<div class=\"thetable\"></div>"),
-    	
-    	regions: {
-    		thetable: ".thetable",
-    	},
-    	
-    	/*
-    	 * options
-    	 * options.collection: the collection of plans to be displayed
-    	 * options.showPlanEvent: the event fired when an event is to be shown
-    	 * options.showPlanArgument: the identifier for the selected plan
-    	 */
-    	initialize: function(options) {
-    		if (options && options.collection) this.collection = options.collection;
-    		if (options && options.showPlanEvent) this.showPlanEvent = options.showPlanEvent;
-    		if (options && options.showPlanArgument) this.showPlanArgument = options.showPlanArgument;
-    	},
-    	
-    	onShow: function() {
-    		this.thetable.show(new PlanListTableView({
-    			collection: this.collection,
-    			showPlanEvent: this.showPlanEvent,
-    			showPlanArgument: this.showPlanArgument
-    		}));
-    	},
-    });
-    
-    var PlanListTableView = TableView.extend( {
-    	backgrid: {
-    	},
-    	
-    	loading:true,
-
-    	/*
-    	 * options
-    	 * options.showPlanEvent: the event fired when an event is to be shown
-    	 * options.showPlanArgument: the identifier for the selected plan
-    	 */
-    	initialize: function(options) {
-    		
-    		this.columns = [
-        		{ name: "ORDER", label: "", cell: "string", editable: false},
-//        		{ name: "DIFFRACTIONPLANID", label: "ID", cell: "string", editable: false},
-        		{ name: "SAMPLENAME", label: "Sample", cell: deUnderscoreCell, editable: false},
-        		{ name: "DETECTORS", label: "Procedure", cell: ProcedureCell, editable: false},
-        		{ name: "SCANMODELS", label: "Axes", cell: ScanCell, editable: false},
-        		{ name: "SCANMODELS", label: "Start:stop:step", cell: SssCell, editable: false},
-        		{ name: "WAVELENGTH", label: "Wavelength (Å)", cell: "string", editable: false},
-        	];
-    		
-    		this.backgrid.row = table.ClickableRow.extend({
-    			event: options.showPlanEvent,
-    			argument: options.showPlanArgument,
-    		});
-    		
-			TableView.prototype.initialize.apply(this, [options]);
-    	},
-    	
-    });
-    
-    var deUnderscoreCell = table.TemplateCell.extend({
-    	getTemplate: function() {
-    		return this.model.get("SAMPLENAME").replace(/__/g, " ");
-    	},
-    });
-    
-    var ProcedureCell = table.TemplateCell.extend({
-    	getTemplate: function() {
-    		var detectors = this.model.get("DETECTORS");
-    		var procedures = detectors.pluck("TYPE");
-    		var procedureString = procedures.join(" & ");
-    		return procedureString;
-    	},
-    });
-
-    var ScanCell = table.TemplateCell.extend({
-    	getTemplate: function() {
-    		var scans = this.model.get("SCANMODELS");
-    		var services = scans.pluck("SERVICENAME");
-    		var serviceString = services.join(", ");
-    		return (serviceString.length > 0) ? serviceString : "(No scan)";
-    	},
-    });
-    
-    var SssCell = table.TemplateCell.extend({
-    	getTemplate: function() {
-    		var scans = this.model.get("SCANMODELS");
-    		var ssss = scans.map(function(scanModel, index, scanModels) {
-    			return scanModel.get("START") + ":" + scanModel.get("STOP") + ":" + scanModel.get("STEP");
-    		});
-    		var sssString = ssss.join(", ");
-    		return sssString;
-    	},
-    });
-    
-    var PlanDetailsView = Marionette.LayoutView.extend({
-    	regions: {
-    		detectortable: ".detectortable",
-    		axistable: ".axistable",
-    	},
-    	
-    	template: _.template("<h2>Plan Details</h2>" + 
-    	        "<ul>" + 
-    	        "<li><span class=\"label\">Instance</span><span><%=SAMPLENAME%></span></li>" +
-    	        "<li><span class=\"label\">Wavelength</span><span><%=WAVELENGTH%></span></li>" +
-    	        "<li><span class=\"label\">Mono. bandwidth</span><span><%=MONOBANDWIDTH%></span></li>" +
-    	        "<li><span class=\"label\">Beam size (mm)</span><span><%=PREFERREDBEAMSIZEX%></span><span>×</span><span><%=PREFERREDBEAMSIZEY%></span></li>" +
-    	        "</ul>" +
-    	        "<h3>Detectors</h3>" +
-    	        "<div class=\"detectortable\"></div>" +
-    	        "<h3 class=\"scantitle\">Scan axes</h3>"+
-    	        "<div class=\"axistable\"></div>"
-    	        
-    	 ),
-    	 
-    	 initialize: function(options) {
-    		 this.model = options.model;
-    	 },
-    	 
-    	 onRender: function() {
-    		this.detectortable.show(new DetectorView({collection: this.model.get("DETECTORS"), pages: false}));
-    		if (this.model.get("SCANMODELS").length > 0) {
-    			this.$el.find("h3.scantitle").show();
-    			this.$el.find("div.axistable").show();
-    			this.axistable.show(new AxisView({collection: this.model.get("SCANMODELS"), pages:false}));
-    		} else {
-    			this.$el.find("h3.scantitle").hide();
-    			this.$el.find("div.axistable").hide();
-    		}
-
-    	 },
-    	
-    });
-    
-    var DetectorView = TableView.extend({
-    	columns: [
-    		{name: "TYPE", label: "Type", cell: "string", editable: false},
-    		{name: "MANUFACTURER", label: "Manufacturer", cell: "string", editable: false},
-    		{name: "MODEL", label: "Model", cell: "string", editable: false},
-    		{name: "DISTANCE", label: "Distance", cell: "string", editable: true},
-    		{name: "EXPOSURETIME", label: "Exposure time (s)", cell: "string", editable: true},
-    		{name: "ORIENTATION", label: "Orientation (0, 45°)", cell: "string", editable: true},
-    	],
-    	
-    });
-    
-    var AxisView = TableView.extend({
-    	columns: [
-    		{name: "MODELNUMBER", label: "Order", cell: "string", editable: false},
-    		{name: "SERVICENAME", label: "Service", cell: "string", editable: false},
-    		{name: "START", label: "Start", cell: "string", editable: true},
-    		{name: "STOP", label: "Stop", cell: "string", editable: true},
-    		{name: "STEP", label: "Step", cell: "string", editable: true},
-    	],
-    });
-    
-	return OverView;
-});
+    return View;
+})
