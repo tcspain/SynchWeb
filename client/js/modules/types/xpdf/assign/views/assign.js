@@ -13,8 +13,6 @@ define([
     "collections/experimentplanfakes/detectors",
     "collections/experimentplanfakes/scanparametersmodels",
     "collections/experimentplanfakes/scanparametersservices",
-    "models/experimentplanfakes/datacollectionplan",
-    "models/experimentplanfakes/samplecollectionplan",
     "modules/types/xpdf/samples/views/samplelisttableview",
     'utils',
     "utils/table",
@@ -35,8 +33,6 @@ define([
     		Detectors,
     		Axes,
     		ParamServices,
-    		DataCollectionPlan,
-    		SampleCollectionPlan,
     		SampleListTableView,
     		utils,
     		table,
@@ -262,9 +258,6 @@ define([
     		this.samples = new Samples({}, {containerID: this.containerId});
     		// An array of SampleCollectionPlans collections, in order of the sample on the sample changer
     		this.plansBySample = [];
-    		// A Collection of plans that do not have an associated sample
-    		this.plansWithoutSample = new SampleCollectionPlans(); 
-
     		var self = this;
     		this.samples.fetch({
     			success: function(samples, response, options) {
@@ -327,12 +320,6 @@ define([
     			});
     		});
     		
-    		// Plans as yet unassigned to a sample
-    		this.plansWithoutSample.each(function(plan, planIndex, plans) {
-    			plan.set({"SAMPLENAME": ""});
-    			self.planCollection.add(plan);
-    		});
-    		
     		// Normalize the order, if required
     		if (normalize)
     			this.planCollection.each( function(plan, planIndex, planCollection) {
@@ -388,9 +375,7 @@ define([
     				},
     				error: function(axes, response, options) {
     					console.log("assign.js:OverView.fetchPlanAxes(): Error fetching scan parameter models for data collection plan "+planId);
-    					var emptyAxes = new Axes([], {dataCollectionPlanId: planId});
-    					
-    					self.planCollection.at(planIndex).set({"SCANMODELS": emptyAxes});
+    					self.planCollection.at(planIndex).set({"SCANMODELS": []});
     					self.fetchPlanDetails(planIndex+1);
     				},
     			});
@@ -538,36 +523,6 @@ define([
         	
         },
         
-        // add a new, empty data collection plan
-        create: function() {
-        	console.log("Create new plan");
-        	
-        	var dataPlan = new DataCollectionPlan();
-        	var self = this;
-        	var nextOrder = this.planCollection.length+1;
-        	dataPlan.save({}, {
-        		success: function(model, response, options) {
-        			dataPlan.set({"DIFFRACTIONPLANID": model.get("DIFFRACTIONPLANID")});
-                	// Create a new SampleCollectionPlan from the DataCollectionPlan
-                	var samplePlan = new SampleCollectionPlan();
-                	samplePlan.set({
-                		"DIFFRACTIONPLANID": dataPlan.get("DIFFRACTIONPLANID"),
-                		"ORDER": nextOrder,
-        				"WAVELENGTH": "",
-        				"PREFERREDBEAMSIZEX": "",
-        				"PREFERREDBEAMSIZEY": "",
-        				"MONOBANDWIDTH": "",
-                	});
-                	// Add the new sample collection plan to this list of sample-less plans
-                	self.plansWithoutSample.add(samplePlan);
-        			self.makePlanCollection();
-        		},
-        		error: function(model, response, options) {
-        			console.log("Could not save new data collection plan", response);
-        			self.makePlanCollection();
-        		},
-        	});
-        },
 
     });
     
@@ -599,16 +554,10 @@ define([
     var PlanListView = Marionette.LayoutView.extend({
     	
     	template: _.template("<h2 class=\"tabletitle\">Data Collection Plans</h2>" +
-    			"<div class=\"thetable\"></div>" + 
-    			"<button type=\"button\" class=\"button create\" title=\"Create new empty plan\"><i class=\"fa fa-plus\"</i>New Data Collection Plan</button>"
-    			),
+    			"<div class=\"thetable\"></div>"),
     	
     	regions: {
     		thetable: ".thetable",
-    	},
-    	
-    	events: {
-    		"click button.create": "createPlan",
     	},
     	
     	/*
@@ -642,10 +591,6 @@ define([
 //    			this.$el.find("h2.tabletitle").hide();
 //    			this.$el.find("div.thetable").hide();
     		}
-    	},
-    	
-    	createPlan: function(event) {
-    		this.collectionView.create();
     	},
     });
     
