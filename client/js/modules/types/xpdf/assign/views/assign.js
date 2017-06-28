@@ -15,7 +15,6 @@ define([
     "collections/experimentplanfakes/scanparametersservices",
     "models/experimentplanfakes/datacollectionplan",
     "models/experimentplanfakes/samplecollectionplan",
-    "models/experimentplanfakes/scanparametersmodel",
     "modules/types/xpdf/samples/views/samplelisttableview",
     'utils',
     "utils/table",
@@ -42,7 +41,6 @@ define([
     		ParamServices,
     		DataCollectionPlan,
     		SampleCollectionPlan,
-    		ScanParametersModel,
     		SampleListTableView,
     		utils,
     		table,
@@ -259,16 +257,9 @@ define([
     		this.services = new ParamServices();
     		this.services.fetch({
     			error: function(services, response, options) {
-    				console.log("assign.js:OverView.onRender(): Error getting scan parameter services");
+    				console.log("assign.js:OverView.fetchAxisServices(): Error getting scan parameter services");
     			},
     		});
-    		// Fetch the list of all available detectors. This will not change over the lifetime of the view (or probably the beamline). 
-    		this.detectors = new Detectors();
-    		this.detectors.fetch({
-    			error: function(detectors, response, options) {
-    				console.log("assign.js:OverView.onRender(): Error getting beamline detectors");
-    			}
-    		})
     	},
 
     	// Show the details of a given container
@@ -470,7 +461,7 @@ define([
     		var plan = this.planCollection.find(function(plan) {return plan.get("ORDER") == planOrdinal});
     		console.log(plan);
 			this.$el.find("div.plandetails").show();
-    		this.planparam.show(new PlanDetailsView({model: plan, detectors: this.detectors, services: this.services.pluck("NAME") }));
+    		this.planparam.show(new PlanDetailsView({model: plan}));
     	},
     	
         templateHelpers: function() {
@@ -818,14 +809,6 @@ define([
     		axistable: ".axistable",
     	},
     	
-    	modelEvents: {
-    		"change": "render",
-    	},
-    	
-    	events: {
-    		"click button.addaxis": "addAxis",
-    	},
-    	
     	template: _.template("<h1>Plan Details</h1>" + 
     	        "<ul>" + 
     	        "<li><span class=\"label\">Instance</span><span><%=SAMPLENAME%></span></li>" +
@@ -836,9 +819,7 @@ define([
     	        "<h2>Detectors</h2>" +
     	        "<div class=\"detectortable\"></div>" +
     	        "<h2 class=\"scantitle\">Scan axes</h2>"+
-    	        "<div class=\"axistable\"></div>" +
-    	        "<button class=\"button addaxis\"><i class=\"fa fa-plus\"></i>Add scan axis</button>"
-    	        
+    	        "<div class=\"axistable\"></div>"
     	        
     	 ),
     	 
@@ -846,9 +827,6 @@ define([
     		 Backbone.Validation.bind(this);
     		 
     		 this.model = options.model;
-    		 this.detectors = options.detectors.clone();
-    		 this.services = options.services;
-    		 
     	 },
     	 
     	 onRender: function() {
@@ -859,76 +837,17 @@ define([
     		 edit.create("PREFERREDBEAMSIZEX", "text");
     		 edit.create("PREFERREDBEAMSIZEY", "text");
     		 
-    		 // Create the collection of detector data, using all the beamline
-    		 // detectors, and the data collection detector data
-    		 var self = this;
-    		 this.detectors.each(function(detector, index, detectors) {
-    			if (self.model.get("DETECTORS").get(detector.get("DETECTORID"))) {
-    				var planDetector = self.model.get("DETECTORS").get(detector.get("DETECTORID"));
-    				detector.set({
-    					"ISUSED": true,
-    					"DISTANCE": planDetector.get("DISTANCE"),
-    					"ORIENTATION": planDetector.get("ORIENTATION"),
-    					"EXPOSURETIME": planDetector.get("EXPOSURETIME"),
-    					});
-    			} else {
-    				detector.set({
-    					"ISUSED": false,
-    					"DISTANCE": detector.get("DISTANCEMIN") + "-" + detector.get("DISTANCEMAX"),
-    					"ORIENTATION": "0 or 45°",
-    					"EXPOSURETIME": "-",
-    				});
-    			}
-  
-    		 });
     		 
-    		 // Construct the array of name-value pairs to feed the service selector
-    		 var serviceSelectorValues = _.reduce(this.services, function(memo, serviceName, index, services) {
-    			 var nyPair = [serviceName, (index+1).toLocaleString()];
-    			 console.log(nyPair, memo);
-    			 memo.push(nyPair);
-    			 return memo;
-    		 }, [])
-    		 
-    		 console.log("serviceSelectorValues:", serviceSelectorValues);
-    		 
-    		 this.detectortable.show(new DetectorView({collection: this.detectors, pages: false}));
+    		 this.detectortable.show(new DetectorView({collection: this.model.get("DETECTORS"), pages: false}));
     		 if (this.model.get("SCANMODELS").length > 0) {
     			 this.$el.find("h3.scantitle").show();
     			 this.$el.find("div.axistable").show();
-    			 this.axistable.show(new AxisView({collection: this.model.get("SCANMODELS"), values: serviceSelectorValues, pages:false}));
+    			 this.axistable.show(new AxisView({collection: this.model.get("SCANMODELS"), pages:false}));
     		 } else {
     			 this.$el.find("h3.scantitle").hide();
     			 this.$el.find("div.axistable").hide();
     		 }
 
-    	 },
-    	 
-    	 addAxis: function(event) {
-    		 console.log("Add an axis!");
-    		 var nyScanParams = new ScanParametersModel();
-    		 var self = this;
-    		 nyScanParams.save({}, {
-    			success: function(params, response, options) {
-    				console.log("assign.js:PlanDetailsView(): Success creating new scan parameters model", params, response);
-    				params.set({
-    					"SCANPARAMETERSSERVICEID": "",
-    					"DATACOLLECTIONPLANID": self.model.get("DATACOLLECTIONPLANID"),
-    					"MODELNUMBER": self.model.get("SCANMODELS").length + 1,
-    					"START": "",
-    					"STOP": "",
-    					"STEP": "",
-    					"ARRAY": [],
-    				});
-    				self.model.get("SCANMODELS").push(params);
-    				
-    			},
-    			error: function(params, response, options) {
-    				console.log("assign.js:PlanDetailsView(): Error creating new scan parameters model");
-    			},
-    			
-    		 });
-    		 
     	 },
     	
     });
@@ -937,13 +856,12 @@ define([
     	initialize: function(options) {
 
     		this.columns =  [
-    			{name: "TYPE", label: "Type", cell: "string", editable: false},
+    			{name: "TYPE", label: "Type", cell: TypeSelectorCell.extend({detectorList: "Bragg"}), editable: true},
     			{name: "MANUFACTURER", label: "Manufacturer", cell: "string", editable: false},
     			{name: "MODEL", label: "Model", cell: "string", editable: false},
     			{name: "DISTANCE", label: "Distance (mm)", cell: "string", editable: true},
     			{name: "EXPOSURETIME", label: "Exposure time (s)", cell: "string", editable: true},
     			{name: "ORIENTATION", label: "Orientation (0, 45°)", cell: "string", editable: true},
-    			{name: "ISUSED", label: "Active?", cell: "boolean", editable: true},
     		];
     		
         	TableView.prototype.initialize.apply(this, [options]);
@@ -953,12 +871,21 @@ define([
     	
     });
 
+    var TypeSelectorCell = Backgrid.SelectCell.extend({
+    	optionValues: function() {
+    		return [
+    			["PDF", "PDF"],
+    			["Bragg", "Bragg"],
+    			]
+    	},
+    });
+    
     var AxisView = TableView.extend({
     	initialize: function(options) {
     	
     	this.columns = [
     		{name: "MODELNUMBER", label: "Order", cell: "string", editable: false},
-    		{name: "SCANPARAMETERSSERVICEID", label: "Service", cell: Backgrid.SelectCell.extend({optionValues: options.values}), editable: true},
+    		{name: "SERVICENAME", label: "Service", cell: "string", editable: false},
     		{name: "START", label: "Start:", cell: "string", editable: true},
     		{name: "STOP", label: "Stop:", cell: "string", editable: true},
     		{name: "STEP", label: "Step", cell: "string", editable: true},
