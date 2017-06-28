@@ -22,15 +22,6 @@ define([
 		state: {
 			pageSize: 15,
 		},
-
-		/*
-		 * options
-		 * options.sampleId: get the data collections for this sample instance
-		 */
-		initialize: function(options) {
-			if (options.sampleId) this.sampleId = options.sampleId;
-		},
-	
 	});
 	
 	/*
