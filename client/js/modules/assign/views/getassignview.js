@@ -23,7 +23,7 @@ define([
 		AssignView : new GetView({
 			views: {
 				mx: AssignView,
-				xpdf: XpdfAssignView,
+//				xpdf: XpdfAssignView,
 			},
 			default: AssignView,
 		}),
