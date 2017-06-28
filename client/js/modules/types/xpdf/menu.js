@@ -9,7 +9,7 @@ define([], function() {
 			dc: "View All Data",
 			visits: "Visits",
 			shipments: "Shipments",
-			assign: "Experiment Planning",
+			assign: "Assign Sample Changers",
 //			dewars: "Samples Sets",
 			containers: "Sample Changers",
 			samples: "Samples",
