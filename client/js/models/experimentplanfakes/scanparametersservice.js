@@ -29,7 +29,6 @@ define([
 				SCANPARAMETERSSERVICEID: "2",
 				NAME: "Cryostat",
 				DESCRIPTION: "A cooler capable of operating between 77 K and 20 K below room temperature.",
-			},
 		},
 	]);
 	

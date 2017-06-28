@@ -20,7 +20,7 @@ define([
 			url: "/api/scanparam/1",
 			responseText: {
 				SCANPARAMETERSMODELID: "1",
-				SCANPARAMETERSSERVICEID: "1",
+				SCANPARAMTERSSERVICEID: "1",
 				DATACOLLECTIONPLANID: "1",
 				MODELNUMBER: "1",
 				START: "400",
@@ -32,7 +32,7 @@ define([
 			url: "/api/scanparam/2",
 			responseText: {
 				SCANPARAMETERSMODELID: "2",
-				SCANPARAMETERSSERVICEID: "1",
+				SCANPARAMTERSSERVICEID: "1",
 				DATACOLLECTIONPLANID: "3",
 				MODELNUMBER: "1",
 				START: "400",
@@ -44,7 +44,7 @@ define([
 			url: "/api/scanparam/3",
 			responseText: {
 				SCANPARAMETERSMODELID: "3",
-				SCANPARAMETERSSERVICEID: "2",
+				SCANPARAMTERSSERVICEID: "2",
 				DATACOLLECTIONPLANID: "3",
 				MODELNUMBER: "2",
 				START: "80",
@@ -56,7 +56,7 @@ define([
 			url: "/api/scanparam/4",
 			responseText: {
 				SCANPARAMETERSMODELID: "4",
-				SCANPARAMETERSSERVICEID: "1",
+				SCANPARAMTERSSERVICEID: "1",
 				DATACOLLECTIONPLANID: "4",
 				MODELNUMBER: "1",
 				START: "400",
