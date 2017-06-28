@@ -6,17 +6,17 @@ define([
 	"backbone.paginator",
 	"jquery.mockjax",
 	
-	"models/experimentplanfakes/samplecollectionplan",
+	"models/experimentplanfakes/samplecollectionplans",
 	], function(
 			PageableCollection,
 			mockjax,
 			SampleCollectionPlan
 	) {
 	var SCPlans = PageableCollection.extend({
-		blSampleId: 0,
+		blSampleId: null,
 		model: SampleCollectionPlan,
 		url: function() {
-			return (this.blSampleId) ? "/dcplan/sample/" + this.blSampleId : "/dcplan";
+			return (this.blSampleId) ? "/dcplan/sample/" + blSampleId : null;
 		},
 		
 		state: {
@@ -24,8 +24,8 @@ define([
 		},
 		
 		initialize: function(models, options) {
-			if (models && models.length > 0) this.models = models;
-			if (options && options.sampleId) this.blSampleId = options.sampleId;
+			if (models) this.models = models;
+			if (options && options.blSampleId) this.blSampleId = options.blSampleId;
 		},
 	});
 	
@@ -84,7 +84,5 @@ define([
 				this.responseText = [];
 		},
 	});
-	
-	return SCPlans;
 
 });
