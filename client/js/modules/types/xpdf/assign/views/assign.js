@@ -445,7 +445,7 @@ define([
         // Plan manipulation functions
         move: function(ordinalIn, moveBy) {
         	// Ensure ordinal is numeric
-        	/*int*/ var ordinal = (typeof ordinalIn === 'number') ? ordinalIn : Number.parseInt(ordinalIn);
+        	var ordinal = (typeof ordinalIn === 'number') ? ordinalIn : Number.parseFloat(ordinalIn);
         	// Since moveBy is not ultimately read from JSON, it is assumed numeric
         	
         	// Make sure nothing moves beyond the end of the array. Ordinal is
@@ -486,29 +486,8 @@ define([
         	
         },
         
-        // remove the data collection plan from its instance in this sample
-        // changer
-        remove: function(sOrdinal) {
-        	// Ensure ordinal is numeric
-        	/*int*/ var ordinal = (typeof sOrdinal === 'number') ? sOrdinal : Number.parseInt(sOrdinal);
+        remove: function(ordinal) {
         	
-        	// remove the plan with ORDER = ordinal from the per-sample and
-        	// per-changer collections of data collection plans
-        	_.each(this.plansBySample, function(samplePlans, index, plansBySample) {
-        		samplePlans.remove({"ORDER": sOrdinal});
-        	});
-        	this.planCollection.remove({"ORDER": sOrdinal});
-        	
-        	// decrease by one the order of every remaining plan after the
-        	// removed plan
-        	this.planCollection.each(function(plan, index, planCollection) {
-        		/*int*/ var planOrder = Number.parseInt(plan.get("ORDER"));
-        		
-        		if (planOrder > ordinal)
-        			plan.set({"ORDER": (planOrder - 1).toLocaleString()});
-        	});
-        	
-        	this.makePlanCollection();
         },
         
         // another instance of the same data collection plan
@@ -693,8 +672,9 @@ define([
         	}
         },
         doRemove: function(order) {
+    		console.log("Deleting plan " + order);
     		// Remove the DataCollectionPlan from the set associated with the sample
-        	this.collectionView.remove(order);
+
         },
         
         /*
