@@ -393,7 +393,6 @@ define([
     		if (this.collection.length > 0) {
     			this.$el.find("div.plantable").show();
     			this.$el.find("div.planparam").show();
-    			this.$el.find("div.plandetails").hide();
     		
     			this.plantable.show(new PlanListView({
     				collection: planCollection, 
@@ -411,7 +410,6 @@ define([
     		console.log("assign.js:OverView.showPlanDetails(): show details for plan " + planOrdinal + " on ", this);
     		var plan = this.collection.find(function(plan) {return plan.get("ORDER") == planOrdinal});
     		console.log(plan);
-			this.$el.find("div.plandetails").show();
     		this.planparam.show(new PlanDetailsView({model: plan}));
     	},
     	
@@ -562,7 +560,7 @@ define([
     	template: _.template("<h2>Plan Details</h2>" + 
     	        "<ul>" + 
     	        "<li><span class=\"label\">Instance</span><span><%=SAMPLENAME%></span></li>" +
-    	        "<li><span class=\"label\">Wavelength (Å)</span><span><%=WAVELENGTH%></span></li>" +
+    	        "<li><span class=\"label\">Wavelength</span><span><%=WAVELENGTH%></span></li>" +
     	        "<li><span class=\"label\">Mono. bandwidth</span><span><%=MONOBANDWIDTH%></span></li>" +
     	        "<li><span class=\"label\">Beam size (mm)</span><span><%=PREFERREDBEAMSIZEX%></span><span>×</span><span><%=PREFERREDBEAMSIZEY%></span></li>" +
     	        "</ul>" +
@@ -597,7 +595,7 @@ define([
     		{name: "TYPE", label: "Type", cell: "string", editable: false},
     		{name: "MANUFACTURER", label: "Manufacturer", cell: "string", editable: false},
     		{name: "MODEL", label: "Model", cell: "string", editable: false},
-    		{name: "DISTANCE", label: "Distance (mm)", cell: "string", editable: true},
+    		{name: "DISTANCE", label: "Distance", cell: "string", editable: true},
     		{name: "EXPOSURETIME", label: "Exposure time (s)", cell: "string", editable: true},
     		{name: "ORIENTATION", label: "Orientation (0, 45°)", cell: "string", editable: true},
     	],
