@@ -32,7 +32,6 @@ define([
 	
 	mockjax({
 		url: "/api/dcplan",
-		type: "GET",
 		responseText: [
 			{
 				DIFFRACTIONPLANID: "1",
@@ -60,15 +59,6 @@ define([
 				MONOBANDWIDTH: "0.1",
 			},
 		]
-	});
-	
-	// POST repsonse for a (single) new data collection plan
-	mockjax({
-		url: "/api/dcplan",
-		type: "POST",
-		responseText: {
-			DIFFRACTIONPLANID: "5",
-		},
 	});
 
 	return DCPlans;
