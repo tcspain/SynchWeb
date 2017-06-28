@@ -493,12 +493,16 @@ define([
         remove: function(sOrdinal) {
         	// Ensure ordinal is numeric
         	/*int*/ var ordinal = (typeof sOrdinal === 'number') ? sOrdinal : Number.parseInt(sOrdinal);
+        	console.log("Romoving plan " + ordinal + ", " + sOrdinal);
         	// remove the plan with ORDER = ordinal from the per-sample and
         	// per-changer collections of data collection plans
         	_.each(this.plansBySample, function(samplePlans, index, plansBySample) {
-        		samplePlans.remove(sOrdinal);//{"ORDER": sOrdinal});
+        		samplePlans.remove({"ORDER": sOrdinal});
+        		console.log("Remaining per-sample plans (n= " + samplePlans.where({"ORDER": sOrdinal}).length + "): " + samplePlans.pluck("ORDER"));
+        		console.log(samplePlans.reject(function (plan) {return plan.get("ORDER") == sOrdinal}));
         	});
-        	this.planCollection.remove(sOrdinal);//{"ORDER": sOrdinal});
+        	this.planCollection.remove({"ORDER": sOrdinal});
+    		console.log("Remaining per-changer plans = " + this.planCollection.where({"ORDER": sOrdinal}).length);
         	
         	this.makePlanCollection(true);
         },
