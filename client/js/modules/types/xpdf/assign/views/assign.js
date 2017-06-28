@@ -482,13 +482,7 @@ define([
     		var plan = this.planCollection.find(function(plan) {return plan.get("ORDER") == planOrdinal});
     		console.log(plan);
 			this.$el.find("div.plandetails").show();
-    		this.planparam.show(new PlanDetailsView({
-    			model: plan,
-    			detectors: this.detectors,
-    			services: this.services.pluck("NAME"),
-    			samples: this.samples,
-    			parentView: this,
-    		}));
+    		this.planparam.show(new PlanDetailsView({model: plan, detectors: this.detectors, services: this.services.pluck("NAME") }));
     	},
     	
         templateHelpers: function() {
@@ -593,27 +587,9 @@ define([
         	
         },
         
-        movePlanToSample(ordinal, nySampleId) {
-    		if (_.contains(this.planCollection.pluck("ORDER"), ordinal)) {
-        		console.log("Move plan at " + ordinal + " to sampleId " + nySampleId);
-        		var movingModel = this.planCollection.findWhere({"ORDER": ordinal});
-        		var targetSampleIndex = _.indexOf(this.samples.pluck("BLSAMPLEID"), nySampleId);
-        		// remove the moving model 
-        		_.each(this.plansBySample, function(plans, index, planses) {
-        			plans.remove(plans.where({"ORDER": ordinal}));
-        		});
-        		this.plansWithoutSample.remove(this.plansWithoutSample.where({"ORDER": ordinal}));
-        		// place the moving model
-        		this.plansBySample[targetSampleIndex].push(movingModel);
-
-    		} else {
-    			console.log("planCollection has no plan ordered in position " + ordinal);
-    		}
-    		this.makePlanCollection();
-        },
         
         doSaveChanger: function() {
-        	console.log("One day this will save the plans to the database for container " + this.containerId);
+        	
         },
 
     });
@@ -855,12 +831,11 @@ define([
     	
     	events: {
     		"click button.addaxis": "addAxis",
-    		"change select.instanceselect": "changeInstance",
     	},
     	
     	template: _.template("<h1>Plan Details</h1>" + 
     	        "<ul>" + 
-    	        "<li><span class=\"label\">Instance</span><select class=\"instanceselect\"></select>" + 
+    	        "<li><span class=\"label\">Instance</span><span><%=SAMPLENAME%></span></li>" +
     	        "<li><span class=\"label\">Wavelength (Å)</span><span class=\"WAVELENGTH\"><%=WAVELENGTH%></span></li>" +
     	        "<li><span class=\"label\">Mono. bandwidth</span><span class=\"MONOBANDWIDTH\"><%=MONOBANDWIDTH%></span></li>" +
     	        "<li><span class=\"label\">Beam size (mm)</span><span class=\"PREFERREDBEAMSIZEX\"><%=PREFERREDBEAMSIZEX%></span><span>×</span><span class=\"PREFERREDBEAMSIZEY\"><%=PREFERREDBEAMSIZEY%></span></li>" +
@@ -874,23 +849,12 @@ define([
     	        
     	 ),
     	 
-    	 /*
-    	  * options:
-    	  * options.model: model of the sampleCollectionPlan  for which the details are to be shown
-    	  * options.detectors: collection of all available detectors
-    	  * options.services: collection of all available scan parameters services
-    	  * options.sample: collection of the samples in this sample changer
-    	  * options.parentView: the object which will handle the movePlanToSample(order, sid) function call
-    	  */
     	 initialize: function(options) {
     		 Backbone.Validation.bind(this);
     		 
     		 this.model = options.model;
     		 this.detectors = options.detectors.clone();
     		 this.services = options.services;
-    		 this.samples = options.samples;
-    		 
-    		 this.parentView = options.parentView;
     		 
     	 },
     	 
@@ -922,36 +886,19 @@ define([
     					"EXPOSURETIME": "-",
     				});
     			}
-    			
-    			
   
     		 });
-
-    		 // The instances available to select does not change in this view
-    		 var selectotron = this.$el.find("select.instanceselect").get(0);
     		 
-    		 this.samples.each(function(sample, index, samples) {
-    			 selectotron.add(new Option(sample.get("NAME").replace(/__/g, " "), sample.get("BLSAMPLEID")));
-    		 });
-    		 // Get the ID of the current sample
-    		 var currentSampleName = this.model.get("SAMPLENAME");
-    		 var currentSampleId;
-    		 if (currentSampleName === "") {
-    			 currentSampleId = -1;
-    		 } else {
-    			 var currentSampleIndex = _.indexOf(this.samples.pluck("NAME"), currentSampleName.replace(/ /g, "__"));
-    			 currentSampleId = this.samples.at(currentSampleIndex).get("BLSAMPLEID");
-    		 }
-    		 selectotron.value = currentSampleId;
-
     		 // Construct the array of name-value pairs to feed the service selector
     		 var serviceSelectorValues = _.reduce(this.services, function(memo, serviceName, index, services) {
     			 var nyPair = [serviceName, (index+1).toLocaleString()];
+    			 console.log(nyPair, memo);
     			 memo.push(nyPair);
     			 return memo;
     		 }, [])
     		 
-    		 // Show or hide the tables as necessary
+    		 console.log("serviceSelectorValues:", serviceSelectorValues);
+    		 
     		 this.detectortable.show(new DetectorView({collection: this.detectors, pages: false}));
     		 if (this.model.get("SCANMODELS").length > 0) {
     			 this.$el.find("h3.scantitle").show();
@@ -978,11 +925,6 @@ define([
 				});
 				this.model.get("SCANMODELS").push(nyScanParams);
 
-    	 },
-    	 
-    	 changeInstance: function(event) {
-    		var selectotron = this.$el.find("select.instanceselect").get(0);
-    		this.parentView.movePlanToSample(this.model.get("ORDER"), selectotron.value);
     	 },
     	
     });
