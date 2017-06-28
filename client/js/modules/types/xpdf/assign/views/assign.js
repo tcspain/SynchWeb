@@ -378,11 +378,11 @@ define([
     	
     	// Having collected all the plans, show them
     	showPlansFinale: function(containerId, sampleIds, planCollection) {
-//    		console.log("Assign:OverView.showPlansFinale: Found "+planCollection.length+" plans:", planCollection.pluck("DIFFRACTIONPLANID"), planCollection.pluck("SAMPLENAME"), planCollection.pluck("ORDER"));
+    		console.log("Assign:OverView.showPlansFinale: Found "+planCollection.length+" plans:", planCollection.pluck("DIFFRACTIONPLANID"), planCollection.pluck("SAMPLENAME"), planCollection.pluck("ORDER"));
     		// Set the  field which lists similar data collections (TODO)
     		planCollection.forEach(function(plan, index, plans) {
 
-//    			console.log(plan);
+    			console.log(plan);
     		});
     		
     		// Store the collection of plans for future reference
@@ -489,144 +489,23 @@ define([
     	backgrid: {
     	},
     	
-    	modelEvents: {
-    		"sort": "render",
-    	},
-    	
     	loading:true,
 
-        deUnderscoreCell: table.TemplateCell.extend({
-        	getTemplate: function() {
-        		return this.model.get("SAMPLENAME").replace(/__/g, " ");
-        	},
-        }),
-        
-        ProcedureCell: table.TemplateCell.extend({
-        	getTemplate: function() {
-        		var detectors = this.model.get("DETECTORS");
-        		var procedures = detectors.pluck("TYPE");
-        		var procedureString = procedures.join(" & ");
-        		return procedureString;
-        	},
-        }),
-
-        ScanCell: table.TemplateCell.extend({
-        	getTemplate: function() {
-        		var scans = this.model.get("SCANMODELS");
-        		var services = scans.pluck("SERVICENAME");
-        		var serviceString = services.join(", ");
-        		return (serviceString.length > 0) ? serviceString : "(No scan)";
-        	},
-        }),
-        
-        SssCell: table.TemplateCell.extend({
-        	getTemplate: function() {
-        		
-        		var scans = this.model.get("SCANMODELS");
-        		var ssss = scans.map(function(scanModel, index, scanModels) {
-        			// Prefer array to incomplete start:stop:step, but not to a complete triplet
-        			if (scanModel.get("ARRAY").length == 0 || (
-        					scanModel.get("START").length > 0 &&
-        					scanModel.get("STOP").length > 0 &&
-        					scanModel.get("STEP").length > 0)) {
-            			return scanModel.get("START") + ":" + scanModel.get("STOP") + ":" + scanModel.get("STEP");
-        			} else {
-        				var despace = scanModel.get("ARRAY").replace(/ /g, "");
-        				var arrayStrings = despace.split(",");
-        				return "[" + arrayStrings[0] + ",...," + arrayStrings[arrayStrings.length-1] + "]";
-        			}
-        			
-        		});
-        		
-        		var sssString = ssss.join(", ");
-        		return sssString;
-        	},
-        }),
-
-        ButtonCell: table.TemplateCell.extend({
-        	events: {
-        		"click button.copy": "doCopy",
-        		"click button.up": "doMoveUp",
-        		"click button.down": "doMoveDown",
-        		"click button.remove": "doDelete",
-        	},
-        	getTemplate: function() {
-        		return "" +
-        		"<button type=\"button\" class=\"button button-notext copy\" title=\"Copy plan to end\"><i class=\"fa fa-copy\"></i></button>" + 
-        		"<button " + ((this.model.get("ORDER") == 1) ? "disabled" : "") + " type=\"button\" class=\"button button-notext up\" title=\"Move up\"><i class=\"fa fa-arrow-up\"></i></button>" +
-        		"<button " + ((this.model.get("ORDER") == this.nPlans) ? "disabled" : "") + " type=\"button\" class=\"button button-notext down\" title=\"Move down\"><i class=\"fa fa-arrow-down\"></i></button>" +
-        		"<button type=\"button\" class=\"button button-notext remove\" title=\"Remove plan\"><i class=\"fa fa-remove\"></i></button>";
-        	},
-        	doCopy: function(event) {
-        		this.parentTable.doCopy(this.model, this);
-        	},
-        	doMoveUp: function(event) {
-        		this.parentTable.moveUp(this.model.get("ORDER"));
-        	},
-        	doMoveDown: function(event) {
-        		this.parentTable.moveDown(this.model.get("ORDER"));
-        	},
-        	doDelete: function(event) {
-        		this.parentTable.doRemove(this.model, this.decrementNPlans);
-        	},
-        	incrementNPlans: function() {
-        		this.nPlans += 1;
-        	},
-        	decrementNPlans: function() {
-        		this.nPlans -= 1;
-        	},
-        }),
-        // Callback functions for the above cell
-        doCopy: function(model, cell) {
-    		console.log("Copying plan " + model.get("ORDER") + " from ", cell);
-        	
-        },
-        moveUp: function(order) {
-        	if (order != 1) {
-        		this.movePlan(order, -1);
-        	}
-        },
-        moveDown: function(order) {
-        	if (order != this.collection.length) {
-        		this.movePlan(order, +1);
-        	}
-        },
-        doRemove: function(model, cell) {
-    		console.log("Deleting plan " + model.get("ORDER") + " at ", cell);
-
-        },
-        movePlan: function(order, moveBy) {
-        	// swap the plans with order order and order+moveBy
-        	var otherOrder = (parseInt(order, 10) + parseInt(moveBy, 10)).toLocaleString();
-        	var model1 = this.collection.findWhere({"ORDER": order});
-        	var model2 = this.collection.findWhere({"ORDER": otherOrder});
-        	model2.set({"ORDER": order});
-        	model1.set({"ORDER": otherOrder});
-        	
-        	this.collection.sort();
-        },
-        
-        /*
+    	/*
     	 * options
     	 * options.showPlanEvent: the event fired when an event is to be shown
     	 * options.showPlanArgument: the identifier for the selected plan
     	 */
     	initialize: function(options) {
     		
-    		var self = this;
-    		
     		this.columns = [
         		{ name: "ORDER", label: "", cell: "string", editable: false},
 //        		{ name: "DIFFRACTIONPLANID", label: "ID", cell: "string", editable: false},
-        		{ name: "SAMPLENAME", label: "Sample", cell: this.deUnderscoreCell, editable: false},
-        		{ name: "DETECTORS", label: "Procedure", cell: this.ProcedureCell, editable: false},
-        		{ name: "SCANMODELS", label: "Axes", cell: this.ScanCell, editable: false},
-        		{ name: "SCANMODELS", label: "Scan values", cell: this.SssCell, editable: false},
+        		{ name: "SAMPLENAME", label: "Sample", cell: deUnderscoreCell, editable: false},
+        		{ name: "DETECTORS", label: "Procedure", cell: ProcedureCell, editable: false},
+        		{ name: "SCANMODELS", label: "Axes", cell: ScanCell, editable: false},
+        		{ name: "SCANMODELS", label: "Scan values", cell: SssCell, editable: false},
         		{ name: "WAVELENGTH", label: "Wavelength (Å)", cell: "string", editable: false},
-        		{ name: "BUTTONS", label: "", cell: this.ButtonCell.extend({
-        			nPlans: options.collection.length,
-        			parentTable: self,
-        		}), editable: false},
         	];
     		
     		this.backgrid.row = table.ClickableRow.extend({
@@ -637,6 +516,54 @@ define([
 			TableView.prototype.initialize.apply(this, [options]);
     	},
     	
+    });
+    
+    var deUnderscoreCell = table.TemplateCell.extend({
+    	getTemplate: function() {
+    		return this.model.get("SAMPLENAME").replace(/__/g, " ");
+    	},
+    });
+    
+    var ProcedureCell = table.TemplateCell.extend({
+    	getTemplate: function() {
+    		var detectors = this.model.get("DETECTORS");
+    		var procedures = detectors.pluck("TYPE");
+    		var procedureString = procedures.join(" & ");
+    		return procedureString;
+    	},
+    });
+
+    var ScanCell = table.TemplateCell.extend({
+    	getTemplate: function() {
+    		var scans = this.model.get("SCANMODELS");
+    		var services = scans.pluck("SERVICENAME");
+    		var serviceString = services.join(", ");
+    		return (serviceString.length > 0) ? serviceString : "(No scan)";
+    	},
+    });
+    
+    var SssCell = table.TemplateCell.extend({
+    	getTemplate: function() {
+    		
+    		var scans = this.model.get("SCANMODELS");
+    		var ssss = scans.map(function(scanModel, index, scanModels) {
+    			// Prefer array to incomplete start:stop:step, but not to a complete triplet
+    			if (scanModel.get("ARRAY").length == 0 || (
+    					scanModel.get("START").length > 0 &&
+    					scanModel.get("STOP").length > 0 &&
+    					scanModel.get("STEP").length > 0)) {
+        			return scanModel.get("START") + ":" + scanModel.get("STOP") + ":" + scanModel.get("STEP");
+    			} else {
+    				var despace = scanModel.get("ARRAY").replace(/ /g, "");
+    				var arrayStrings = despace.split(",");
+    				return "[" + arrayStrings[0] + ",...," + arrayStrings[arrayStrings.length-1] + "]";
+    			}
+    			
+    		});
+    		
+    		var sssString = ssss.join(", ");
+    		return sssString;
+    	},
     });
     
     var PlanDetailsView = Marionette.LayoutView.extend({
