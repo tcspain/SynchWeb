@@ -28,7 +28,7 @@ define([
 		 * options.sampleId: get the data collections for this sample instance
 		 */
 		initialize: function(options) {
-			if (options && options.sampleId) this.blSampleId = options.sampleId;
+			if (options.sampleId) this.sampleId = options.sampleId;
 		},
 	
 	});
@@ -77,8 +77,8 @@ define([
 		url: /^\/api\/dcplan\/sample\/([\d]*)$/,
 		urlParams: ["sampleId"],
 		response: function(settings) {
-			if (settings.urlParams.sampleId === "398867") 
-				this.responseText = [
+			if (settings.sampleId === "398867") 
+				return [
 					{
 						DIFFRACTIONPLANID: "1",
 						WAVELENGTH: "0.163",
@@ -95,8 +95,8 @@ define([
 						ORDER: "3",
 					},
 					];
-			else if (settings.urlParams.sampleId === "398869")
-				this.responseText = [
+			else if (settings.sampleId === "398869")
+				return [
 					{
 						DIFFRACTIONPLANID: "2",
 						WAVELENGTH: "0.207",
@@ -113,8 +113,8 @@ define([
 						ORDER: "4",
 					},
 					];
-			else if (settings.urlParams.sampleId === "398865")
-				this.responseText = [
+			else if (settings.sampleId === "398865")
+				return [
 					{
 						DIFFRACTIONPLANID: "4",
 						WAVELENGTH: "0.288",
@@ -125,9 +125,7 @@ define([
 					},
 					];
 			else
-				this.responseText = [];
+				return [];
 		},
 	});
-	
-	return DCPlans;
 });
