@@ -504,7 +504,7 @@ define([
         		{ name: "SAMPLENAME", label: "Sample", cell: deUnderscoreCell, editable: false},
         		{ name: "DETECTORS", label: "Procedure", cell: ProcedureCell, editable: false},
         		{ name: "SCANMODELS", label: "Axes", cell: ScanCell, editable: false},
-        		{ name: "SCANMODELS", label: "Scan values", cell: SssCell, editable: false},
+        		{ name: "SCANMODELS", label: "Start:stop:step", cell: SssCell, editable: false},
         		{ name: "WAVELENGTH", label: "Wavelength (Å)", cell: "string", editable: false},
         	];
     		
@@ -544,23 +544,10 @@ define([
     
     var SssCell = table.TemplateCell.extend({
     	getTemplate: function() {
-    		
     		var scans = this.model.get("SCANMODELS");
     		var ssss = scans.map(function(scanModel, index, scanModels) {
-    			// Prefer array to incomplete start:stop:step, but not to a complete triplet
-    			if (scanModel.get("ARRAY").length == 0 || (
-    					scanModel.get("START").length > 0 &&
-    					scanModel.get("STOP").length > 0 &&
-    					scanModel.get("STEP").length > 0)) {
-        			return scanModel.get("START") + ":" + scanModel.get("STOP") + ":" + scanModel.get("STEP");
-    			} else {
-    				var despace = scanModel.get("ARRAY").replace(/ /g, "");
-    				var arrayStrings = despace.split(",");
-    				return "[" + arrayStrings[0] + ",...," + arrayStrings[arrayStrings.length-1] + "]";
-    			}
-    			
+    			return scanModel.get("START") + ":" + scanModel.get("STOP") + ":" + scanModel.get("STEP");
     		});
-    		
     		var sssString = ssss.join(", ");
     		return sssString;
     	},
@@ -620,43 +607,14 @@ define([
     });
     
     var AxisView = TableView.extend({
-    	initialize: function(options) {
-    	
-    	this.columns = [
+    	columns: [
     		{name: "MODELNUMBER", label: "Order", cell: "string", editable: false},
     		{name: "SERVICENAME", label: "Service", cell: "string", editable: false},
-    		{name: "START", label: "Start:", cell: "string", editable: true},
-    		{name: "STOP", label: "Stop:", cell: "string", editable: true},
+    		{name: "START", label: "Start", cell: "string", editable: true},
+    		{name: "STOP", label: "Stop", cell: "string", editable: true},
     		{name: "STEP", label: "Step", cell: "string", editable: true},
-    		{name: "ARRAY", label: "Array values", cell: ParameterArrayCell, editable: true},
-    	];
-
-    	TableView.prototype.initialize.apply(this, [options]);
-    	
-    	},
+    	],
     });
-    
-//    var SssEditCell = table.TemplateCell.extend({
-//    	getTemplate: function() {
-//    		var scanModel = this.model;
-//    			return scanModel.get("START") + ":" + scanModel.get("STOP") + ":" + scanModel.get("STEP");
-//    	}});
-
-    var ParameterArrayCell = table.TemplateCell.extend({
-    	getTemplate: function() {
-
-    		var scanModel = this.model;
-    		if (scanModel.get("ARRAY").length != 0) {
-    			var despace = scanModel.get("ARRAY").replace(/ /g, "");
-    			var arrayStrings = despace.split(",");
-    			return "[" + arrayStrings[0] + ",...," + arrayStrings[arrayStrings.length-1] + "]";
-    		} else {
-    			return ""
-    		}
-    	},
-
-    });
-    
     
 	return OverView;
 });
