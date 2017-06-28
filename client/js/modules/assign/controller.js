@@ -2,9 +2,6 @@ define(['marionette',
     'models/visit',
     'collections/visits',
     
-    "collections/experimentplanfakes/detectors",
-    "modules/types/xpdf/assign/detectors",
-    
 //    'modules/assign/views/selectvisit',
 //    'modules/assign/views/assign',
     
@@ -12,9 +9,6 @@ define(['marionette',
     ], function(Marionette,
     		Visit,
     		Visits,
-    		
-    		Detectors,
-    		DetectorsView,
     		
 //    		SelectVisitView,
 //    		AssignView,
@@ -68,25 +62,7 @@ define(['marionette',
                     app.message({ title: 'No such visit', message: 'The specified visit doesnt exist' })
                 }
             })
-        },
-        
-        detectorList: function(visit) {
-        	
-        	var detectors = new Detectors();
-        	
-        	detectors.fetch({
-        		success: function() {
-        			app.bc.reset();
-        			app.content.show(new DetectorsView({collection: detectors}));
-        		},
-        		error: function() {
-        			app.bc.reset([getBC(), {title: "Error"}]);
-        			app.message({title: "Error getting detectors", message: "There has been an error in retrieving the detector information"});
-        		},
-        	});
-        	
         }
-        
     }
        
     app.addInitializer(function() {
