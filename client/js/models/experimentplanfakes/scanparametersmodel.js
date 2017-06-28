@@ -67,15 +67,6 @@ define([
 		}
 	]);
 	
-	// Single response of a new scan axis
-	mockjax({
-		url: "/api/scanparam",
-		type: "POST",
-		responseText: {
-			SCANPARAMETERSMODELID: "5",
-		},
-	});
-	
 	return Parameters;
 	
 });

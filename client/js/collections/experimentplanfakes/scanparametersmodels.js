@@ -99,7 +99,6 @@ define([
 	// All scanParametersModels
 	mockjax({
 		url: "/api/scanparam",
-		type: "GET",
 		responseText: [
 			{
 				SCANPARAMETERSMODELID: "1",
