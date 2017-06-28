@@ -29,8 +29,7 @@ define([
 		 * options.dataCollectionPlanId: The collection will hold the scan
 		 * parameters for this data collection plan.
 		 */
-		initialize: function(models, options) {
-			if (models) this.models;
+		initialize: function(options) {
 			if (options && options.dataCollectionPlanId) this.dataCollectionPlanId = options.dataCollectionPlanId;
 		}
 	});
