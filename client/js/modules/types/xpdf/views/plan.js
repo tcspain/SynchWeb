@@ -214,7 +214,15 @@ define(['marionette',
             this.$el.html(planaxis(this.model.toJSON()))
             this.bindModel()
             return this
-        }
+        },
+        
+        updateModel: function(e) {
+        	ValidatedCell.prototype.updateModel.call(this, e);
+
+        	if ($(e.target).attr('name') == "SEQUENCENUMBER" && this.model.isValid(true))
+        		this.column.trigger("axiscell:modsequence");
+
+        },
     })
 
     var StaticAxisCell = Backgrid.Cell.extend({
@@ -237,6 +245,7 @@ define(['marionette',
 
     		this.listenTo(this.model, "row:collapse", this.doCollapse);
     		this.listenTo(this.model, "row:expand", this.doExpand);
+//    		this.listenTo(this.)
         },
         
         addAxis: function(e) {
@@ -271,6 +280,10 @@ define(['marionette',
                { label: '', cell: DeleteCell, editable: false },
             ]
 
+            var pointlessCallback = function() {
+            	console.log("AxesCell: sequence modified");
+            };
+            
             this.atable = new TableView({ 
                 collection: this.model.get('SCANPARAMETERSMODELS'), 
                 columns: columns, 
@@ -279,7 +292,9 @@ define(['marionette',
                 pages: false,
                 backgrid: { emptyText: 'No axes found' },
             })
-
+            // Listen for the sequence number being modified
+            this.listenTo(this.atable.grid.columns.models[1], "axiscell:modsequence", this.normalizeSequence);
+            
             var staticColumns = [
             	{ label: 'Axis', cell: table.TemplateCell, editable: false, template: '<%=SCANPARAMETERSSERVICE%>' },
             	{ label: 'Parameters', cell: StaticAxisCell, editable: false },
@@ -321,6 +336,15 @@ define(['marionette',
             this.$el.find(".axesstatic").hide();
     	},
 
+    	// Order the axes within their collection by sequencenumber, and set the sequnce numbers to consecutive natural numbers
+    	normalizeSequence: function() {
+    		var scanParametersModels = this.model.get("SCANPARAMETERSMODELS");
+    		scanParametersModels.sort();
+    		scanParametersModels.each(function(model, index, collection) {
+    			model.set({"SEQUENCENUMBER": index+1});
+    		});
+    	},
+    	
     })
 
 

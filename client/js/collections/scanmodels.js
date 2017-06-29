@@ -4,7 +4,9 @@ define(['backbone.paginator', 'models/scanmodel'], function(PageableCollection, 
         model: ScanModel,
         mode: 'server',
         url: '/exp/parameters/models',
-                                          
+        
+        comparator: "SEQUENCENUMBER",
+        
         state: {
             pageSize: 15,
         },
