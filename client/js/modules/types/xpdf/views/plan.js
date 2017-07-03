@@ -209,7 +209,12 @@ define(['marionette',
 
 
     var AxisCell = ValidatedCell.extend({
-        render: function() {
+    	events: {
+    		"click a.moveup": "decrementSequence",
+    		"click a.movedown": "incrementSequence",
+    	},
+    	
+    	render: function() {
             this.$el.empty()
             this.$el.html(planaxis(this.model.toJSON()))
             this.bindModel()
@@ -222,6 +227,40 @@ define(['marionette',
         	if ($(e.target).attr('name') == "SEQUENCENUMBER" && this.model.isValid(true))
         		this.column.trigger("axiscell:modsequence");
 
+        },
+
+        changeSequence: function(e, delta) {
+        	e.preventDefault();
+        	var seq = this.model.get("SEQUENCENUMBER");
+        	console.log("Sequence number was ", seq);
+        	seq = Number.parseInt(seq);
+        	
+        	seq += delta;
+
+        	seq = seq.toString();
+        	
+        	this.model.set({"SEQUENCENUMBER" : seq});
+        	if (this.model.has("SEQUENCENUMBER")) console.log("1 Sequence number is ", this.model.get("SEQUENCENUMBER"));
+
+        	this.column.trigger("axiscell:modsequence");
+        	if (this.model.has("SEQUENCENUMBER")) console.log("2 Sequence number is ", this.model.get("SEQUENCENUMBER"));
+        	ValidatedCell.prototype.preSave.call(this);
+
+        },
+        
+        incrementSequence: function(e) {
+        	e.preventDefault();
+        	if (this.model.get("SEQUENCENUMBER") < Number.MAX_SAFE_INTEGER) {
+        		console.log("Increment!");
+        		this.changeSequence(e, +1.01);
+        	}
+        },
+        decrementSequence: function(e) {
+        	e.preventDefault();
+        	if (this.model.get("SEQUENCENUMBER") > 1) {
+        		console.log("Decrement!");
+        		this.changeSequence(e, -1.01);
+        	}
         },
     })
 
@@ -341,7 +380,7 @@ define(['marionette',
     		var scanParametersModels = this.model.get("SCANPARAMETERSMODELS");
     		scanParametersModels.sort();
     		scanParametersModels.each(function(model, index, collection) {
-    			model.set({"SEQUENCENUMBER": index+1});
+    			model.set({"SEQUENCENUMBER": (index+1).toString()});
     		});
     	},
     	

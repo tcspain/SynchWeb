@@ -1,7 +1,11 @@
 <table>
     <tr>
         <td class="renderable">Sequence #</td>
-        <td class="renderable"><input type="text" name="SEQUENCENUMBER" value="<%=SEQUENCENUMBER%>" /></td>
+        <td class="renderable"><!-- <input type="text" name="SEQUENCENUMBER" value="<%=SEQUENCENUMBER%>" /> -->
+        	<span><%=SEQUENCENUMBER%></span>
+        	<a href="#" class="button movedown" title="Move later in the sequence"><i class="fa fa-chevron-down"></i></a>
+        	<a href="#" class="button moveup" title="Move earlier in the sequence"><i class="fa fa-chevron-up"></i></a>
+        </td>
     </tr>
     <tr>
         <td class="renderable">Start</td>
