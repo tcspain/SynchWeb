@@ -209,9 +209,11 @@ define(['marionette',
 
 
     var AxisCell = ValidatedCell.extend({
-    	events: {
-    		"click a.moveup": "decrementSequence",
-    		"click a.movedown": "incrementSequence",
+    	events: function() {
+    		return _.extend({}, ValidatedCell.prototype.events, {
+    			"click a.moveup": "decrementSequence",
+    			"click a.movedown": "incrementSequence",
+    		});
     	},
     	
     	render: function() {
