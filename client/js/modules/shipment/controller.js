@@ -36,6 +36,8 @@ define(['marionette',
         
         'modules/types/xpdf/views/plan',
 
+        'modules/shipment/views/manifest',
+
         'modules/shipment/views/createawb',
     
 ], function(Marionette,	
@@ -47,6 +49,7 @@ define(['marionette',
     RegisteredDewar, DewarRegistry, DewarRegView, RegDewarView, RegDewarAddView,
     DispatchView, TransferView, Dewars, DewarOverview,
     PlanView,
+    ManifestView,
     CreateAWBView) {
     
     var bc = { title: 'Shipments', url: '/shipments' }
@@ -313,6 +316,12 @@ define(['marionette',
                 app.message({ title: 'No dewars', message: 'Couldnt fetch dewar list'})
             },
         })
+    },
+
+
+    manifest: function() {
+        app.bc.reset([bc, { title: 'Manifest' }])
+        app.content.show(new ManifestView())
     }
 
   }

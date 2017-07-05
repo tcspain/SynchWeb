@@ -22,8 +22,6 @@ use DHL\Client\Web as WebserviceClient;
 class DHL {
     
     public $log = false;
-    public $env = 'staging';
-
     public $region = 'EU';
 
     public $_country_codes = array(
@@ -97,7 +95,7 @@ class DHL {
     );    
 
 
-    function __construct($user=null, $password=null) {
+    function __construct($user=null, $password=null, $env='staging') {
         if (!defined('DHL_API_DIR')) define('DHL_API_DIR', dirname(__FILE__).'/../lib/DHL-API/');
         require_once(DHL_API_DIR . 'vendor/autoloadManager/autoloadManager.php');
 
@@ -118,6 +116,7 @@ class DHL {
 
         $this->_user = $user;
         $this->_password = $password;
+        $this->env = $env;
     }
 
 
@@ -190,6 +189,8 @@ class DHL {
         $shipment->ShipmentDetails->DoorTo = 'DD';
         // $shipment->ShipmentDetails->IsDutiable = 'Y';
 
+        if (array_key_exists('notification', $options)) $shipment->Notification->EmailAddress = $options['notification'];
+        if (array_key_exists('message', $options)) $shipment->Notification->Message = $options['message'];
 
         $weight = 0;
         foreach ($options['pieces'] as $i => $d) {
@@ -232,11 +233,19 @@ class DHL {
         $response->initFromXML($xml);
         // echo $response->toXML();
 
+        $pieces = array();
+        foreach ($response->Pieces as $p) {
+            array_push($pieces, array(
+                'piecenumber' => $p->PieceNumber,
+                'licenseplate' => $p->LicensePlate,
+            ));
+        }
+
         return array(
             'awb' => $response->AirwayBillNumber,
             'label' => $response->LabelImage->OutputImage,
             'weight' => $response->ChargeableWeight,
-            'pieces' => sizeof($options['pieces']),
+            'pieces' => $pieces,
         );
     }
 
@@ -384,25 +393,27 @@ class DHL {
         }
 
         $products = array();
-        foreach ($xml->GetQuoteResponse->BkgDetails->QtdShp as $q) {
-            $pkup = explode('-', (string)$q->PickupDate);
-            $del = explode('-', (string)$q->DeliveryDate);
+        if ($xml->GetQuoteResponse->BkgDetails->QtdShp) {
+            foreach ($xml->GetQuoteResponse->BkgDetails->QtdShp as $q) {
+                $pkup = explode('-', (string)$q->PickupDate);
+                $del = explode('-', (string)$q->DeliveryDate);
 
-            $code = (string)$q->GlobalProductCode;
-            if ($code == 'C') continue;
+                $code = (string)$q->GlobalProductCode;
+                if ($code == 'C') continue;
 
-            array_push($products, array(
-                'productcode' => $code,
-                'productname' => (string)$q->ProductShortName,
-                'shippingdate' => $pkup[2].'-'.$pkup[1].'-'.$pkup[0],
-                'cutofftime' => str_replace('PT', '', $q->PickupCutoffTime),
-                'bookingtime' => str_replace('PT', '', $q->BookingTime),
-                'deliverydate' => $del[2].'-'.$del[1].'-'.$del[0],
-                'deliverytime' => str_replace('PT', '', $q->DeliveryTime),
-                'totalprice' => (float)$q->ShippingCharge,
-                'totaltax' => (float)$q->TotalTaxAmount,
-                'currencycode' => (string)$q->CurrencyCode,
-            ));
+                array_push($products, array(
+                    'productcode' => $code,
+                    'productname' => (string)$q->ProductShortName,
+                    'shippingdate' => $pkup[2].'-'.$pkup[1].'-'.$pkup[0],
+                    'cutofftime' => str_replace('PT', '', $q->PickupCutoffTime),
+                    'bookingtime' => str_replace('PT', '', $q->BookingTime),
+                    'deliverydate' => $del[2].'-'.$del[1].'-'.$del[0],
+                    'deliverytime' => str_replace('PT', '', $q->DeliveryTime),
+                    'totalprice' => (float)$q->ShippingCharge,
+                    'totaltax' => (float)$q->TotalTaxAmount,
+                    'currencycode' => (string)$q->CurrencyCode,
+                ));
+            }
         }
 
         return $products;
