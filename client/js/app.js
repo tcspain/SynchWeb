@@ -220,14 +220,16 @@ function(Backbone, Marionette, _, $, HeaderView, SideBarView, DialogRegion, Logi
         }
 
 
-        if (app.token) app.getuser({ 
-          callback: function() {
-              if (!Backbone.History.started) app.starthistory()
+        $.when(app.loadopts()).done(function() {
+          if (app.token) app.getuser({ 
+            callback: function() {
+                if (!Backbone.History.started) app.starthistory()
+            }
+          })
+          else {
+            if (!Backbone.History.started) app.starthistory()
           }
         })
-        else {
-          if (!Backbone.History.started) app.starthistory()
-        }
     })
   })
     
@@ -313,7 +315,7 @@ function(Backbone, Marionette, _, $, HeaderView, SideBarView, DialogRegion, Logi
   */
   app.loadopts = function() {
       app.options = new Options()
-      app.options.fetch({
+      return app.options.fetch({
           success: function() {
               if (app.options.get('motd')) {
                   var options = {
@@ -397,7 +399,7 @@ function(Backbone, Marionette, _, $, HeaderView, SideBarView, DialogRegion, Logi
               
               var is_routable = function(href) {
                   console.log('routable', href.indexOf('/'))
-                  return href.indexOf("#") === -1 && (is_relative_to_page(href) || href.indexOf(Backbone.history.root) > -1 || href.indexOf('/') == 0) && (href.indexOf(app.apiurl) != 0);
+                  return href.indexOf("#") === -1 && (is_relative_to_page(href) || href.indexOf(Backbone.history.root) == 0 || href.indexOf('/') == 0) && (href.indexOf(app.apiurl) != 0);
               };
               
               $document.keydown(function(e) {
@@ -425,8 +427,6 @@ function(Backbone, Marionette, _, $, HeaderView, SideBarView, DialogRegion, Logi
               log()
           })
       }
-
-      app.loadopts()
   }
 
 
