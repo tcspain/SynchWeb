@@ -14,7 +14,7 @@
     <% if (LCOUT && LCRET) { %>
     <div class="ra">
         <% if (SHIPPINGSTATUS == 'opened') { %>
-            <a class="button send" href="#"><i class="fa fa-plane"></i> Send to DLS</a>
+            <a class="button send" href="#"><i class="fa fa-plane"></i> Mark as Sent</a>
         <% } %>
 
         <% if (DHL_ENABLE) { %>
@@ -26,8 +26,9 @@
         <% } %>
         <% } %>
 
-        <a href="<%=APIURL%>/pdf/container/sid/<%=SHIPPINGID%>/prop/<%=PROP%>" class="label button pdf" title="Print Shipment Contents"><i class="fa fa-print"></i> Print Shipment Contents</a>
         <a href="<%=APIURL%>/pdf/sid/<%=SHIPPINGID%>/prop/<%=PROP%>" class="label button pdf" title="Print Shipment Labels"><i class="fa fa-print"></i> Print Shipment Labels</a>
+
+        <a href="<%=APIURL%>/pdf/container/sid/<%=SHIPPINGID%>/prop/<%=PROP%>" class="label button pdf" title="Print Shipment Contents"><i class="fa fa-print"></i> Print Contents</a>
     </div>
     <% } %>
 
