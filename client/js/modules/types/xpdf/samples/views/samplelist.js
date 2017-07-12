@@ -39,6 +39,7 @@ define(["marionette",
 		 * result in the abundance of the given phase in each sample being
 		 * shown.
 		 * options.noButton: do not display the "+ New Sample" button.
+		 * options.hideNewInstance: hide the "Create new instance" column
 		 */				
          initialize: function(options) {
         	 
@@ -62,10 +63,15 @@ define(["marionette",
         		 this.template = _.template("<h1>Samples</h1>\n<p class=\"help\">This page shows sample associated with the currently selected XPDF proposal</p>\n<div class=\"filter type\"></div>\n<div class=\"wrapper\"></div>");
         	 }
         	 
+        	 if (options["hideNewInstance"])
+        		 this.hideNewInstance = true;
+        	 else
+        		 this.hideNewInstance = false;
+        	 
          },
          
          onRender: function() {
-        	 this.wrap.show(new SampleListTableView({collection: this.collection, phaseId: this.phaseId, row: this.row}))
+        	 this.wrap.show(new SampleListTableView({collection: this.collection, phaseId: this.phaseId, row: this.row, hideNewInstance: this.hideNewInstance}));
         		 
          },
        

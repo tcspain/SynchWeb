@@ -30,6 +30,22 @@ define([
 			return "<div>"+this.model.get("NAME").replace(/__/g, " ")+"</div>"
 		}
 	});
+	
+	var NewInstanceCell = table.TemplateCell.extend({
+		events: {
+			"click a.instance": "goToInstancePage",
+		},
+		
+		getTemplate: function() {
+			return "<a class=\"button instance\" href=\"#\"><i class=\"fa fa-plus\"></i></a>";
+		},
+		
+		goToInstancePage: function(e) {
+			e.preventDefault();
+			console.log("Making instance of "+this.model.get("BLSAMPLEID"));
+			app.trigger("instance:create", this.model.get("BLSAMPLEID"));
+		},
+	});
 	  
 	return TableView.extend( {
 
@@ -42,11 +58,16 @@ define([
 		  * options.collection: collection of samples to display
 		  * options.phaseId: phaseId to get the abundances of, or -1 for an
 		  * 	undefined phase
-		  * options.row: The row class to use 
+		  * options.row: The row class to use
+		  * options.hideNewInstance: hide the "Create new instance" column
 		  */
 		 initialize: function(options) {
 			 this.collection = options.collection;
 
+			 var hideNewInstance = false;
+			 if (options["hideNewInstance"] !== undefined)
+				 hideNewInstance = options["hideNewInstance"];
+			 
 			 this.columns = [
 			            { name: "NAME", label: "Name", cell: SampleNameCell, editable: false},
 //			            { name: "ACRONYM", label: "ID", cell: "string", editable: false },
@@ -55,8 +76,8 @@ define([
 //			            { name: "COMPOSITION", label: "Composition", cell: "string", editable: false },
 			            { name: "THEORETICALDENSITY", label: "Density", cell: "string", editable: false},
 			            { name: "PACKINGFRACTION", label: "Packing", cell:"string", editable: false},
+			            { name: "NEWINSTANCE", label: "Create new instance", cell: NewInstanceCell, editable: false, renderable: !hideNewInstance },
 			            ];
-			 this.hiddenColumns = [];
 
 			 if (options["row"] !== undefined) this.backgrid.row = options.row;
 			 

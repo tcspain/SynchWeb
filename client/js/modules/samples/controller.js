@@ -29,7 +29,7 @@ define(['marionette',
   var sbc =  { title: 'Samples', url: '/samples' }
   var pbc =  { title: 'Proteins', url: '/proteins' }
   var phbc = { title: "Phases", url: "/phases" }
-
+  
   var hasPhases = function() {
 	  var phaseTypes = ["xpdf"];
 	  return (phaseTypes.indexOf(app.type) != -1);
@@ -101,6 +101,21 @@ define(['marionette',
         app.bc.reset([phpbc(), { title: 'Add '+componentName }])
         app.content.show(GetView.ProteinAdd.get(app.type))
     },
+    
+    newinstance: function(sid) {
+    	app.loading();
+    	var sample = new Sample({BLSAMPLEID: sid});
+    	sample.fetch({
+    		success: function() {
+    			app.bc.reset([sbc, {title: "New Instance of " + sample.get("NAME") }]);
+    			app.content.show(GetView.NewInstance.get(app.type, {sampleModel: sample}));
+    		},
+    		error: function() {
+    			app.bc.reset([sbc]);
+    			app.message({ title: "No such sample", message: "The specified sample could not be found."});
+    		},
+    	});
+    },
 
   }
        
@@ -130,6 +145,11 @@ define(['marionette',
         app.navigate('phases/pid/'+pid)
         controller.proteinview(pid)
       })
+    
+    app.on("instance:create", function(sid) {
+    	app.navigate("instance/new");
+    	controller.newinstance(sid);
+    });
   })
        
   return controller

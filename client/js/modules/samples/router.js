@@ -14,7 +14,12 @@ define(['utils/lazyrouter'], function(LazyRouter) {
       "phases/add": "proteinadd",
     },
       
-    loadEvents: ['samples:show', 'proteins:show', 'samples:view', 'proteins:view', "phases:view"],
+    loadEvents: ['samples:show',
+    	'proteins:show',
+    	'samples:view',
+    	'proteins:view',
+    	"phases:view",
+    	"instance:create"],
       
   })
        
