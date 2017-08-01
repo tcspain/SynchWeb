@@ -136,7 +136,11 @@ define([
 					self.assignNewSample(newSample)
 				} else {
 					var newPhase = new Phase();
-					newPhase.set({"ACRONYM": "xpdfphase"});
+					
+					// 20170801 phase acronyms must now be proposal-unique
+					var suffix = (new Date().getTime() % 1000000).toString();
+					
+					newPhase.set({"ACRONYM": "xpdfphase"+suffix});
 					newPhase.set({"PROPOSALID": app.prop});
 					newPhase.save({}, {
 						success: function(model, response, options){
