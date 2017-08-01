@@ -614,9 +614,9 @@ define(['marionette',
             	{ label: "", cell: CollapseExpandCell, editable: false, template: "<a class=\"button collapsar\" href=\"#\"><i class=\"expcol fa fa-chevron-right\"></i></a>"},
                 // { label: '#', cell: table.TemplateCell, editable: false, template: '<%=ORDER%>' },
                 { label: 'Instance', cell: table.TemplateCell, editable: false, template: '<%=SAMPLE%>' },
-                { label: 'Parameters', cell: DCPlanCell, editable: false },
                 { label: 'Axes', cell: AxesCell, editable: false, scanservices: this.scanservices, scanmodels: this.scanmodels },
                 { label: 'Detectors', cell: DetectorsCell, editable: false, detectors: this.detectors, dpdetectors: this.datacollectionplandetectors },
+                { label: 'Parameters', cell: DCPlanCell, editable: false },
             ]
 
             this.table2 = new SortableTableView({ 
