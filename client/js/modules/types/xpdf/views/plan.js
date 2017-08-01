@@ -184,6 +184,9 @@ define(['marionette',
 
         	this.listenTo(this.model, "row:collapse", this.doCollapse);
     		this.listenTo(this.model, "row:expand", this.doExpand);
+    		
+    		// Add keV energy as a model attribute in KEVENERGY
+    		this.model.set({"KEVENERGY": (this.model.get("ENERGY")*0.001).toPrecision(3)});
     	},
     	
     	render: function() {
