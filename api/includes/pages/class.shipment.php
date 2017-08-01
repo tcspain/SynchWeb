@@ -240,7 +240,7 @@
                 if (array_key_exists($this->arg('sort_by'), $cols)) $order = $cols[$this->arg('sort_by')].' '.$dir;
             }
 
-            $rows = $this->db->paginate("SELECT s.deliveryagent_agentname, s.deliveryagent_agentcode, TO_CHAR(s.deliveryagent_shippingdate, 'DD-MM-YYYY') as deliveryagent_shippingdate, TO_CHAR(s.deliveryagent_deliverydate, 'DD-MM-YYYY') as deliveryagent_deliverydate, s.safetylevel, count(d.dewarid) as dcount,s.sendinglabcontactid, c.cardname as lcout, c2.cardname as lcret, s.returnlabcontactid, s.shippingid, s.shippingname, s.shippingstatus,TO_CHAR(s.creationdate, 'DD-MM-YYYY') as created, s.isstorageshipping, s.shippingtype, s.comments, s.deliveryagent_flightcode, IF(s.deliveryAgent_label IS NOT NULL, 1, 0) as deliveryagent_has_label, TO_CHAR(s.readybytime, 'HH24:MI') as readybytime, TO_CHAR(s.closetime, 'HH24:MI') as closetime, s.physicallocation, s.deliveryagent_pickupconfirmation, TO_CHAR(s.deliveryagent_readybytime, 'HH24:MI') as deliveryAgent_readybytime, TO_CHAR(s.deliveryAgent_callintime, 'HH24:MI') as deliveryAgent_callintime, CONCAT(p.proposalcode, p.proposalnumber) as prop, TO_CHAR(s.deliveryagent_flightcodetimestamp, 'HH24:MI DD-MM-YYYY') as deliveryagent_flightcodetimestamp, sum(d.weight) as weight, pe.givenname, pe.familyname, l.name as labname, l.address, l.city, l.postcode, l.country, CONCAT(p.proposalcode, p.proposalnumber) as prop, GROUP_CONCAT(IF(d.facilitycode, d.facilitycode, d.code)) as dewars, s.deliveryagent_productcode, IF(cta.couriertermsacceptedid,1,0) as termsaccepted, GROUP_CONCAT(d.deliveryagent_barcode) as deliveryagent_barcode
+            $rows = $this->db->paginate("SELECT s.deliveryagent_agentname, s.deliveryagent_agentcode, TO_CHAR(s.deliveryagent_shippingdate, 'DD-MM-YYYY') as deliveryagent_shippingdate, TO_CHAR(s.deliveryagent_deliverydate, 'DD-MM-YYYY') as deliveryagent_deliverydate, s.safetylevel, count(d.dewarid) as dcount,s.sendinglabcontactid, c.cardname as lcout, c2.cardname as lcret, s.returnlabcontactid, s.shippingid, s.shippingname, s.shippingstatus,TO_CHAR(s.creationdate, 'DD-MM-YYYY') as created, s.isstorageshipping, s.shippingtype, s.comments, s.deliveryagent_flightcode, IF(s.deliveryAgent_label IS NOT NULL, 1, 0) as deliveryagent_has_label, TO_CHAR(s.readybytime, 'HH24:MI') as readybytime, TO_CHAR(s.closetime, 'HH24:MI') as closetime, s.physicallocation, s.deliveryagent_pickupconfirmation, TO_CHAR(s.deliveryagent_readybytime, 'HH24:MI') as deliveryAgent_readybytime, TO_CHAR(s.deliveryAgent_callintime, 'HH24:MI') as deliveryAgent_callintime, CONCAT(p.proposalcode, p.proposalnumber) as prop, TO_CHAR(s.deliveryagent_flightcodetimestamp, 'HH24:MI DD-MM-YYYY') as deliveryagent_flightcodetimestamp, sum(d.weight) as weight, pe.givenname, pe.familyname, l.name as labname, l.address, l.city, l.postcode, l.country, CONCAT(p.proposalcode, p.proposalnumber) as prop, GROUP_CONCAT(IF(d.facilitycode, d.facilitycode, d.code)) as dewars, s.deliveryagent_productcode, IF(cta.couriertermsacceptedid,1,0) as termsaccepted, GROUP_CONCAT(d.deliveryagent_barcode) as deliveryagent_barcode, pe2.login as deliveryagent_flightcodeperson
               FROM proposal p 
               INNER JOIN shipping s ON p.proposalid = s.proposalid 
               LEFT OUTER JOIN labcontact c2 ON s.returnlabcontactid = c2.labcontactid 
@@ -249,6 +249,7 @@
               LEFT OUTER JOIN labcontact c ON c.labcontactid = s.sendinglabcontactid
               LEFT OUTER JOIN person pe ON c.personid = pe.personid 
               LEFT OUTER JOIN laboratory l ON l.laboratoryid = pe.laboratoryid 
+              LEFT OUTER JOIN person pe2 ON pe2.personid = s.deliveryagent_flightcodepersonid
               WHERE $where 
               GROUP BY s.sendinglabcontactid, s.returnlabcontactid, s.deliveryagent_agentname, s.deliveryagent_agentcode, s.deliveryagent_shippingdate, s.deliveryagent_deliverydate, s.safetylevel, c.cardname, c2.cardname, s.shippingid, s.shippingname, s.shippingstatus,TO_CHAR(s.creationdate, 'DD-MM-YYYY'), s.isstorageshipping, s.shippingtype, s.comments, s.creationdate 
               ORDER BY $order DESC", $args);
@@ -339,17 +340,17 @@
 
             $track = $this->has_arg('TRACKINGNUMBERFROMSYNCHROTRON') ? $this->arg('TRACKINGNUMBERFROMSYNCHROTRON') : $dew['TRACKINGNUMBERFROMSYNCHROTRON'];
 
-            $this->db->pq("INSERT INTO dewartransporthistory (dewartransporthistoryid,dewarid,dewarstatus,storagelocation,arrivaldate) VALUES (s_dewartransporthistory.nextval,:1,'at DLS',lower(:2),CURRENT_TIMESTAMP) RETURNING dewartransporthistoryid INTO :id", array($dew['DEWARID'], $this->arg('LOCATION')));
+            $this->db->pq("INSERT INTO dewartransporthistory (dewartransporthistoryid,dewarid,dewarstatus,storagelocation,arrivaldate) VALUES (s_dewartransporthistory.nextval,:1,'at facility',lower(:2),CURRENT_TIMESTAMP) RETURNING dewartransporthistoryid INTO :id", array($dew['DEWARID'], $this->arg('LOCATION')));
             $dhid = $this->db->id();
 
-            $this->db->pq("UPDATE dewar set dewarstatus='at DLS', storagelocation=lower(:2), trackingnumberfromsynchrotron=:3 WHERE dewarid=:1", array($dew['DEWARID'], $this->arg('LOCATION'), $track));
-            $this->db->pq("UPDATE shipping set shippingstatus='at DLS' WHERE shippingid=:1", array($dew['SHIPPINGID']));
+            $this->db->pq("UPDATE dewar set dewarstatus='at facility', storagelocation=lower(:2), trackingnumberfromsynchrotron=:3 WHERE dewarid=:1", array($dew['DEWARID'], $this->arg('LOCATION'), $track));
+            $this->db->pq("UPDATE shipping set shippingstatus='at facility' WHERE shippingid=:1", array($dew['SHIPPINGID']));
 
             $containers = $this->db->pq("SELECT containerid 
                 FROM container 
                 WHERE dewarid=:1", array($dew['DEWARID']));
             foreach ($containers as $c) {
-                $this->db->pq("INSERT INTO containerhistory (containerid,status) VALUES (:1,:2)", array($c['CONTAINERID'], 'at DLS'));
+                $this->db->pq("INSERT INTO containerhistory (containerid,status) VALUES (:1,:2)", array($c['CONTAINERID'], 'at facility'));
             }
 
             // Email
@@ -359,14 +360,13 @@
             $dew['TRACKINGNUMBERFROMSYNCHROTRON'] = $track;
 
             if (strtolower($this->arg('LOCATION')) == 'stores-in' && $dew['LCOUTEMAIL']) {
-                $lcs = $this->db->pq("SELECT CONCAT(p.givenname, p.familyname) as name
+                $lcs = $this->db->pq("SELECT p.login
                   FROM person p 
                   INNER JOIN session_has_person shp ON shp.personid = p.personid
-                  WHERE shp.sessionid=:1 AND shp.role = 'Local Contact' OR shp.role = 'Local Contact 2'", array($dew['FIRSTEXPERIMENTID']));
-
+                  WHERE shp.sessionid=:1 AND (shp.role = 'Local Contact' OR shp.role = 'Local Contact 2')", array($dew['FIRSTEXPERIMENTID']));
                 $emails = array($dew['LCOUTEMAIL'],$transfer_email);
                 foreach ($lcs as $lc) {
-                    array_push($emails, $this->_get_email_fn($lc['NAME']));
+                    array_push($emails, $this->_get_email($lc['LOGIN']));
                 }
 
                 require_once('includes/class.email.php');
@@ -965,8 +965,8 @@
             if (!sizeof($ship)) $this->_error('No such shipment');
             $ship = $ship[0];
             
-            $this->db->pq("UPDATE shipping SET shippingstatus='sent to DLS' where shippingid=:1", array($ship['SHIPPINGID']));
-            $this->db->pq("UPDATE dewar SET dewarstatus='sent to DLS' where shippingid=:1", array($ship['SHIPPINGID']));
+            $this->db->pq("UPDATE shipping SET shippingstatus='sent to facility' where shippingid=:1", array($ship['SHIPPINGID']));
+            $this->db->pq("UPDATE dewar SET dewarstatus='sent to facility' where shippingid=:1", array($ship['SHIPPINGID']));
             
             $dewars = $this->db->pq("SELECT d.dewarid, s.visit_number as vn, s.beamlinename as bl, TO_CHAR(s.startdate, 'DD-MM-YYYY HH24:MI') as startdate 
               FROM dewar d 
@@ -974,7 +974,7 @@
               WHERE d.shippingid=:1", array($ship['SHIPPINGID']));
             foreach ($dewars as $d) {
                 $this->db->pq("INSERT INTO dewartransporthistory (dewartransporthistoryid,dewarid,dewarstatus,arrivaldate) 
-                  VALUES (s_dewartransporthistory.nextval,:1,'sent to DLS',CURRENT_TIMESTAMP) RETURNING dewartransporthistoryid INTO :id", 
+                  VALUES (s_dewartransporthistory.nextval,:1,'sent to facility',CURRENT_TIMESTAMP) RETURNING dewartransporthistoryid INTO :id", 
                   array($d['DEWARID']));
             }
 
@@ -1782,15 +1782,16 @@
             if (!$this->has_arg('DEWARS')) $this->_error('No dewars specified');
             if (!is_array($this->arg('DEWARS'))) $this->_error('No dewars specified');
             
-            $ship = $this->db->pq("SELECT s.shippingid,s.sendinglabcontactid,s.returnlabcontactid, s.deliveryagent_agentcode, s.deliveryagent_flightcode, TO_CHAR(s.deliveryagent_shippingdate, 'YYYY-MM-DD') as deliveryagent_shippingdate, s.deliveryagent_pickupconfirmation, TO_CHAR(s.readybytime, 'HH24:MI') as readybytime, TO_CHAR(s.closetime, 'HH24:MI') as closetime, s.physicallocation
+            $ship = $this->db->pq("SELECT s.shippingid,s.sendinglabcontactid,s.returnlabcontactid, s.deliveryagent_agentcode, s.deliveryagent_flightcode, TO_CHAR(s.deliveryagent_shippingdate, 'YYYY-MM-DD') as deliveryagent_shippingdate, s.deliveryagent_pickupconfirmation, TO_CHAR(s.readybytime, 'HH24:MI') as readybytime, TO_CHAR(s.closetime, 'HH24:MI') as closetime, s.physicallocation, CONCAT(p.proposalcode, p.proposalnumber) as prop, s.shippingname
                 FROM shipping s 
+                INNER JOIN proposal p ON p.proposalid = s.proposalid
                 WHERE s.proposalid = :1 AND s.shippingid = :2", array($this->proposalid,$this->arg('sid')));
             if (!sizeof($ship)) $this->_error('No such shipment');
             $ship = $ship[0];
 
             $ids = range(2,sizeof($this->arg('DEWARS'))+1);
             $args = array_merge(array($ship['SHIPPINGID']), $this->arg('DEWARS'));
-            $dewars = $this->db->pq("SELECT d.dewarid, d.weight
+            $dewars = $this->db->pq("SELECT d.dewarid, d.weight, IF(d.facilitycode, d.facilitycode, d.code) as name
                 FROM dewar d
                 WHERE d.shippingid=:1 AND d.dewarid IN (:".implode(',:', $ids).")", $args);
 
@@ -1851,6 +1852,7 @@
 
             $pieces = array();
             $totalweight = 0;
+            $names = array();
             foreach ($dewars as $d) {
                 array_push($pieces, array(
                     'weight' => $d['WEIGHT'],
@@ -1859,8 +1861,12 @@
                     'depth' => 40,
                 ));
                 $totalweight += $d['WEIGHT'];
+                array_push($names, $d['NAME']);
             }
 
+            $emails = array($cont['EMAILADDRESS']);
+            global $shipbooked_email;
+            array_push($emails, str_replace(',', ';', $shipbooked_email));
 
             $awb = null;
             if (!$ship['DELIVERYAGENT_FLIGHTCODE']) {
@@ -1877,18 +1883,24 @@
                         'receiver' => $this->has_arg('RETURN') ? $user : $facility,
 
                         'pieces' => $pieces,
+                        'notification' => implode(';', $emails),
+                        'message' => $facility_company.': Shipment booked from ISPyB for '.$ship['PROP'].' '.$ship['SHIPPINGNAME'].' containing '.implode(',', $names)
                     ));
 
                     $this->db->pq("UPDATE shipping 
-                    SET deliveryagent_flightcode=:1, deliveryagent_flightcodetimestamp=CURRENT_TIMESTAMP, deliveryagent_label=:2, deliveryagent_productcode=:3 
-                    WHERE shippingid=:4", array($awb['awb'], $awb['label'], $product, $ship['SHIPPINGID']));
+                    SET deliveryagent_flightcode=:1, deliveryagent_flightcodetimestamp=CURRENT_TIMESTAMP, deliveryagent_label=:2, deliveryagent_productcode=:3, deliveryagent_flightcodepersonid=:4, shippingstatus='awb created' 
+                    WHERE shippingid=:5", array($awb['awb'], $awb['label'], $product, $this->user->personid, $ship['SHIPPINGID']));
 
                     $tno = $this->has_arg('RETURN') ? 'trackingnumberfromsynchrotron' : 'trackingnumbertosynchrotron';
                     foreach ($dewars as $i => $d) {
                         if ($i >= sizeof($awb['pieces'])) continue;
 
                         $p = $awb['pieces'][$i];
-                        $this->db->pq("UPDATE dewar SET $tno=:1, deliveryAgent_barcode=:2 WHERE dewarid=:3", array($awb['awb'], $p['licenseplate'], $d['DEWARID']));
+                        $this->db->pq("UPDATE dewar SET $tno=:1, deliveryAgent_barcode=:2, dewarstatus='awb created' WHERE dewarid=:3", array($awb['awb'], $p['licenseplate'], $d['DEWARID']));
+
+                        $this->db->pq("INSERT INTO dewartransporthistory (dewartransporthistoryid,dewarid,dewarstatus,arrivaldate) 
+                        VALUES (s_dewartransporthistory.nextval,:1,'awb created',CURRENT_TIMESTAMP) RETURNING dewartransporthistoryid INTO :id", 
+                        array($d['DEWARID']));
                     }
 
                     $ship['DELIVERYAGENT_FLIGHTCODE'] = $awb['awb'];
@@ -1917,8 +1929,15 @@
                     ));
 
                     $this->db->pq("UPDATE shipping 
-                    SET deliveryagent_pickupconfirmation=:1, deliveryagent_pickupconfirmationtimestamp=CURRENT_TIMESTAMP, deliveryAgent_readybytime=TO_DATE(:2, 'HH24:MI'), deliveryAgent_callintime=TO_DATE(:3, 'HH24:MI')
+                    SET deliveryagent_pickupconfirmation=:1, deliveryagent_pickupconfirmationtimestamp=CURRENT_TIMESTAMP, deliveryAgent_readybytime=TO_DATE(:2, 'HH24:MI'), deliveryAgent_callintime=TO_DATE(:3, 'HH24:MI'), shippingstatus='pickup booked'
                     WHERE shippingid=:4", array($pickup['confirmationnumber'], $pickup['readybytime'], $pickup['callintime'], $ship['SHIPPINGID']));
+
+                    foreach ($dewars as $i => $d) {
+                        $this->db->pq("UPDATE dewar SET dewarstatus='pickup booked' WHERE dewarid=:1", array($d['DEWARID']));
+                        $this->db->pq("INSERT INTO dewartransporthistory (dewartransporthistoryid,dewarid,dewarstatus,arrivaldate) 
+                        VALUES (s_dewartransporthistory.nextval,:1,'pickup booked',CURRENT_TIMESTAMP) RETURNING dewartransporthistoryid INTO :id", 
+                        array($d['DEWARID']));
+                    }
 
                 } catch (Exception $e) {
                     $this->_error($e->getMessage());
