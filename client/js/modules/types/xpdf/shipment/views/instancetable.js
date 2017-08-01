@@ -68,7 +68,7 @@ define([
 			                {name: "LOCATION", label: "Location", cell: "string", editable: false},
 			                {name: "NAME", label: "Name", cell: SampleNameCell, editable: false},
 //			                {name: "ACRONYM", label: "Acronym", cell: "string", editable: false},
-			                {name: "COMPOSITION", label: "Composition", cell: "string", editable: false},
+//			                {name: "COMPOSITION", label: "Composition", cell: "string", editable: false},
 			                {name: "COMMENTS", label: "Comments", cell: "string", editable: false},
 			                ];
 			
