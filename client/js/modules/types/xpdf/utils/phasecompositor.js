@@ -260,7 +260,7 @@ define([],
 				// Case where there is only one phase
 				overallString = phaseCollection.at(0).get("SEQUENCE");
 			}
-			return (subscriptify) ? subscriptifyNumbers(overallString) : overallString;
+			return (doSubscriptify) ? subscriptifyNumbers(overallString) : overallString;
 		},
 		
 		molecularMassFromComposition: function(compositionString) {
