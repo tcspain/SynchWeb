@@ -25,7 +25,7 @@ define([
 		getTemplate: function() {
 			var phases = this.model.get("components");
 			var fractions = phases.pluck("ABUNDANCE"); // Phases here have an additional abundance attribute
-			var compositionString = phaseCompositor.composeComposition(phases, fractions);
+			var compositionString = phaseCompositor.composeComposition(phases, fractions, true);
 
 			return "<div class=\"composition\">"+compositionString+"</div>";
 		},

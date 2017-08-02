@@ -241,7 +241,7 @@ define([],
 			return formatDecimalTo3(density);
 		},
 		
-		composeComposition: function(phaseCollection, molarFractionArray) {
+		composeComposition: function(phaseCollection, molarFractionArray, doSubscriptify) {
 
 			var overallString;
 			if (phaseCollection.length > 0/*1*/) {
@@ -260,8 +260,7 @@ define([],
 				// Case where there is only one phase
 				overallString = phaseCollection.at(0).get("SEQUENCE");
 			}
-			return subscriptifyNumbers(overallString);
-//			return overallString;
+			return (subscriptify) ? subscriptifyNumbers(overallString) : overallString;
 		},
 		
 		molecularMassFromComposition: function(compositionString) {

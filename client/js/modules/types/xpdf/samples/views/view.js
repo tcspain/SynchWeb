@@ -231,7 +231,7 @@ define(["marionette",
 				if (doComposition) {
 					var oldComposition = this.model.get("COMPOSITION");
 //					var composition = oldPhaseCompositor.compositionComposite(this.phaseCollection, this.abundanceMap);
-					var composition = phaseCompositor.composeComposition(this.phaseCollection, this.abundanceArray);
+					var composition = phaseCompositor.composeComposition(this.phaseCollection, this.abundanceArray, true);
 					if (oldComposition != composition) {
 						this.model.set({"COMPOSITION": composition});
 						isChanged = true;
