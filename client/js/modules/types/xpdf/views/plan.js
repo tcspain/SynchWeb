@@ -179,6 +179,11 @@ define(['marionette',
 
     var DCPlanCell = ValidatedCell.extend({
 
+    	events: _.extend({}, ValidatedCell.events, {
+    		"click a.locked": "doUnlock",
+    		"click a.unlocked": "doLock",
+    	}),
+    	
     	initialize: function(options) {
         	DCPlanCell.__super__.initialize.apply(this, [options]);
 
@@ -201,12 +206,25 @@ define(['marionette',
 
         doCollapse: function() {
     		this.$el.html(planparamsstatic(this.model.toJSON()));
+    		this.$el.find("a.locked").hide();
+    		this.$el.find("p.warnusers").hide();
     	},
     	
     	doExpand: function() {
+    		this.$el.find("a.locked").show();
+    		this.$el.find("p.warnusers").show();
+    	},
+    	
+    	doUnlock: function(e) {
+    		e.preventDefault();
             this.$el.html(planparams(this.model.toJSON()));
     	},
 
+    	doLock: function(e) {
+    		e.preventDefault();
+    		this.$el.html(planparamsstatic(this.model.toJSON()));
+    	},
+    	
     })
 
 
