@@ -8,7 +8,7 @@ define(['marionette', 'views/filter', 'modules/blstats/models/plstats',
     
     var SeriesItem = Marionette.ItemView.extend({
         tagName: 'li',
-        template: _.template('<label><input type="checkbox" name="<%=name%>" checked="checked" /> <%=name%><label>'),
+        template: _.template('<label><input type="checkbox" name="<%-name%>" checked="checked" /> <%-name%><label>'),
         events: {
             'change input': 'setStatus',
         },
@@ -120,7 +120,7 @@ define(['marionette', 'views/filter', 'modules/blstats/models/plstats',
             ops.yaxes[0].axisLabel = this.stats.get('yaxis')
             
             $.plot(this.ui.plot, data, ops)
-            this.ui.title.html(this.stats.get('title'))
+            this.ui.title.text(this.stats.get('title'))
             this.ui.plot.removeClass('loading')
         },
         
