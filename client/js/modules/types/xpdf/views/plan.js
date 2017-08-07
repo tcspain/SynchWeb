@@ -319,7 +319,7 @@ define(['marionette',
 
         render: function() {
             var columns = [
-               { label: 'Axis', cell: table.TemplateCell, editable: false, template: '<%=SCANPARAMETERSSERVICE%>' },
+               { label: 'Axis', cell: table.TemplateCell, editable: false, template: '<%-SCANPARAMETERSSERVICE%>' },
                { label: 'Parameters', cell: AxisCell, editable: false },
                { label: '', cell: DeleteCell, editable: false },
             ]
@@ -454,7 +454,7 @@ define(['marionette',
 
         render: function() {
             var columns = [
-               { label: 'Detector', cell: table.TemplateCell, editable: false, template: '<%=DETECTORTYPE%><br /><%=DETECTORMANUFACTURER%><br /><%=DETECTORMODEL%><br />' },
+               { label: 'Detector', cell: table.TemplateCell, editable: false, template: '<%-DETECTORTYPE%><br /><%-DETECTORMANUFACTURER%><br /><%-DETECTORMODEL%><br />' },
                { label: 'Parameters', cell: DetectorCell, editable: false },
                { label: '', cell: DeleteCell, editable: false },
             ]
@@ -593,7 +593,7 @@ define(['marionette',
 
         doOnRender: function() {
             var columns = [
-                { label: '#', cell: table.TemplateCell, editable: false, template: '<%=LOCATION%>' },
+                { label: '#', cell: table.TemplateCell, editable: false, template: '<%-LOCATION%>' },
                 { name: 'NAME', label: 'Name', cell: 'string', editable: false },
                 { name: 'ACRONYM', label: 'Component', cell: 'string', editable: false },
                 { label: '', cell: AddCell, editable: false, datacollectionplans: this.datacollectionplans },
