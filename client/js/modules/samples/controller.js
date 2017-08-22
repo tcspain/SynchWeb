@@ -15,6 +15,9 @@ define(['marionette',
         // 'modules/types/gen/samples/views/componentlist',
         // 'modules/types/gen/samples/views/componentadd',
 
+        "models/crystal",
+        "collections/crystals",
+        
         'models/protein',
         'collections/proteins',
     
@@ -24,11 +27,14 @@ define(['marionette',
   Sample, Samples, 
   // ProteinList, ProteinView, AddProteinView, 
   // GenComponentList, GenComponentAdd,
+  Crystal, Crystals,
   Protein, Proteins) {
     
   var sbc =  { title: 'Samples', url: '/samples' }
   var pbc =  { title: 'Proteins', url: '/proteins' }
   var phbc = { title: "Phases", url: "/phases" }
+  var xbc =  { title: "Crystals", url: "/crystals" };
+  var xsbc = { title: "Samples", url: "/samples" };
   
   var hasPhases = function() {
 	  var phaseTypes = ["xpdf"];
@@ -37,6 +43,10 @@ define(['marionette',
   
   var phpbc = function() {
 	  return (hasPhases()) ? phbc : pbc;
+  }
+  
+  var xsxbc = function() {
+	  return (hasPhases()) ? xsbc : xbc;
   }
   
   var controller = {
@@ -100,6 +110,42 @@ define(['marionette',
     	var componentName = phpbc().title.substring(0, phpbc().title.length-1)
         app.bc.reset([phpbc(), { title: 'Add '+componentName }])
         app.content.show(GetView.ProteinAdd.get(app.type))
+    },
+    
+    // Crystals as XPDF samples
+    crystallist: function(s, page) {
+    	app.loading();
+    	app.bc.reset([xsxbc()]);
+    	page = page ? parseInt(page) : 1;
+    	var crystalQueryParams = { s : s };
+    	var crystals = new Crystals(null, {state: {currentPage: page}, queryParams: crystalQueryParams });
+    	crystals.fetch().done(function() {
+    		app.content.show(GetView.CrystalList.get(app.type, { collection: crystals, params: { s: s } }));
+    	});
+    },
+    
+    crystalview: function(xid) {
+    	app.loading();
+    	var crystal = new Crystal({CRYSTALID: xid});
+    	crystal.fetch({
+    		success: function() {
+    			app.bc.reset([xsxbc(), {title: crystal.get("NAME")}]);
+    			app.content.show(GetView.CrystalView.get(app.type, {model: crystal}));
+    		},
+    		error: function() {
+    			var bc = xsxbc();
+    			var component = bc.title.substring(0, bc.title.length-1); // remove the plural
+    			app.bc.reset([bc]);
+    			app.message({ title: "No such " + component.toLowerCase(), message: "The specified " + component.toLowerCase() + " could not be found"});
+    		},
+    	});
+    },
+    
+    crystaladd: function() {
+    	var bc = xsxbc();
+    	var component = bc.title.substring(0, bc.title.length-1); // singularize the title 
+    	app.bc.reset([bc, {title: "Add " + component }]);
+    	app.content.show(GetView.CrystalAdd.get(app.type));
     },
     
     newinstance: function(sid) {

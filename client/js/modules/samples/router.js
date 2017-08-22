@@ -12,6 +12,10 @@ define(['utils/lazyrouter'], function(LazyRouter) {
       "phases(/s/:s)(/page/:page)": "proteinlist",
       "phases/pid/:pid": "proteinview",
       "phases/add": "proteinadd",
+      
+      "xpdfsamples(/s/:s)(/page/:page)": "crystallist",
+      "xpdfsamples/xid/:xid": "crystalview",
+      "xpdfsamples/add": "crystaladd",
     },
       
     loadEvents: ['samples:show',
@@ -19,6 +23,7 @@ define(['utils/lazyrouter'], function(LazyRouter) {
     	'samples:view',
     	'proteins:view',
     	"phases:view",
+    	"crystals:view",
     	"instance:create"],
       
   })
