@@ -253,7 +253,14 @@
                             'MotionCorrectionDrift',
                             'CTF',
 
-                            '',
+                            // Sample groups
+                            'BLSampleGroup',
+                            'BLSampleGroup_has_BLSample',
+
+                            // Reprocessing
+                            'Reprocessing',
+                            'ReprocessingParameter',
+                            'ReprocessingImageSweep',
 
                 );
 
