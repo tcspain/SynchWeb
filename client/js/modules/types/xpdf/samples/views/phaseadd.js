@@ -22,7 +22,15 @@ define([
 		},
 		
 		initialize: function(options) {
-			// Do nothing
+		},
+		
+		onRender: function(options) {
+		
+			var acronym = this.$el.find("input.acronym");
+			
+			var millis = (new Date()).getTime();
+			acronym.val("xpdf"+millis.toString());
+			console.log("acronym", acronym, " at " + millis + " ms");
 		},
 	});
 });
