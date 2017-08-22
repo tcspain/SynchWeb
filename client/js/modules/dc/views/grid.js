@@ -21,6 +21,8 @@ define(['marionette', 'views/tabs',
       z: '.z',
       val: '.val',
       img: '.img',
+      bx: '.boxx',
+      by: '.boxy'
     },
 
     initialize: function(options) {
@@ -53,6 +55,14 @@ define(['marionette', 'views/tabs',
       var edit = new Editable({ model: this.model, el: this.$el })
       edit.create('COMMENTS', 'text')
         
+      this.gridplot.gridPromise().done(this.showBox.bind(this))
+    },
+
+
+    showBox: function() {
+        var gi = this.gridplot.gridInfo()
+        this.ui.bx.text((gi.get('DX_MM')*1000).toFixed(0))
+        this.ui.by.text((gi.get('DY_MM')*1000).toFixed(0))
     },
                                       
     onDestroy: function() {
@@ -71,7 +81,7 @@ define(['marionette', 'views/tabs',
       
     renderFlag: function() {
       this.model.get('FLAG') ? this.$el.find('.flag').addClass('button-highlight') : this.$el.find('.flag').removeClass('button-highlight')
-      this.$el.find('.COMMENTS').html(this.model.get('COMMENTS'))
+      this.$el.find('.COMMENTS').text(this.model.get('COMMENTS'))
     },
       
     events: {
@@ -85,7 +95,7 @@ define(['marionette', 'views/tabs',
     expandPath: function(e) {
         e.preventDefault()
 
-        this.ui.temp.html(this.fullPath ? (this.model.get('DIR')+this.model.get('FILETEMPLATE')) : (this.model.get('DIRFULL')+this.model.get('FILETEMPLATE')))
+        this.ui.temp.text(this.fullPath ? (this.model.get('DIR')+this.model.get('FILETEMPLATE')) : (this.model.get('DIRFULL')+this.model.get('FILETEMPLATE')))
         this.ui.exp.toggleClass('fa-caret-right')
         this.ui.exp.toggleClass('fa-caret-left')
         

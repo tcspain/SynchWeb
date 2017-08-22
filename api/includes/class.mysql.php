@@ -246,9 +246,21 @@
                             'XRFFluorescenceMapping',
                             'XRFFluorescenceMappingROI',
 
-                            'Particle',
+                            'GridImageMap',
 
-                            '',
+                            // EM
+                            'MotionCorrection',
+                            'MotionCorrectionDrift',
+                            'CTF',
+
+                            // Sample groups
+                            'BLSampleGroup',
+                            'BLSampleGroup_has_BLSample',
+
+                            // Reprocessing
+                            'Reprocessing',
+                            'ReprocessingParameter',
+                            'ReprocessingImageSweep',
 
                 );
 

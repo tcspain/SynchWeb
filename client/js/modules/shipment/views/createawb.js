@@ -60,7 +60,7 @@ define(['marionette',
 
     var DewarView = Marionette.ItemView.extend({
         tagName: 'li',
-        template: _.template('<label><input type="checkbox" /> <% if (FACILITYCODE) { %><%=FACILITYCODE%><% } else { %><%=CODE%><% } %></label>'),
+        template: _.template('<label><input type="checkbox" /> <% if (FACILITYCODE) { %><%-FACILITYCODE%><% } else { %><%-CODE%><% } %></label>'),
         events: {
             'click @ui.sel': 'select',
         },
@@ -83,7 +83,7 @@ define(['marionette',
 
     var RadioCell = Backgrid.Cell.extend({
         render: function() {
-            this.$el.html('<input type="radio" name="value" value="'+this.model.get('productcode')+'" />')
+            this.$el.html('<input type="radio" name="value" value="'+this.model.escape('productcode')+'" />')
             return this
         }
     })

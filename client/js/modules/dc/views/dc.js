@@ -14,7 +14,7 @@ define(['marionette', 'views/tabs', 'modules/dc/views/dccomments', 'modules/dc/v
       AttachmentsView,
       template) {
 
-  return Marionette.ItemView.extend({
+  return Marionette.LayoutView.extend({
     template: template,
     plotView: DCDISTLView,
     imageStatusItem: DCImageStatusItem,
@@ -48,19 +48,8 @@ define(['marionette', 'views/tabs', 'modules/dc/views/dccomments', 'modules/dc/v
       this.imagestatus = new (this.getOption('imageStatusItem'))({ ID: this.model.get('ID'), TYPE: this.model.get('DCT'), statuses: this.getOption('imagestatuses'), el: this.$el })
       this.apstatus = new (this.getOption('apStatusItem'))({ ID: this.model.get('ID'), SCREEN: (this.model.get('OVERLAP') != 0 && this.model.get('AXISRANGE')), statuses: this.getOption('apstatuses'), el: this.$el })
       this.listenTo(this.apstatus, 'status', this.updateAP, this)
-
-      this.listenTo(this.getOption('reprocstatuses'), 'sync', this.updateReprocStatus, this)
     },
 
-    updateReprocStatus: function() {
-        if (this.getOption('reprocstatuses').get('IDS').indexOf(this.model.get('ID')) > -1) {
-            // this.ui.rp.addClass('active')
-            this.ui.rp.find('i').addClass('fa-spin')
-        } else {
-            // this.ui.rp.removeClass('active')
-            this.ui.rp.find('i').removeClass('fa-spin')
-        }
-    },
 
     updateAP: function(e) {
         setTimeout(this.doUpdateAP.bind(this), 1000)
@@ -87,9 +76,9 @@ define(['marionette', 'views/tabs', 'modules/dc/views/dccomments', 'modules/dc/v
       
     renderFlag: function() {
       this.model.get('FLAG') ? this.$el.find('.flag').addClass('button-highlight') : this.$el.find('.flag').removeClass('button-highlight')
-      this.$el.find('.COMMENTS').html(this.model.get('COMMENTS'))
+      this.$el.find('.COMMENTS').text(this.model.get('COMMENTS'))
 
-      this.ui.cc.html(this.model.get('DCCC'))
+      this.ui.cc.text(this.model.get('DCCC'))
     },
       
     events: {
@@ -135,7 +124,7 @@ define(['marionette', 'views/tabs', 'modules/dc/views/dccomments', 'modules/dc/v
     expandPath: function(e) {
         e.preventDefault()
 
-        this.ui.temp.html(this.fullPath ? (this.model.get('DIR')+this.model.get('FILETEMPLATE')) : (this.model.get('DIRFULL')+this.model.get('FILETEMPLATE')))
+        this.ui.temp.text(this.fullPath ? (this.model.get('DIR')+this.model.get('FILETEMPLATE')) : (this.model.get('DIRFULL')+this.model.get('FILETEMPLATE')))
         this.ui.exp.toggleClass('fa-caret-right')
         this.ui.exp.toggleClass('fa-caret-left')
         
