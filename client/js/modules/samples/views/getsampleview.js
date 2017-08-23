@@ -19,6 +19,8 @@ define(['views/getview',
         "modules/types/xpdf/samples/views/phaseadd",
         "modules/types/xpdf/samples/views/phaseview",
         "modules/types/xpdf/samples/views/newcrystalsample",
+        "modules/types/xpdf/samples/views/crystalsamplelist",
+        "modules/types/xpdf/samples/views/crystalsampleview",
         "modules/types/xpdf/samples/views/newinstance",
 ], function(GetView,
 	SampleList, SampleView,
@@ -27,7 +29,7 @@ define(['views/getview',
 	ProteinList, ProteinView, AddProteinView,
 	GenComponentList, GenComponentAdd, GenComponentView,
 	XpdfSampleList, XpdfSampleView, XpdfPhaseList, XpdfPhaseAdd, XpdfPhaseView,
-	XpdfCrystalSampleAdd, 
+	XpdfCrystalSampleAdd, XpdfCrystalSampleList, XpdfCrystalSampleView,
 	XpdfNewInstanceView
 	){
 
@@ -90,14 +92,14 @@ define(['views/getview',
         
         CrystalList: new GetView({
         	views: {
-//        		xpdf: XpdfCrystalSampleList,
+        		xpdf: XpdfCrystalSampleList,
         	},
 //        	default: GenCrystalList,
         }),
         
         CrystalView: new GetView({
         	views: {
-//        		xpdf: XpdfCrystalSampleView,
+        		xpdf: XpdfCrystalSampleView,
         	},
 //        	default: GenCrystalView,
         }),

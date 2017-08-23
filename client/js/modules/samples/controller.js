@@ -188,9 +188,14 @@ define(['marionette',
     })
 
     app.on('phases:view', function(pid) {
-        app.navigate('phases/pid/'+pid)
-        controller.proteinview(pid)
-      })
+    	app.navigate('phases/pid/'+pid)
+    	controller.proteinview(pid)
+    })
+      
+    app.on("crystals:view", function(xid) {
+    	app.navigate("xpdfsamples/xid/"+xid);
+    	controller.crystalview(xid);
+    });
     
     app.on("instance:create", function(sid) {
     	app.navigate("instance/new");
