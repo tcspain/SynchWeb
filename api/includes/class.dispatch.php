@@ -21,7 +21,6 @@ class Dispatch {
         'pdf',
         'robot',
         'dc',
-        'mc',
         'assign',
         'status',
         'cell',
@@ -29,6 +28,8 @@ class Dispatch {
         'stats',
         
         'imaging',
+        'process',
+        'em',
     );
     
 
