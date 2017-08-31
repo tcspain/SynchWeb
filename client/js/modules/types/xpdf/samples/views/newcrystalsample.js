@@ -8,12 +8,14 @@ define([
 	"models/crystal",
 	"collections/proteins",
 	"modules/types/xpdf/samples/views/crystalphasetable",
+	"modules/types/xpdf/utils/componentmudex",
 	"tpl!templates/types/xpdf/samples/newcrystalsample.html"
 	], function(
 			FormView,
 			Crystal,
 			Phases,
 			CrystalPhaseTable,
+			ComponentMudex,
 			template
 	) {
 	return FormView.extend({
@@ -33,7 +35,8 @@ define([
 		},
 		
 		initialize: function(options) {
-			
+			this.createModel();
+			this.mudex = new ComponentMudex(this.model);
 		},
 
 		onSubmit: function(e) {
@@ -46,7 +49,7 @@ define([
 		},
 		
 		onRender: function(e) {
-			this.phase_table.show(new CrystalPhaseTable({collection: new Phases()}));
+			this.phase_table.show(new CrystalPhaseTable({collection: this.mudex.getComponents()}));
 		}
 		
 	});

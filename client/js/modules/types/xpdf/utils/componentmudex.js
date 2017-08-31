@@ -4,50 +4,73 @@
  */ 
 
 define([
-], function(
-		) {
-	var clazz = {
-			initialize: function(model) {
+	"models/protein",
+	"collections/proteins",
+	],
+	function(
+			Phase,
+			Phases,
+	) {
+			
+			// Start with the ComponentMudex constructor
+			function ComponentMudex(model) {
+				if (!(this instanceof ComponentMudex)) {
+	throw new TypeError("ComponentMudex constructor cannot be called as a function.");
+}
+				
+				_.extend(this, Backbone.Events);
 				this.model = model;
-				this.allComponents = this.muxModel(this.model);
-				this.listenTo(this.allComponents, "change add remove reset", this.updateAllComponents);
+				this.allComponents = muxModel(this.model);
+				this.listenTo(this.allComponents, "change add remove reset", this.updateComponents);
 				this.beSilent = false;
-			},
+			};
 			
-			setBeSilent: function(nowBeSilent) {
-				this.beSilent = Boolean(nowBeSilent);
-			},
+			// define the object protoype, including the constructor
+			ComponentMudex.prototype = {
+					constructor: ComponentMudex,
 			
-			updateAllComponents: function() {
-				this.demuxModel(this.model, this.allComponents, this.beSilent);
-			},
+					setSilence: function(nowBeSilent) {
+						this.beSilent = Boolean(nowBeSilent);
+					},
+
+					updateComponents: function() {
+						console.log("ComponentMudex: components in need of updating.");
+						//						demuxModel(this.model, this.allComponents, this.beSilent);
+					},
+					
+					getComponents: function() {
+						return this.allComponents;
+					},
+					
+			};
 			
-			getAllComponents: function() {
-				return this.allComponents;
-			}
-			
-			mux: function(primaryId, primaryAbundance, primaryAcronym, componentIds, componentAbundances, componentAcronyms) {
+			var mux = function(primaryId, primaryAbundance, primaryAcronym, componentIds, componentAbundances, componentAcronyms) {
+				
+				// Arrays combining primary attributes with those of the components
 				var ids = [primaryId].concat(componentIds);
 				var acronyms = [primaryAcronym].concat(componentAcronyms);
 				var abundances = [primaryAbundance].concat(componentAbundances);
 				
-				var components = _.map(ids, function(id, i) {
-					return {
-						PROTEINID: id,
-						ACRONYM: acronyms[i],
-						ABUNDANCE: ( (i < abs.length) ? abs[i] : 0),
-					};
+				var components = new Phases();
+				
+				// Map from the indiviual arrays to a collection single array of objects 
+				_.reduce(ids, function(collection, id, index, ids) {
+					var phase = new Phase();
+					phase.set({"PROTEINID": id,
+						"ACRONYM": acronyms[index],
+						"ABUNDANCE": (index < abundances.length) ? abundances[index] : 0
+					});
 				});
 				
 				return components;
-			},
+			};
 			
-			muxModel: function(model) {
-				return this.mux(model.get("PROTEIN"), model.get("ABUNDANCE"), model.get("ACRONYM"),
+			var muxModel = function(model) {
+				return mux(model.get("PROTEIN"), model.get("ABUNDANCE"), model.get("ACRONYM"),
 						model.get("COMPONENTIDS") || [], model.get("COMPONENTACRONYMS") || [], model.get("COMPONENTAMOUNTS") || []);
-			},
+			};
 			
-			demuxModel: function(model, allComponents, beSilent) {
+			var demuxModel = function(model, allComponents, beSilent) {
 				var primary = allComponents[0];
 				var primaryId = primary["PROTEINID"];
 				var primaryAcronym = primary["ACRONYM"];
@@ -79,8 +102,8 @@ define([
 				
 				if (!beSilent && model.changedAttributes())
 					model.save(model.changedAttributes);
-			}
-	};
+			};
 	
-	return clazz;
+			return ComponentMudex;
+	
 });
