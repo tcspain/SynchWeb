@@ -7,11 +7,19 @@ define([
 	"marionette",
 	"utils/table",
 	"views/table",
+	"views/dialog",
+	"collections/proteins",
+	"modules/types/xpdf/samples/views/linkphaseview",
+    "modules/types/xpdf/samples/views/proteinlist",
 	"tpl!templates/types/xpdf/samples/crystalphasetable.html"
 	], function(
 			Marionette,
 			table,
 			TableView,
+			DialogView,
+			Phases,
+			LinkPhaseView,
+			PhaseList,
 			template
 	) {
 	
@@ -36,7 +44,9 @@ define([
 		addPhase: function(e) {
 			e.preventDefault();
 			console.log("Add existing phase");
+			app.dialog.show(new LinkPhaseView({collection: this.collection}));
 		},
+
 		
 		addNewPhase: function(e) {
 			e.preventDefault();
@@ -62,11 +72,7 @@ define([
 		},
 
 		doRemove: function(event) {
-
-			console.log("Removing phase " + this.model.get("PROTEINID") + " from sample " + this.crystalId);
-			//			var removedPhaseId = this.model.get("PROTEINID");
-//			var theSample = this.sample;
-//			removePhase(theSample, removedPhaseId);
+			this.collection.remove(this.model.get("PROTEINID"));
 		},
 	});
 	
@@ -82,7 +88,7 @@ define([
 				{ name: "NAME", label: "Name", cell: "string", editable: false },
 				{ name: "SEQUENCE", label: "Composition", cell: "string", editable: false },
 				{ name: "ABUNDANCE", label: "Fraction", cell: "string", editable: true },
-				{ name: "REMOVE", label: "Remove", cell: RemoveCell.extend({crystalId: options.sampleId}), editable: false},
+				{ name: "REMOVE", label: "Remove", cell: RemoveCell.extend({collection: options.collection}), editable: false},
 				{ name: "GOTO", label: "Phase details", cell: GotoCell, editable: false },
 			];
 			TableView.prototype.initialize.apply(this, [options]);
