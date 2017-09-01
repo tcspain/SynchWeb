@@ -34,8 +34,8 @@ define([
 					},
 
 					updateComponents: function() {
-						console.log("ComponentMudex: components in need of updating.");
-						//						demuxModel(this.model, this.allComponents, this.beSilent);
+						console.log("ComponentMudex: components in need of updating.", this.allComponents);
+						demuxModel(this.model, this.allComponents, this.beSilent);
 					},
 					
 					getComponents: function() {
@@ -71,37 +71,39 @@ define([
 			};
 			
 			var demuxModel = function(model, allComponents, beSilent) {
-				var primary = allComponents[0];
-				var primaryId = primary["PROTEINID"];
-				var primaryAcronym = primary["ACRONYM"];
-				var primaryAbundance = primary["ABUNDANCE"];
+				var primary = allComponents.at(0);
+				var primaryId = primary.get("PROTEINID");
+				var primaryAcronym = primary.get("ACRONYM");
+				var primaryAbundance = primary.get("ABUNDANCE");
 				
 				// Set any primary parameters that have changed 
-				if (primaryId != model.get("PROTEINID"))
+				if (!model.has("PROTEINID") || primaryId != model.get("PROTEINID"))
 					model.set({"PROTEINID": primaryId});
-				if (primaryAcronym != model.get("ACRONYM"))
+				if (!model.has("ACRONYM") || primaryAcronym != model.get("ACRONYM"))
 					model.set({"ACRONYM": primaryAcronym});
-				if (primaryAbundance != model.get("ABUNDANCE"))
+				if (!model.has("ABUNDANCE") || primaryAbundance != model.get("ABUNDANCE"))
 					model.set({"ABUNDANCE": primaryAbundance});
 
 				// set the components, regardless of whether they have changed
 				var components = allComponents.slice(1, allComponents.length);
 				
 				model.set({
-					"COMPONENTIDS": components.pluck("PROTEINID"),
-					"COMPONENTACRONYMS": components.pluck("ACRONYM"),
-					"COMPONENTABUNDANCES": components.pluck("ABUNDANCE"),
+					"COMPONENTIDS": _.pluck(components, "PROTEINID"),
+					"COMPONENTACRONYMS": _.pluck(components, "ACRONYM"),
+					"COMPONENTABUNDANCES": _.pluck(components, "ABUNDANCE"),
 				});
+
+				console.log("ComponentMudex: model is now ", model);
 				
-				if (beSilent === "undefined")
-					if (this.beSilent == null || this.beSilent === "undefined") {
-						beSilent = this.beSilent;
-					} else {
-						beSilent = false;
-					}
+//				if (beSilent === "undefined")
+//					if (this.beSilent == null || this.beSilent === "undefined") {
+//						beSilent = this.beSilent;
+//					} else {
+//						beSilent = false;
+//					}
 				
-				if (!beSilent && model.changedAttributes())
-					model.save(model.changedAttributes);
+//				if (!beSilent && model.changedAttributes())
+//					model.save(model.changedAttributes);
 			};
 	
 			return ComponentMudex;
