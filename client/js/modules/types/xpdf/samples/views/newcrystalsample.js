@@ -35,20 +35,11 @@ define([
 		},
 		
 		initialize: function(options) {
-			this.createModel();
-			this.mudex = new ComponentMudex(this.model);
 		},
 
-		onSubmit: function(e) {
-			// get the phases from the phase table
-			
-			// add them to the model
-			
-			// call FormView.onSubmit()
-			FormView.prototype.onSubmit.apply(this, e);
-		},
-		
 		onRender: function(e) {
+			this.mudex = new ComponentMudex(this.model);
+			this.mudex.setSilence(true);
 			this.phase_table.show(new CrystalPhaseTable({collection: this.mudex.getComponents()}));
 		}
 		
