@@ -108,8 +108,9 @@ define([
 						beSilent = false;
 					}
 				
-				if (!beSilent && model.changedAttributes())
-					model.save(model.changedAttributes);
+				if (!beSilent && model.changedAttributes()) {
+					model.save(model.changedAttributes(), {patch:true});
+				}
 			};
 	
 			return ComponentMudex;
