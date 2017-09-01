@@ -42,7 +42,9 @@ define([
 		 */
 		initialize: function(options) {
 			var self = this;
-			this.model = options.model;
+			this.collection = options.collection;
+			
+			this.selection = new Phases();
 			
 			// The Backgrid row class
 			var selectARow = Backgrid.Row.extend({
@@ -51,7 +53,7 @@ define([
 				},
 				
 				onClick: function(event) {
-					self.doSelect(this.model.get("PROTEINID"));
+					self.doSelect(this.model);
 				}
 			});
 			this.phases = new Phases();
@@ -62,8 +64,8 @@ define([
 			this.onError = options.onError;
 		},
 		
-		doSelect: function(proteinId) {
-			this.selectedPhase = proteinId;
+		doSelect: function(phase) {
+			this.selection.push(phase);
 		},
 		
 		doActivate: function() {
