@@ -20,7 +20,9 @@ define([
 				
 				_.extend(this, Backbone.Events);
 				this.model = model;
+				console.log(this.model);
 				this.allComponents = muxModel(this.model);
+				console.log(this.allComponents);
 				this.listenTo(this.allComponents, "change add remove reset", this.updateComponents);
 				this.beSilent = false;
 			};
@@ -60,13 +62,14 @@ define([
 						"ACRONYM": acronyms[index],
 						"ABUNDANCE": (index < abundances.length) ? abundances[index] : 0
 					});
-				});
+					collection.push(phase);
+				}, components);
 				
 				return components;
 			};
 			
 			var muxModel = function(model) {
-				return mux(model.get("PROTEIN"), model.get("ABUNDANCE"), model.get("ACRONYM"),
+				return mux(model.get("PROTEINID"), model.get("ABUNDANCE"), model.get("ACRONYM"),
 						model.get("COMPONENTIDS") || [], model.get("COMPONENTACRONYMS") || [], model.get("COMPONENTAMOUNTS") || []);
 			};
 			
@@ -85,25 +88,28 @@ define([
 					model.set({"ABUNDANCE": primaryAbundance});
 
 				// set the components, regardless of whether they have changed
-				var components = allComponents.slice(1, allComponents.length);
+				var components = new Phases();
+				components.add(allComponents.slice(1, allComponents.length));
+				
+				console.log(components);
 				
 				model.set({
-					"COMPONENTIDS": _.pluck(components, "PROTEINID"),
-					"COMPONENTACRONYMS": _.pluck(components, "ACRONYM"),
-					"COMPONENTABUNDANCES": _.pluck(components, "ABUNDANCE"),
+					"COMPONENTIDS": components.pluck("PROTEINID"),
+					"COMPONENTACRONYMS": components.pluck("ACRONYM"),
+					"COMPONENTAMOUNTS": components.pluck("ABUNDANCE"),
 				});
 
 				console.log("ComponentMudex: model is now ", model);
 				
-//				if (beSilent === "undefined")
-//					if (this.beSilent == null || this.beSilent === "undefined") {
-//						beSilent = this.beSilent;
-//					} else {
-//						beSilent = false;
-//					}
+				if (beSilent === "undefined")
+					if (this.beSilent == null || this.beSilent === "undefined") {
+						beSilent = this.beSilent;
+					} else {
+						beSilent = false;
+					}
 				
-//				if (!beSilent && model.changedAttributes())
-//					model.save(model.changedAttributes);
+				if (!beSilent && model.changedAttributes())
+					model.save(model.changedAttributes);
 			};
 	
 			return ComponentMudex;
