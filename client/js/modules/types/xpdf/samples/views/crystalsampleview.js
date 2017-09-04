@@ -10,6 +10,7 @@ define([
 	"collections/samples",
 	"modules/types/xpdf/samples/views/samplelisttableview",
 	"modules/types/xpdf/utils/componentmudex",
+	"utils/table",
 	"tpl!templates/types/xpdf/samples/crystalsampleview.html"
 	], function(
 		Marionette,
@@ -19,6 +20,7 @@ define([
 		Instances,
 		InstanceListTable,
 		ComponentMudex,
+		table,
 		template
 	) {
 	return Marionette.LayoutView.extend({
@@ -41,18 +43,27 @@ define([
 		},
 		
 		onRender: function() {
+			// Table of phases
 			this.phaseTable.show(new CrystalPhaseTable({collection: this.collection}));
 			
+			// Table of instances
 			var instances = new Instances();
 			var sampleId = this.model.get("CRYSTALID");
 			var instanceTable = this.instanceTable;
+			
+			var instanceRow = table.ClickableRow.extend({
+				event: "samples:view",
+				argument: "BLSAMPLEID",
+				cookie:true,
+			});
+			
 			instances.fetch({data: {crid: sampleId},
 				success: function(collection, response, options) {
 					console.log("Found " + collection.length + " instances of sample " + sampleId);
-					instanceTable.show(new InstanceListTable({collection: collection, hideNewInstance: true}));
+					instanceTable.show(new InstanceListTable({collection: collection, hideNewInstance: true, row: instanceRow}));
 				},
 				error: function(collection, response, options) {
-					console.log("Error fetching insantces of sample " + sampleId);
+					console.log("Error fetching instances of sample " + sampleId);
 				},
 			});
 		},
