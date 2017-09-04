@@ -39,16 +39,13 @@ define(["marionette",
 		
 		regions: {
 			history: '.history',
-			phases: ".phases",
-			newphase: ".newphase",
 			makeInstance: ".makeinstance",
 			xpdfContainer: ".xpdfcontainer",
 //			density: ".density",
 		},
 		
 		events: {
-			"click a.makeinstance": "showInstance",
-			"click a.linkphase": "linkPhase",
+			"click a.gotosample": "goToSample",
 		},
 		
 		modelEvents: {
@@ -112,7 +109,7 @@ define(["marionette",
 			this.getAllPhases(this.drawPhaseTable);
 			
 			// Show the add phases hidden form in the "newphase" region
-			this.newphase.show(new NewPhaseView({"CRYSTALID" : this.model.get("CRYSTALID")}));
+//			this.newphase.show(new NewPhaseView({"CRYSTALID" : this.model.get("CRYSTALID")}));
 			
 //			var DensityView = Marionette.ItemView.extend({
 //				template:"<span class=\"density\">N/A</span>",
@@ -133,7 +130,7 @@ define(["marionette",
 		
 		// draw the table of all contained phases
 		drawPhaseTable: function(self) {
-			self.phases.show(new PhaseTableView({ collection: self.phaseCollection, loading: true, sampleId: self.model.get("BLSAMPLEID"), sample: self.model}));
+//			self.phases.show(new PhaseTableView({ collection: self.phaseCollection, loading: true, sampleId: self.model.get("BLSAMPLEID"), sample: self.model}));
 			// We also want to update the composition once we have the
 			// collection of phases:
 			// Calculate the total density and composition, and display
@@ -189,10 +186,10 @@ define(["marionette",
 		// details of the container if it is, and the button to select the 
 		// container if it is not.
 		// Currently, an instance has the word INSTANCE in its comment
-		showInstance: function() {
-			var makeInstanceView = new CreateInstanceView({model: this.model});
-			app.dialog.show(makeInstanceView);
-		},
+//		showInstance: function() {
+//			var makeInstanceView = new CreateInstanceView({model: this.model});
+//			app.dialog.show(makeInstanceView);
+//		},
 		
 		makeAbundanceMap: function(sample) {
         	var aMap = {};
@@ -241,10 +238,15 @@ define(["marionette",
 			}
 		},
 		
-		// Link a pre-existing phase to this sample, selected from a modal dialog
-		linkPhase: function() {
-			var linkPhaseView = new LinkPhaseView({ model: this.model});
-			app.dialog.show(linkPhaseView);
+//		// Link a pre-existing phase to this sample, selected from a modal dialog
+//		linkPhase: function() {
+//			var linkPhaseView = new LinkPhaseView({ model: this.model});
+//			app.dialog.show(linkPhaseView);
+//		},
+
+		goToSample: function(e) {
+			e.preventDefault();
+			app.trigger("crystals:view", this.model.get("CRYSTALID"));
 		},
 	});
 });

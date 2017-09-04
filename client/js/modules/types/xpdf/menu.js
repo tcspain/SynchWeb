@@ -12,7 +12,8 @@ define([], function() {
 //			assign: "Assign Sample Changers",
 //			dewars: "Samples Sets",
 			containers: "Sample Changers",
-			samples: "Samples",
+			samples: "Instances",
+			xpdfsamples: "Samples",
 			phases: "Phases",
 		
 		},

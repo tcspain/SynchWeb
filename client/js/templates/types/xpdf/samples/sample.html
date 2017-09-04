@@ -1,6 +1,6 @@
-<h1>Sample Details</h1>
+<h1>Instance Details</h1>
 
-<p class="help"> This page will show the sample details and history for XPDF samples</p>
+<p class="help"> This page shows the details and history for an XPDF sample instance</p>
 <div class="form">
 	<ul>
 		<li>
@@ -9,19 +9,9 @@
 		</li>
 		
 		<li>
-			<span class="label">Phases</span>
-			<!-- <div class="ra"><a class="button" href="proteins/add"><i class="fa fa-plus"></i>Add Phase</a></div>
-			<form action="/api/sample/proteins" method="post" enctype="multipart/form-data">
-			<input type="hidden" name="ACRONYM" value="xpdfnewphase">
-			<button name="submit" value="1" type="submit" class="button submit"><i class="fa fa-plus"></i>Add Phase</button>
-			</form> -->
-			<span class="phases"></span>
-			<span class="newphase"></span>
-			<a class="button linkphase" href="#" title="Add Existing Phase"><i class="fa fa-link"></i><span>Add Existing Phase</span></a>
-		</li>
-		
-		<li>
-			<a class="button makeinstance" href="#" title="Make new instance"><i class="fa fa-copy"></i><span>New Instance</span></a>
+			<span class="label">Instance of</span>
+			<span class="ofsample"><%=CRYSTALID%></span>
+			<a class="button gotosample" href="#"><i class="fa fa-share"></i></a>
 		</li>
 		
 		<li>
