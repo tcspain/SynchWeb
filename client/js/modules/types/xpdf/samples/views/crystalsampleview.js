@@ -7,6 +7,8 @@ define([
 	"modules/types/xpdf/samples/views/crystalphasetable",
 	"models/protein",
 	"collections/proteins",
+	"collections/samples",
+	"modules/types/xpdf/samples/views/samplelisttableview",
 	"modules/types/xpdf/utils/componentmudex",
 	"tpl!templates/types/xpdf/samples/crystalsampleview.html"
 	], function(
@@ -14,6 +16,8 @@ define([
 		CrystalPhaseTable,
 		Phase,
 		Phases,
+		Instances,
+		InstanceListTable,
 		ComponentMudex,
 		template
 	) {
@@ -23,6 +27,7 @@ define([
 		
 		regions: {
 			phaseTable: ".phasetable",
+			instanceTable: ".instancetable",
 		},
 		
 		initialize: function(options) {
@@ -36,7 +41,20 @@ define([
 		},
 		
 		onRender: function() {
-			this.phaseTable.show(new CrystalPhaseTable({collection: this.collection}))
-		}
+			this.phaseTable.show(new CrystalPhaseTable({collection: this.collection}));
+			
+			var instances = new Instances();
+			var sampleId = this.model.get("CRYSTALID");
+			var instanceTable = this.instanceTable;
+			instances.fetch({data: {crid: sampleId},
+				success: function(collection, response, options) {
+					console.log("Found " + collection.length + " instances of sample " + sampleId);
+					instanceTable.show(new InstanceListTable({collection: collection, hideNewInstance: true}));
+				},
+				error: function(collection, response, options) {
+					console.log("Error fetching insantces of sample " + sampleId);
+				},
+			});
+		},
 	});
 });
