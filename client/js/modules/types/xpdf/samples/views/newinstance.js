@@ -23,6 +23,12 @@ define([
 		createModel: function() {
 			this.model = new Instance();
 			this.model.set({"SAMPLENAME": this.sampleName});
+			
+			// Set default values for the container model values
+			this.model.set({"SIZE": "N/A",
+				"CONTAINERMATERIAL": "",
+				"CONTAINERDENSITY": "",
+			});
 		},
 		
 	});

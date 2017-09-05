@@ -27,6 +27,10 @@ define([
 		className: "content",
 		template: template,
 		
+		events: {
+			"click a.newinstance": "newInstance",
+		},
+		
 		regions: {
 			phaseTable: ".phasetable",
 			instanceTable: ".instancetable",
@@ -66,6 +70,11 @@ define([
 					console.log("Error fetching instances of sample " + sampleId);
 				},
 			});
+		},
+		
+		newInstance: function(e) {
+			e.preventDefault();
+			app.trigger("instance:create", this.model.get("CRYSTALID"));
 		},
 	});
 });

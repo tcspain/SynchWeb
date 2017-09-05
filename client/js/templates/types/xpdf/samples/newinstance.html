@@ -1,2 +1,48 @@
 <h1>New Instance</h1>
-<div>Of <span class="SAMPLENAME"><%=SAMPLENAME%></span></div>
+<form method="post" id="new_instance" enctype="multipart/form-data">
+	<div class="form">
+		<ul>
+			<li>
+				<label>Name
+				<span class="small">Name of the instance</span></label>
+				<span class="name"><input type="text" name="NAME" /></span>
+			</li>
+
+			<li>
+				<label>Of</label> <span class="SAMPLENAME"><%=SAMPLENAME%></span>
+			</li>
+		</ul>
+		<hr />
+		<ul>			
+			<li>
+				<label>In
+				<span class="small">Container for the instance</span></label>
+				<select class="available-containers"></select>
+			</li>
+			
+			<li>
+				<label>Size in container</label>
+				<span class="size"><%=SIZE%> mm</span>
+			</li>
+			
+			<li>
+				<label>Container material</label>
+				<span class="container-material"><%=CONTAINERMATERIAL%> &nbsp;</span>
+			</li>
+			
+			<li>
+				<label>Container density</label>
+				<span class="container-density"><%=CONTAINERDENSITY%> g cm⁻³</span>
+			</li>
+		</ul>	
+		<hr />
+		<label>Comment</label>
+		<span class="comment"><textarea form="new_instance"></textarea></span>
+		<button name="submit" value="1" type="submit" class="button submit"><i class="fa fa-plus"></i>Add Instance</button>
+		
+	</div>
+</form>
+
+
+
+
