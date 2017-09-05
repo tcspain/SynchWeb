@@ -150,11 +150,11 @@ define(['marionette',
     
     newinstance: function(sid) {
     	app.loading();
-    	var sample = new Sample({BLSAMPLEID: sid});
-    	sample.fetch({
+    	var xpdfsample = new Crystal({CRYSTALID: sid});
+    	xpdfsample.fetch({
     		success: function() {
-    			app.bc.reset([sbc, {title: "New Instance of " + sample.get("NAME") }]);
-    			app.content.show(GetView.NewInstance.get(app.type, {sampleModel: sample}));
+    			app.bc.reset([sbc, {title: "New Instance of " + xpdfsample.get("NAME") }]);
+    			app.content.show(GetView.NewInstance.get(app.type, {sampleModel: xpdfsample}));
     		},
     		error: function() {
     			app.bc.reset([sbc]);
