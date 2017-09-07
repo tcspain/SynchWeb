@@ -4,12 +4,18 @@
 
 define([
 	"marionette",
+	"views/form",
 	"models/sample",
+	"collections/samples",
+	"modules/types/xpdf/utils/containerinstances",
 	"tpl!templates/types/xpdf/samples/newinstance.html"
 	],
 	function(
 			Marionette,
+			FormView,
 			Instance,
+			Instances,
+			ContainerInstances,
 			template
 	) {
 	
@@ -23,6 +29,9 @@ define([
 		initialize: function(options) {
 			this.sampleName = options.sampleModel.get("NAME");
 			this.theoreticalDensity = options.sampleModel.get("THEORETICALDENSITY");
+			this.containers = new Instances();
+			this.listenTo(this.containers, "add", this.onContainersUpdate);
+			this.updateContainers();
 		},
 		
 		createModel: function() {
@@ -50,6 +59,28 @@ define([
 				"PACKINGFRACTION": valueStr,
 				"EXPERIMENTALDENSITY": nyDensity});
 			this.render();
+		},
+
+		// update the collection of containers availabler to encapsulate the new instance
+		updateContainers: function() {
+			var self = this;
+			var containerInstances = ContainerInstances.getContainers({
+				success: function(collection, response, options) {
+					console.log("Found " + collection.length + " containers");
+					// update the collection of containers without changing the reference
+					self.containers.reset()
+					// Will fire the add listener
+					self.containers.add(collection.models);
+				},
+				error: function(collection, response, options) {
+					console.log("Error getting containers");
+				},
+			});
+		},
+
+		// Add the list of available containers to the interface 
+		onContainersUpdate: function() {
+			console.log("Redraw container stuff");
 		},
 		
 	});
