@@ -8,6 +8,7 @@ define([
 	"models/sample",
 	"collections/samples",
 	"modules/types/xpdf/utils/containerinstances",
+	"modules/types/xpdf/samples/views/containerview",
 	"tpl!templates/types/xpdf/samples/newinstance.html"
 	],
 	function(
@@ -16,11 +17,16 @@ define([
 			Instance,
 			Instances,
 			ContainerInstances,
+			ContainerView,
 			template
 	) {
 	
 	return FormView.extend({
 		template: template,
+		
+		regions: {
+			containerview: ".container-view",
+		},
 		
 		events: {
 			"change input.packingfraction": "onChangePacking",
@@ -81,8 +87,9 @@ define([
 		// Add the list of available containers to the interface 
 		onContainersUpdate: function() {
 			console.log("Redraw container stuff");
+			this.containerview.show(new ContainerView({containers: this.containers}));
 		},
-		
+	
 	});
 	
 });
