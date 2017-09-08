@@ -72,10 +72,12 @@ define([
 		className: "true-container",
 		
 		template: _.template("<div class=\"form=\"><ul>" + 
-		"<li><span class=\"label\">Sample Dimensions</span><span class=\"SAMPLEDIMENSIONS\"><%=SAMPLEDIMENSIONS%></span>" + 
-		"<li><span class=\"label\">Container Material</span><span class=\"CONTMATERIAL\"><%=CONTMATERIAL%></span>" + 
-		"<li><span class=\"label\">Container Density</span><span class=\"CONTDENSITY\"><%=CONTDENSITY%></span>" + 
-		"</ul></div>"),
+				"<li><span class=\"label\">Container ID</span><span class=\"BLSAMPLEID\"><%=BLSAMPLEID%></span>" + 
+				"<li><span class=\"label\">Sample Dimensions</span><span class=\"SAMPLEDIMENSIONS\"><%=SAMPLEDIMENSIONS%></span>" + 
+				"<li><span class=\"label\">Container Material</span><span class=\"CONTMATERIAL\"><%=CONTMATERIAL%></span>" + 
+				"<li><span class=\"label\">Container Density</span><span class=\"CONTDENSITY\"><%=CONTDENSITY%></span>" + 
+				"</ul></div>"
+				),
 
 		initialize: function(options) {
 			console.log(options.properties);
@@ -107,9 +109,10 @@ define([
 			nyOption.text = element.get("NAME");
 			// TODO get dynamically
 			containerProperties[element.get("NAME")] = {
+					"BLSAMPLEID": element.get("BLSAMPLEID"),
 					"SAMPLEDIMENSIONS": "0.3 mm dia × 20 mm",
 					"CONTMATERIAL": "Quartz",
-					"CONTDENSITY": "2.6",
+					"CONTDENSITY": "2.6 g cm⁻³",
 			};
 			select.add(nyOption);
 		});
