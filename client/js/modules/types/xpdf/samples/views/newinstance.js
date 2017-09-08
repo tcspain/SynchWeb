@@ -9,6 +9,7 @@ define([
 	"collections/samples",
 	"modules/types/xpdf/utils/containerinstances",
 	"modules/types/xpdf/samples/views/containerview",
+	"modules/types/xpdf/utils/defaultcontainer",
 	"tpl!templates/types/xpdf/samples/newinstance.html"
 	],
 	function(
@@ -18,6 +19,7 @@ define([
 			Instances,
 			ContainerInstances,
 			ContainerView,
+			defaultContainer,
 			template
 	) {
 	
@@ -35,26 +37,41 @@ define([
 		
 		initialize: function(options) {
 			this.sampleName = options.sampleModel.get("NAME");
+			this.crystalId  = options.sampleModel.get("CRYSTALID");
+			this.proteinId  = options.sampleModel.get("PROTEINID");
+			this.abundance  = options.sampleModel.get("ABUNDANCE");
 			this.theoreticalDensity = options.sampleModel.get("THEORETICALDENSITY");
+			
+			// Here 'container' is the XPDF container
 			this.containers = new Instances();
 			this.listenTo(this.containers, "add", this.onContainersUpdate);
 			this.updateContainers();
+			
+			// Here 'container' is the ISPyB container
+			defaultContainer.getDefault(this.setContainer);
 		},
 		
 		createModel: function() {
 			this.model = new Instance();
 			this.model.set({
+				"CRYSTALID": this.crystalId,
+				"PROTEINID": this.proteinId,
+				"ABUNDANCE": this.abundance,
 				"SAMPLENAME": this.sampleName,
 				"PACKINGFRACTION": "1.0",
 				"THEORETICALDENSITY": this.theoreticalDensity,
 				"EXPERIMENTALDENSITY": this.theoreticalDensity,
-				});
-			
-			// Set default values for the container model values
-			this.model.set({"SIZE": "N/A",
-				"CONTAINERMATERIAL": "",
-				"CONTAINERDENSITY": "",
+				"LOCATION": "0",
+				"CONTAINERID": this.defaultContainer,
 			});
+			
+		},
+		
+		setContainer(container) {
+			console.log("default container is ", container);
+			this.defaultContainer = container;
+			if (this.model)
+				this.model.set({"CONTAINERID": container});
 		},
 		
 		onChangePacking: function(e) {
@@ -88,10 +105,12 @@ define([
 		// Add the list of available containers to the interface 
 		onContainersUpdate: function() {
 			console.log("Redraw container stuff");
-			this.containerview.show(new ContainerView({containers: this.containers}));
+			if (this.isRendered == true)
+				this.containerview.show(new ContainerView({containers: this.containers}));
 		},
 		
 		onRender: function() {
+			this.isRendered = true;
 			this.showDensityView(this.model.get("EXPERIMENTALDENSITY"), "g cm⁻³");
 		},
 		
