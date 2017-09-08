@@ -21,11 +21,12 @@ define([
 			template
 	) {
 	
-	return FormView.extend({
+	var NewInstance = FormView.extend({
 		template: template,
 		
 		regions: {
 			containerview: ".container-view",
+			density: ".density",
 		},
 		
 		events: {
@@ -64,7 +65,7 @@ define([
 			this.model.set({
 				"PACKINGFRACTION": valueStr,
 				"EXPERIMENTALDENSITY": nyDensity});
-			this.render();
+			this.showDensityView(nyDensity, "g cm⁻³");
 		},
 
 		// update the collection of containers availabler to encapsulate the new instance
@@ -89,7 +90,44 @@ define([
 			console.log("Redraw container stuff");
 			this.containerview.show(new ContainerView({containers: this.containers}));
 		},
+		
+		onRender: function() {
+			this.showDensityView(this.model.get("EXPERIMENTALDENSITY"), "g cm⁻³");
+		},
+		
+		showDensityView: function(density, units) {
+			this.density.show(new DensityView({value: density, units: units}));
+			var densityDiv = this.$el.find("div.density");
+			if (densityDiv.size() > 0) {
+				densityDiv[0].style.display = "inline";
+			}
+		},
 	
 	});
+	
+	var DensityView = Marionette.LayoutView.extend({
+		className: "density",
+		
+		template: _.template("<%=VALUE%> <%=UNITS%>"),
+		
+		initialize: function(options) {
+			this.model = new Backbone.Model({
+				"VALUE": options.value,
+				"UNITS": options.units,
+			});
+		},
+		
+		onRender: function(){
+			console.log("rendering DensityView");
+			var ownDiv = this.$el.find("div.density");
+			if (ownDiv.size() > 0) {
+				console.log("Setting density div style");
+				ownDiv[0].style.display = "inline";
+			}
+		},
+		
+	});
+	
+	return NewInstance;
 	
 });
