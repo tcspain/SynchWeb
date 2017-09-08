@@ -34,7 +34,6 @@ define([
 		
 		onRender: function() {
 			
-//			if (this.select === undefined) {
 				// Get the elements associated with this container
 				// TODO Cope with multiple containers. Make sure to select only
 				// this container's elements
@@ -53,7 +52,6 @@ define([
 				};
 
 				addAllToSelect(this.containers, "", {select: this.select, properties: this.containerProperties});
-//			}
 		},
 		
 		_selectContainer: function(e) {
@@ -73,11 +71,11 @@ define([
 	var TrueContainerView = Marionette.LayoutView.extend({
 		className: "true-container",
 		
-		template: "<div class=\"form=\"><ul>" + 
+		template: _.template("<div class=\"form=\"><ul>" + 
 		"<li><span class=\"label\">Sample Dimensions</span><span class=\"SAMPLEDIMENSIONS\"><%=SAMPLEDIMENSIONS%></span>" + 
 		"<li><span class=\"label\">Container Material</span><span class=\"CONTMATERIAL\"><%=CONTMATERIAL%></span>" + 
 		"<li><span class=\"label\">Container Density</span><span class=\"CONTDENSITY\"><%=CONTDENSITY%></span>" + 
-		"</ul></div>",
+		"</ul></div>"),
 
 		initialize: function(options) {
 			console.log(options.properties);
@@ -88,11 +86,11 @@ define([
 	var PseudoContainerView = Marionette.LayoutView.extend({
 		className: "pseudo-container",
 		
-		template: "<div class=\"form\"><ul>" + 
-		"<li><span class=\"label DIMENSION1\"><%DIMENSION1%></span><input type=\"text\" name=\"SIZE1\"></input> mm</li>" + 
-		"<li><span class=\"label DIMENSION1\"><%DIMENSION2%></span><input type=\"text\" name=\"SIZE2\"></input> mm</li>" + 
-		"<li><span class=\"label DIMENSION1\"><%DIMENSION3%></span><input type=\"text\" name=\"SIZE3\"></input> mm</li>" + 
-		"</ul></div>",
+		template: _.template("<div class=\"form\"><ul>" + 
+		"<li><span class=\"label DIMENSION1\"><%=DIMENSION1%></span><input type=\"text\" name=\"SIZE1\"></input> mm</li>" + 
+		"<li><span class=\"label DIMENSION1\"><%=DIMENSION2%></span><input type=\"text\" name=\"SIZE2\"></input> mm</li>" + 
+		"<li><span class=\"label DIMENSION1\"><%=DIMENSION3%></span><input type=\"text\" name=\"SIZE3\"></input> mm</li>" + 
+		"</ul></div>"),
 		
 		initialize: function(options) {
 			console.log(options.properties);
@@ -100,7 +98,6 @@ define([
 		},
 		
 	});
-	
 	
 	var addAllToSelect = function(collection, response, options) {
 		var select = options.select;
