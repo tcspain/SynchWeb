@@ -12,19 +12,19 @@ define([
 
 	var defaultContainer = {
 			/*
-			 * visitId is the database identifier from the Database.
-			 * Callback is a one-argument function, taking the default containerId for the visit. 
+			 * callback is a one-argument function, taking the default containerId for the visit.
+			 * context is an object providing context for the callback
 			 */
-			getDefault: function(callback) {
-				this.getVisit(this.getDefaultDewar, this.getDefaultContainer, callback);
+			getDefault: function(callback, context) {
+				this.getVisit(this.getDefaultDewar, this.getDefaultContainer, callback, context);
 			},
 
-			getVisit: function(callback, dewarCallback, finalCallback) {
+			getVisit: function(callback, dewarCallback, finalCallback, finalContext) {
 				var prop = new Proposal({PROPOSAL: app.prop});
 				prop.fetch({
 					success: function(model, response, options) {
 						var visitString = prop.get("PROPOSAL")+"-"+prop.get("VCOUNT");
-						callback(visitString, dewarCallback, finalCallback);
+						callback(visitString, dewarCallback, finalCallback, finalContext);
 					},
 					error: function(model, response, options) {
 						console.log("Could not get proposal data.");
@@ -32,14 +32,14 @@ define([
 				});
 			},
 			
-			getDefaultDewar: function(visitId, successCallback, finalCallback) {
+			getDefaultDewar: function(visitId, successCallback, finalCallback, finalContext) {
 				var self = this;
 				Backbone.ajax({
 					url: app.apiurl+"/shipment/dewars/default",
 					data: {visit: visitId},
 					success: function(dewarId) {
 						console.log("new sample dewar obtained");
-						successCallback(dewarId, visitId, finalCallback);	
+						successCallback(dewarId, visitId, finalCallback, finalContext);	
 					},
 					error: function() {
 						app.bc.reset([bc, {title: "Error" }]);
@@ -51,7 +51,7 @@ define([
 			// With the default dewar for this proposal, get the default
 			// container for this visit. Also, check default containers exist
 			// for all visits. 
-			getDefaultContainer : function(dewarId, visitId, successCallback) {
+			getDefaultContainer : function(dewarId, visitId, successCallback, context) {
 				var self = this;
 				
 				Backbone.ajax({
@@ -89,14 +89,14 @@ define([
 							defaultContainer.set(defaultParameters);
 							defaultContainer.save({},{
 								success: function(model, response, options) {
-									successCallback(model);
+									successCallback(model, context);
 								},
 								error: function(model, response, options) {
 									console.log("Error saving default container for proposal "+app.prop);
 								}
 							});
 						} else {
-							successCallback(defaultContainer);
+							successCallback(defaultContainer, context);
 						}
 
 					},
