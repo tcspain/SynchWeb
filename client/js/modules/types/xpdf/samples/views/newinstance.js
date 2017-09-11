@@ -47,12 +47,11 @@ define([
 			this.listenTo(this.containers, "add", this.onContainersUpdate);
 			this.updateContainers();
 			
-			// Here 'container' is the ISPyB container
-			defaultContainer.getDefault(this.setContainer);
 		},
 		
 		createModel: function() {
 			this.model = new Instance();
+			console.log("createModel: default container ID is:" + this.defaultContainer);
 			this.model.set({
 				"CRYSTALID": this.crystalId,
 				"PROTEINID": this.proteinId,
@@ -62,18 +61,19 @@ define([
 				"THEORETICALDENSITY": this.theoreticalDensity,
 				"EXPERIMENTALDENSITY": this.theoreticalDensity,
 				"LOCATION": "0",
-				"CONTAINERID": this.defaultContainer,
 			});
+
+			// Here 'container' is the ISPyB container
+			defaultContainer.getDefault(this.setContainer, {model: this.model});
 			
 		},
 		
-		setContainer(container) {
-			console.log("default container is ", container);
-			this.defaultContainer = container;
-			if (this.model)
-				this.model.set({"CONTAINERID": container});
+		setContainer(container, context) {
+			var containerId = container.get("CONTAINERID");
+			if (context.model)
+				context.model.set({"CONTAINERID": containerId});
 		},
-		
+
 		onChangePacking: function(e) {
 			var valueStr = e.target.value;
 			var nyPackingFraction = Number.parseFloat(valueStr);
