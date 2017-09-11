@@ -121,6 +121,16 @@ define([
 				densityDiv[0].style.display = "inline";
 			}
 		},
+		
+		success: function(model, response, options) {
+			var nySample = model;
+			
+			// TODO: define the new sample group here
+			
+			
+			
+			app.trigger("samples:view", model.get("BLSAMPLEID"));
+		},
 	
 	});
 	
