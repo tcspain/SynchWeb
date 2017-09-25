@@ -434,7 +434,7 @@
             WHERE $sess[3] $where4
                    
             UNION
-            SELECT $extc 1 as dcac, 1 as dccc, 1 as dcc, smp.name as sample,smp.blsampleid, ses.visit_number as vn, 1,1,1,'A',1,'A',ROUND(TIMESTAMPDIFF('SECOND', CAST(r.starttimestamp AS DATE), CAST(r.endtimestamp AS DATE)), 1),1,1, 1, 1, r.status, r.message, 'load' as type, r.actiontype, 1, smp.code, r.robotactionid, 1,  r.samplebarcode, r.containerlocation, r.dewarlocation, 1, 1, TO_CHAR(r.starttimestamp, 'DD-MM-YYYY HH24:MI:SS') as st, 1, 1, 1, 'A', 1, 1, 'A', 'A', 'A', 'A', r.starttimestamp as sta, 1, 1, 1, 0,
+            SELECT $extc 1 as dcac, 1 as dccc, 1 as dcc, smp.name as sample,smp.blsampleid, ses.visit_number as vn, 1,1,1,'A',1,'A',ROUND(TIMESTAMPDIFF('SECOND', CAST(r.starttimestamp AS DATE), CAST(r.endtimestamp AS DATE)), 1),1,1, 1, 1, r.status, r.message, 'load' as type, r.actiontype, 1, smp.code, r.robotactionid, 1,  r.samplebarcode, r.containerlocation, r.dewarlocation, 1, 1, TO_CHAR(r.starttimestamp, 'DD-MM-YYYY HH24:MI:SS') as st, 1, 1, 1, 'A', 1, 1, r.xtalsnapshotbefore, r.xtalsnapshotafter, 'A', 'A', r.starttimestamp as sta, 1, 1, 1, 0,
                 1, 1, 1, 1, 1, 1, 1, 1, '', '', TIMESTAMPDIFF('MINUTE', r.starttimestamp, CURRENT_TIMESTAMP) as age,
                 0, 0, 0, 0, 0, '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
             FROM robotaction r
@@ -456,13 +456,17 @@
                 #if ($this->has_arg('sid') || $this->has_arg('pjid')) $dc['VIS'] = $this->arg('prop').'-'.$dc['VN'];
                 if ($this->has_arg('sid')) $dc['VIS'] = $this->arg('prop').'-'.$dc['VN'];
                 
+                foreach (array('X1', 'X2', 'X3', 'X4') as $x) {
+                    $dc[$x] = file_exists($dc[$x]) ? 1 : 0;
+                }
+
                 
                 // Data collections
                 if ($dc['TYPE'] == 'data') {
                     $nf = array(1 => array('AXISSTART'), 2 => array('RESOLUTION', 'TRANSMISSION', 'AXISRANGE'), 3 => array('EXPOSURETIME'), 4 => array('WAVELENGTH'));
 
                     $dc['DIRFULL'] = $dc['DIR'];
-                    $dc['DIR'] = preg_replace('/.*\/\d\d\d\d\/\w\w\d+-\d+\//', '', $dc['DIR']);
+                    $dc['DIR'] = preg_replace('/.*\/'.$this->arg('prop').'-'.$dc['VN'].'\//', '', $dc['DIR']);
                     
                     $dc['BSX'] = round($dc['BSX']*1000);
                     $dc['BSY'] = round($dc['BSY']*1000);
@@ -489,7 +493,7 @@
                     # Transmission factor rather than transmission :(
                     $dc['TRANSMISSION'] *= 100;
                     
-                    $dc['FILETEMPLATE'] = preg_replace('/.*\/\d\d\d\d\/\w\w\d+-\d+\//', '', $dc['FILETEMPLATE']);
+                    $dc['FILETEMPLATE'] = preg_replace('/.*\/'.$this->arg('prop').'-'.$dc['VN'].'\//', '', $dc['FILETEMPLATE']);
                     
                     $nf = array(2 => array('EXPOSURETIME'), 2 => array('AXISSTART', 'RESOLUTION', 'TRANSMISSION'));
                     $this->profile('edge');  
@@ -1476,8 +1480,8 @@
             else $info = $info[0];
             $this->db->close();
             
-            $file = $info['FILEPATH'].'/'.str_replace('fast_dp.log', 'xdsstat.log', $info['FILENAME']);
-            
+            $file = $info['FILEPATH'].'/xdsstat.log';
+
             $rows = array();
             if (file_exists($file)) {
                 $log = file_get_contents($file);
