@@ -4,9 +4,13 @@
 
 define([
 	"marionette",
+	"models/sample",
+	"collections/samples",
 	"tpl!templates/types/xpdf/samples/containerview.html"
 	], function(
 			Marionette,
+			Instance,
+			Instances,
 			template
 	){
 	
@@ -17,6 +21,7 @@ define([
 		regions: {
 			containerDetails: "div.container-details",
 			encapContainer: "div.encapsulating",
+			containerName: "span.container-name",
 		},
 		
 		events: {
@@ -25,33 +30,76 @@ define([
 		
 		/*
 		 * options:
+		 * options.offset: the layer at which the container lies
+		 * For new sample groups:
 		 * options.containers: list of available containers
+		 * For existing sample groups:
+		 * options.collection: array of containers to display
 		 */
 		initialize: function(options) {
-			this.containers = options.containers;
+			console.log("ContainerView:", options);
+			this.offset = options.offset;
+			if (options.collection) {
+				this.collection = options.collection;
+				this.model = options.collection.at(this.offset);
+				this.containers = new Instances();
+				this.isNew = false;
+			} else {
+				this.collection = [];
+				this.model = null;
+				this.containers = options.containers;
+				this.isNew = true;
+			}
 			this.containerProperties = {};
 		},
 		
 		onRender: function() {
-			
-				// Get the elements associated with this container
-				// TODO Cope with multiple containers. Make sure to select only
-				// this container's elements
-				this.select = this.$el.find("select.container-select")[0];
+			if (this.isNew)
+				this._renderNew();
+			else
+				this._renderExisting();
+		},
+		
+		_renderNew: function() {
+			// Get the elements associated with this container
+			// TODO Cope with multiple containers. Make sure to select only
+			// this container's elements
+			this.select = this.$el.find("select.container-select")[0];
 
-				var nyOption = document.createElement("option");
-				// Add a Block Form as an option for the first level of containers
-				nyOption.value= "block-form";
-				nyOption.text = "Block Form";
-				this.select.add(nyOption);
-				// Add Block Form properties (hard coded, currently)
-				this.containerProperties[nyOption.value] = {
-						"DIMENSION1": "Height",
-						"DIMENSION2": "Width",
-						"DIMENSION3": "Thickness",
-				};
+			var nyOption = document.createElement("option");
+			// Add a Block Form as an option for the first level of containers
+			nyOption.value= "block-form";
+			nyOption.text = "Block Form";
+			this.select.add(nyOption);
+			// Add Block Form properties (hard coded, currently)
+			this.containerProperties[nyOption.value] = {
+					"DIMENSION1": "Height",
+					"DIMENSION2": "Width",
+					"DIMENSION3": "Thickness",
+			};
 
-				addAllToSelect(this.containers, "", {select: this.select, properties: this.containerProperties});
+			addAllToSelect(this.containers, "", {select: this.select, properties: this.containerProperties});
+		},
+		
+		_renderExisting: function() {
+			this.$el.find("select.container-select")[0].style.display = "none";
+
+			this.container = new Instance();
+			this.container.set({"BLSAMPLEID": this.model.get("BLSAMPLEID")});
+			var drawRegion = this.containerDetails;
+			this.container.fetch({
+				success: function(model, response, options) {
+					console.log(model);
+					drawRegion.show(new ContainerDetails({model: model}));
+				},
+				failure: function(model, response, options) {
+					console.log("Could not retrieve details for container " + model.get("BLSAMPLEID"));
+				}
+			});
+			// Show ecapsulating containers
+			if (this.offset+1 < this.collection.length) {
+				this.encapContainer.show(new ContainerView({collection: this.collection, offset: this.offset+1}))
+			}
 		},
 		
 		_selectContainer: function(e) {
@@ -99,6 +147,22 @@ define([
 			this.model = new Backbone.Model(options.properties);
 		},
 		
+	});
+	
+	var ContainerDetails = Marionette.LayoutView.extend({
+		template: _.template("<div class=\"form\">" + 
+				"<ul>" + 
+				"<li><span class=\"label\">Name</span><span class=\"NAME\"><%=NAME%></span></li>" +
+				"</ul>" + 
+		"</div>"),
+		
+		/*
+		 * options:
+		 * model: a sample model of the container instance
+		 */
+		initialize: function(options) {
+			this.model = options.model;
+		},
 	});
 	
 	var addAllToSelect = function(collection, response, options) {
