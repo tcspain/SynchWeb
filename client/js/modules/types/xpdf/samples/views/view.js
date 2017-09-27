@@ -16,6 +16,8 @@ define(["marionette",
         "modules/types/xpdf/samples/views/phasetableview",
         "modules/types/xpdf/samples/views/createinstance",
         "modules/types/xpdf/samples/views/linkphaseview",
+        "modules/types/xpdf/samples/views/containerview",
+        "modules/types/xpdf/samples/collections/samplegroup",
         "tpl!templates/types/xpdf/samples/sample.html",
         ], function(Marionette,
         		Editable,
@@ -31,6 +33,8 @@ define(["marionette",
         		PhaseTableView,
         		CreateInstanceView,
         		LinkPhaseView,
+        		ContainerView,
+        		SampleGroup,
         		template) {
 	
 	return Marionette.LayoutView.extend({
@@ -41,6 +45,7 @@ define(["marionette",
 			history: '.history',
 			makeInstance: ".makeinstance",
 			xpdfContainer: ".xpdfcontainer",
+			
 //			density: ".density",
 		},
 		
@@ -119,12 +124,14 @@ define(["marionette",
 //			this.density.show(new DensityView);
 			
 			// The instance information
-			var sampleComment = this.model.get("COMMENT"); 
-			if (!(new Boolean(sampleComment)) && sampleComment.includes("INSTANCE")) {
-				this.xpdfContainer.show(new Marionette.LayoutView.extend({
-					template:"<span class=\"thecontainer\">xx mm capillary</span>",
-				}));
-			}
+//			var sampleComment = this.model.get("COMMENT"); 
+//			if (!(new Boolean(sampleComment)) && sampleComment.includes("INSTANCE")) {
+//				this.xpdfContainer.show(new Marionette.LayoutView.extend({
+//					template:"<span class=\"thecontainer\">xx mm capillary</span>",
+//				}));
+//			}
+			
+			this.getContainers();
 
 		},
 		
@@ -247,6 +254,24 @@ define(["marionette",
 		goToSample: function(e) {
 			e.preventDefault();
 			app.trigger("crystals:view", this.model.get("CRYSTALID"));
+		},
+		
+		
+		// Get the containers in the BLSampleGroup for this instance
+		getContainers: function() {
+			var drawRegion = this.xpdfContainer;
+			this.sampleGroup = new SampleGroup();
+			// Hardcoded, known ID. TODO: replace with actual fetch by BLSampleId
+			this.sampleGroup.fetch({
+				data: {"BLSAMPLEGROUPID": "1", },
+				success: function(collection, response, options) {
+					// The offset for the first container is 1, with 0 being the sample
+					drawRegion.show(new ContainerView({collection: collection, offset: 1}));
+				},
+				error: function(collection, response, options) {
+					console.log("Failed to fetch sample group: ", response);
+				},
+			});
 		},
 	});
 });
