@@ -106,7 +106,8 @@ define([
 		onContainersUpdate: function() {
 			console.log("Redraw container stuff");
 			if (this.isRendered == true)
-				this.containerview.show(new ContainerView({containers: this.containers}));
+				// offset of the first layer of container is 1, 0 being the sample itself
+				this.containerview.show(new ContainerView({containers: this.containers, offset: 1}));
 		},
 		
 		onRender: function() {
