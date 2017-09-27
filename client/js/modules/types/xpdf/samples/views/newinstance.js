@@ -94,6 +94,7 @@ define([
 					// update the collection of containers without changing the reference
 					self.containers.reset()
 					// Will fire the add listener
+					console.log(collection.models);
 					self.containers.add(collection.models);
 				},
 				error: function(collection, response, options) {
@@ -104,7 +105,6 @@ define([
 
 		// Add the list of available containers to the interface 
 		onContainersUpdate: function() {
-			console.log("Redraw container stuff");
 			if (this.isRendered == true)
 				// offset of the first layer of container is 1, 0 being the sample itself
 				this.containerview.show(new ContainerView({containers: this.containers, offset: 1}));
