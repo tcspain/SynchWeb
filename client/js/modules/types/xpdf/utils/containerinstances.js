@@ -28,7 +28,8 @@ define([
 							success: filterSuccess,
 							error: function(collection, response, options) {
 								console.log("Error filtering instances. How did you even manage this?");
-							}});
+							},
+						});
 					},
 					error: function(collection, response, options) {
 						console.log("Could not retrieve container instances", response);
@@ -39,6 +40,14 @@ define([
 			isContainer: function(instance) {
 				return isAContainer(instance);
 			},
+			
+			isShaping: function(instance) {
+				return isShaping(instance);
+			},
+			
+			isNonShaping: function(instance) {
+				return isNonShaping(instance);
+			},
 	};
 	
 	
@@ -46,22 +55,43 @@ define([
 	
 	
 	// current method of determining containers: Match names with a hard-coded set.
-	// TODO: implement a better method of deterining containerhood
-	var containerNames = [
-			"0p3mm_capillary",
-			"Diamond Anvil Cell",
+	// TODO: implement a better method of determining containerhood
+	var shapingContainer = [
+		"0p3mm_capillary",
+	];
+	
+	var nonshapingContainer = [
+		"Diamond Anvil Cell",
 	];
 	
 	var isAContainer = function(container) {
-		return _.contains(containerNames, container.get("NAME"));
+		return isShaping(container) || isNonShaping(container);
 	};
 	
+	var isShaping = function(container) {
+		return _.contains(shapingContainer, container.get("NAME"));
+	};
+	
+	var isNonShaping = function(container) {
+		return _.contains(nonshapingContainer, container.get("NAME"));
+	}
+	
 	var filterInstances = function(collection, response, options) {
-		var containerArray = collection.filter(isAContainer);
+		var filterFunction = isAContainer;
+		var shapingCollection = new Instances();
+		var nonShapingCollection = new Instances();
+		shapingCollection.add(collection.filter(isShaping));
+		nonShapingCollection.add(collection.filter(isNonShaping));
+		shapingCollection.each(function(element, index, collection) {
+			element.set({"ISSHAPING": true});
+		});
+		nonShapingCollection.each(function(element, index, collection) {
+			element.set({"ISSHAPING": false});
+		});
 		// convert the array to a collection
-		console.log(containerArray);
 		var containers = new Instances();
-		containers.add(containerArray);
+		containers.add(shapingCollection.models);
+		containers.add(nonShapingCollection.models);
 		options.success(containers, response, options);
 	};
 	

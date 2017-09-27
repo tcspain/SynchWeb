@@ -45,7 +45,7 @@ define([
 				this.containers = new Instances();
 				this.isNew = false;
 			} else {
-				this.collection = [];
+				this.collection = new Instances();
 				this.model = null;
 				this.containers = options.containers;
 				this.isNew = true;
@@ -66,19 +66,26 @@ define([
 			// this container's elements
 			this.select = this.$el.find("select.container-select")[0];
 
-			var nyOption = document.createElement("option");
-			// Add a Block Form as an option for the first level of containers
-			nyOption.value= "block-form";
-			nyOption.text = "Block Form";
-			this.select.add(nyOption);
-			// Add Block Form properties (hard coded, currently)
-			this.containerProperties[nyOption.value] = {
-					"DIMENSION1": "Height",
-					"DIMENSION2": "Width",
-					"DIMENSION3": "Thickness",
-			};
-
-			addAllToSelect(this.containers, "", {select: this.select, properties: this.containerProperties});
+			var addedTrueContainers = new Instances();
+			// Add 'form' containers, to define the shape of un contained samples. Might still be in a furnace
+			if (this.offset == 1) {
+				var nyOption = document.createElement("option");
+				// Add a Block Form as an option for the first level of containers
+				nyOption.value= "block-form";
+				nyOption.text = "Block Form";
+				this.select.add(nyOption);
+				// Add Block Form properties (hard coded, currently)
+				this.containerProperties[nyOption.value] = {
+						"DIMENSION1": "Height",
+						"DIMENSION2": "Width",
+						"DIMENSION3": "Thickness",
+				};
+				addedTrueContainers.add(this.containers.where({"ISSHAPING": true}));
+			} else {
+				addedTrueContainers.add(this.containers.where({"ISSHAPING": false}));
+			}
+			console.log(addedTrueContainers);
+			addAllToSelect(addedTrueContainers, "", {select: this.select, properties: this.containerProperties});
 		},
 		
 		_renderExisting: function() {
@@ -112,6 +119,8 @@ define([
 			} else {
 				this.containerDetails.show(new TrueContainerView({properties: this.containerProperties[value]}));
 			}
+			
+			this.encapContainer.show(new ContainerView({containers: this.containers, offset: this.offset+1}));
 		},
 	
 	});
