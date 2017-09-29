@@ -10,6 +10,8 @@ define([
 	"modules/types/xpdf/utils/containerinstances",
 	"modules/types/xpdf/samples/views/containerview",
 	"modules/types/xpdf/utils/defaultcontainer",
+	"modules/types/xpdf/samples/collections/samplegroup",
+	"modules/types/xpdf/samples/models/samplegroupmember",
 	"tpl!templates/types/xpdf/samples/newinstance.html"
 	],
 	function(
@@ -20,6 +22,8 @@ define([
 			ContainerInstances,
 			ContainerView,
 			defaultContainer,
+			SampleGroup,
+			SampleGroupMember,
 			template
 	) {
 	
@@ -124,13 +128,20 @@ define([
 		},
 		
 		success: function(model, response, options) {
-			var nySample = model;
+			var nyInstance = model;
+			
+			console.log("New instance BLSAMPLEID: " + nyInstance.get("BLSAMPLEID"));
 			
 			// TODO: define the new sample group here
+			var sampleGroup = new SampleGroup();
+			var member = new sampleGroupMember();
+			member.set({"BLSAMPLEID": this.model.get("BLSAMPLEID"),
+					"TYPE": "sample",
+					"ORDER": "0",});
+			sampleGroup.add(member);
 			
 			
-			
-			app.trigger("samples:view", model.get("BLSAMPLEID"));
+//			app.trigger("samples:view", model.get("BLSAMPLEID"));
 		},
 	
 	});
