@@ -1522,8 +1522,8 @@
             $order = $this->has_arg('ORDER') ? $this->arg('ORDER') : 1;
             $type = $this->has_arg('TYPE') ? $this->arg('TYPE') : null;
 
-            $this->db->pq("INSERT INTO blsamplegroup_has_blsample (blsampleid, blsamplegroupid, order, type) 
-                VALUES (:1,:2)", array($this->arg('BLSAMPLEID'), $sgid, $order, $type));
+            $this->db->pq("INSERT INTO blsamplegroup_has_blsample (blsampleid, blsamplegroupid, `order`, type) 
+                VALUES (:1,:2,:3,:4)", array($this->arg('BLSAMPLEID'), $sgid, $order, $type));
 
             $this->_output(array('BLSAMPLEID' => $this->arg('BLSAMPLEID'), 'BLSAMPLEGROUPID' => $sgid));
         }
