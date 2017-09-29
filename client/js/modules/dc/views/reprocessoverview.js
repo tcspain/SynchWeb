@@ -12,10 +12,10 @@ define(['marionette',
         var StatusCell = Backgrid.Cell.extend({
             render: function() {
                 var icons = {
-                    submitted: '<i class="fa icon grey fa-pause alt="Waiting" title="Waiting"></i>',
-                    running: '<i class="fa icon grey fa-cog fa-spin alt="Running" title="Running"></i>',
-                    finished: '<i class="fa icon green fa-check alt="Completed" title="Completed"></i>',
-                    failed: '<i class="fa icon red fa-times alt="Failed" title="Failed"></i>',
+                    2: '<i class="fa icon grey fa-pause alt="Waiting" title="Waiting"></i>',
+                    null: '<i class="fa icon grey fa-cog fa-spin alt="Running" title="Running"></i>',
+                    1: '<i class="fa icon green fa-check alt="Completed" title="Completed"></i>',
+                    0: '<i class="fa icon red fa-times alt="Failed" title="Failed"></i>',
                 }
 
                 if (this.model.get('STATUS') in icons) this.$el.append(icons[this.model.get('STATUS')])
@@ -65,7 +65,7 @@ define(['marionette',
                 this.$el.html(ptable.render().$el)
 
                 var columns = [
-                   { label: 'Files', cell: table.TemplateCell, editable: false, template: '<a href="/dc/visit/<%-VISIT%>/id/<%-DATACOLLECTIONID%>"><%-IMAGEDIRECTORY%><%-IMAGEPREFIX%></a>' },
+                   { label: 'Files', cell: table.TemplateCell, editable: false, template: '<a href="/dc/visit/<%-VISIT%>/id/<%-DATACOLLECTIONID%>"><%-IMAGEDIRECTORY%><%-IMAGEPREFIX%>_<%-DATACOLLECTIONNUMBER%></a>' },
                    { label: 'Image #', cell: table.TemplateCell, editable: false, template: '<%-STARTIMAGE%> - <%-ENDIMAGE%>' },
                 ]
 
@@ -171,9 +171,8 @@ define(['marionette',
                     { label: 'DC', cell: table.TemplateCell, editable: false, template: '<a href="/dc/visit/<%-VISIT%>/id/<%-DATACOLLECTIONID%>"><%-IMAGEPREFIX%></a>' },
                     { name: 'DISPLAYNAME', label: 'Process', cell: 'string', editable: false },
                     { name: 'COMMENTS', label: 'Comments', cell: 'string', editable: false },
-                    // { name: 'RECORDTIMESTAMP', label: 'Created', cell: 'string', editable: false },
                     { name: 'LASTUPDATETIMESTAMP', label: 'Last Updated', cell: 'string', editable: false },
-                    { name: 'LASTUPDATEMESSAGE', label: 'Last Message', cell: 'string', editable: false },
+                    { name: 'PROCESSINGMESSAGE', label: 'Last Message', cell: 'string', editable: false },
                     { label: 'Arguments', cell: ArgsCell, editable: false, sweeps: this.sweeps, params: this.parameters },
                 ]
 
