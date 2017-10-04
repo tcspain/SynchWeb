@@ -9,7 +9,7 @@ define([
 	],
 	function(
 			Phase,
-			Phases,
+			Phases
 	) {
 			
 			// Start with the ComponentMudex constructor
