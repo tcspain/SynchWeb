@@ -20,3 +20,9 @@ api/lib/*
 .project
 api/config.php
 client/js/config.json
+lib/*
+/config.json
+/config.php
+/config.php~
+/lib.zip
+/.directory
