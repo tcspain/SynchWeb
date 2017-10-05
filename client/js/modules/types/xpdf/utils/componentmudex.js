@@ -63,6 +63,7 @@ define([
 						"ABUNDANCE": (index < abundances.length) ? abundances[index] : 0
 					});
 					collection.push(phase);
+					return collection;
 				}, components);
 				
 				return components;
@@ -70,7 +71,7 @@ define([
 			
 			var muxModel = function(model) {
 				return mux(model.get("PROTEINID"), model.get("ABUNDANCE"), model.get("ACRONYM"),
-						model.get("COMPONENTIDS") || [], model.get("COMPONENTACRONYMS") || [], model.get("COMPONENTAMOUNTS") || []);
+						model.get("COMPONENTIDS") || [], model.get("COMPONENTAMOUNTS") || [], model.get("COMPONENTACRONYMS") || []);
 			};
 			
 			var demuxModel = function(model, allComponents, beSilent) {
