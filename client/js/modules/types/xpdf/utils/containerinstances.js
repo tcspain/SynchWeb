@@ -58,10 +58,12 @@ define([
 	// TODO: implement a better method of determining containerhood
 	var shapingContainer = [
 		"0p3mm_capillary",
+		"Diamond__Anvil__Cell",
+
 	];
 	
 	var nonshapingContainer = [
-		"Diamond Anvil Cell",
+		"Furnace",
 	];
 	
 	var isAContainer = function(container) {
@@ -76,22 +78,31 @@ define([
 		return _.contains(nonshapingContainer, container.get("NAME"));
 	}
 	
-	var filterInstances = function(collection, response, options) {
-		var filterFunction = isAContainer;
+	var filterInstances = function(allInstances, response, options) {
 		var shapingCollection = new Instances();
 		var nonShapingCollection = new Instances();
-		shapingCollection.add(collection.filter(isShaping));
-		nonShapingCollection.add(collection.filter(isNonShaping));
-		shapingCollection.each(function(element, index, collection) {
-			element.set({"ISSHAPING": true});
-		});
-		nonShapingCollection.each(function(element, index, collection) {
-			element.set({"ISSHAPING": false});
-		});
-		// convert the array to a collection
 		var containers = new Instances();
-		containers.add(shapingCollection.models);
-		containers.add(nonShapingCollection.models);
+
+		_.each(shapingContainer, function(targetContainerName, index, list) {
+			// Find the first instance with each name
+			var firstInstance = allInstances.find(function(candidateContainer) {
+				return candidateContainer.get("NAME") == targetContainerName;
+			});
+			// set the flag as to whether the container dictates the shape of the sample
+			firstInstance.set({"ISSHAPING": true});
+			containers.add(firstInstance);
+		});
+		_.each(nonshapingContainer, function(targetContainerName, index, list) {
+			// Find the first instance with each name
+			var firstInstance = allInstances.find(function(candidateContainer) {
+				return candidateContainer.get("NAME") == targetContainerName;
+			});
+			// set the flag as to whether the container dictates the shape of the sample
+			firstInstance.set({"ISSHAPING": false});
+			containers.add(firstInstance);
+		});
+
+		
 		options.success(containers, response, options);
 	};
 	
