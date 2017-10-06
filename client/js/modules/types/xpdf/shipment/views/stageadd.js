@@ -88,8 +88,8 @@ define([
 			var validSamples = new Samples(this.samples.filter(function(sample) {return sample.get("BLSAMPLEID") > 0}));
 			console.log("Ready to put "+validSamples.length+" samples into container "+model.get("CONTAINERID"));
 			
-			console.log("id attribute is "+validSamples.at(0).idAttribute);
-			
+			if (validSamples.length > 0) console.log("id attribute is "+validSamples.at(0).idAttribute);
+
 			// Save the new CONTAINERID and the assigned position in the container
 			validSamples.each(function(s) {
 				s.set({CONTAINERID: model.get("CONTAINERID")}, {silent: true}, this);
@@ -116,9 +116,9 @@ define([
 					});
 				}
 			});
-//			validSamples.save();
-			
-			
+
+			app.trigger("container:show", model.get("CONTAINERID"));
+
 		},
 	});
 });
