@@ -4,22 +4,26 @@
 
 define([
 	"marionette",
+	"utils/editable",
 	"modules/types/xpdf/samples/views/crystalphasetable",
 	"models/protein",
 	"collections/proteins",
 	"collections/samples",
 	"modules/types/xpdf/samples/views/samplelisttableview",
 	"modules/types/xpdf/utils/componentmudex",
+	"modules/types/xpdf/utils/manglingeditable",
 	"utils/table",
 	"tpl!templates/types/xpdf/samples/crystalsampleview.html"
 	], function(
 		Marionette,
+		Editable,
 		CrystalPhaseTable,
 		Phase,
 		Phases,
 		Instances,
 		InstanceListTable,
 		ComponentMudex,
+		Mangler,
 		table,
 		template
 	) {
@@ -47,6 +51,13 @@ define([
 		},
 		
 		onRender: function() {
+			var edit = new Editable({model: this.model, el: this.$el});
+			edit.create("NAME", "text");
+			edit.create("THEORETICALDENSITY", "text");
+			
+			var mangler = new Mangler({model:this.model, el:this.$el});
+			mangler.create("UNMANGLEDNAME", "NAME", / /g, "__");
+			
 			// Table of phases
 			this.phaseTable.show(new CrystalPhaseTable({collection: this.collection}));
 			
