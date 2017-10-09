@@ -22,10 +22,24 @@ define([
 		
 		initialize: function(options) {
 			this.collection = options.collection;
+			if (options.row) this.row = options.row;
+			
+			if (options.hideButton) this.hideButton = options.hideButton;
 		},
 	
 		onRender: function() {
-			this.tablewrap.show(new CrystalListView({collection: this.collection}));
+			var options = {};
+			if (this.row) options.row = this.row;
+			options.collection = this.collection;
+			
+			if (this.hideButton) {
+				var crystalButton = this.$el.find("a.newcrystal")
+				console.log("Crystal sample list number of buttons = " + crystalButton.size());
+				if (crystalButton.size() > 0)
+					crystalButton[0].style.display = "none";
+			}
+			
+			this.tablewrap.show(new CrystalListView(options));
 		},
 		
 	});
@@ -79,6 +93,9 @@ define([
 				{ name: "THEORETICALDENSITY", label: "Density", cell: "string", editable: false },
 				{ name: "NPHASES", label: "# Phases", cell: NPhaseCell, editable: false },
 			];
+
+			if (options.row)
+				this.backgrid.row = options.row;
 			
 			TableView.prototype.initialize.apply(this, [options]);
 		},
