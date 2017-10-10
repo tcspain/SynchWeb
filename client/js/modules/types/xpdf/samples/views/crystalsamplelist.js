@@ -20,6 +20,10 @@ define([
 			tablewrap: ".table",
 		},
 		
+		events: {
+			"click a.newcrystal": "createCrystal",
+		},
+		
 		initialize: function(options) {
 			this.collection = options.collection;
 			if (options.row) this.row = options.row;
@@ -34,7 +38,6 @@ define([
 			
 			if (this.hideButton) {
 				var crystalButton = this.$el.find("a.newcrystal")
-				console.log("Crystal sample list number of buttons = " + crystalButton.size());
 				if (crystalButton.size() > 0)
 					crystalButton[0].style.display = "none";
 			}
@@ -42,6 +45,11 @@ define([
 			this.tablewrap.show(new CrystalListView(options));
 		},
 		
+		
+		createCrystal: function(e) {
+			e.preventDefault();
+			app.trigger("crystals:new");
+		},
 	});
 	
 	// Classes for the cells of the list table
