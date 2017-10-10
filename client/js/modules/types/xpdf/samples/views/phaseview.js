@@ -3,10 +3,11 @@
  */
 define(["marionette",
         "utils/editable",
-        "collections/samples", // generic sample collection for now
+        "collections/crystals",
         "modules/types/xpdf/samples/views/molecularmass",
         "modules/types/xpdf/samples/views/copyphaseview",
         "modules/types/xpdf/samples/views/addcif",
+        "modules/types/xpdf/samples/views/crystalsamplelist",
         "tpl!templates/types/xpdf/samples/phase.html",
         ], function(Marionette,
         		Editable,
@@ -14,6 +15,7 @@ define(["marionette",
         		MolecularMassView,
         		CopyPhaseView,
         		AddCIFView,
+        		SampleList,
         		template) {
 	return Marionette.LayoutView.extend({
 		className: "content",
@@ -62,10 +64,7 @@ define(["marionette",
 			edit.create("SEQUENCE", "text");
 			edit.create("DENSITY", "text");
 		
-            // Prevent cyclic dependency
-            var GetSampleView = require('modules/samples/views/getsampleview')
- 
-			this.samplesRegio.show(GetSampleView.SampleList.get(app.type, {collection: this.samples, noPageUrl:true, noFilterUrl: true, noSearchUrl: true, noButton: true, }));
+			this.samplesRegio.show(new SampleList({collection: this.samples, noPageUrl:true, noFilterUrl: true, noSearchUrl: true, hideButton: true, }));
 
             this.molecularmass.show(new MolecularMassView({model: this.model}));
             
