@@ -210,6 +210,11 @@ define(['marionette',
     	controller.proteinview(pid)
     })
       
+    app.on("crystals:new", function() {
+    	app.navigate("xpdfsamples/add");
+    	controller.crystaladd();
+    });
+    
     app.on("crystals:view", function(xid) {
     	app.navigate("xpdfsamples/xid/"+xid);
     	controller.crystalview(xid);
