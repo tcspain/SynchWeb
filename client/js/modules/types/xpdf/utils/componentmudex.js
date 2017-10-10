@@ -27,7 +27,7 @@ define([
 				this.beSilent = false;
 			};
 			
-			// define the object protoype, including the constructor
+			// define the object prototype, including the constructor
 			ComponentMudex.prototype = {
 					constructor: ComponentMudex,
 			
@@ -53,6 +53,8 @@ define([
 				var acronyms = [primaryAcronym].concat(componentAcronyms);
 				var abundances = [primaryAbundance].concat(componentAbundances);
 				
+				
+				
 				var components = new Phases();
 				
 				// Map from the indiviual arrays to a collection single array of objects 
@@ -62,7 +64,8 @@ define([
 						"ACRONYM": acronyms[index],
 						"ABUNDANCE": (index < abundances.length) ? abundances[index] : 0
 					});
-					collection.push(phase);
+					if (phase.get("PROTEINID"))
+						collection.push(phase);
 					return collection;
 				}, components);
 				
