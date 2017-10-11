@@ -595,12 +595,20 @@ define(['marionette',
             this.datacollectionplandetectors.queryParams.CONTAINERID = this.model.get('CONTAINERID')
             this.datacollectionplandetectors.fetch()
 
-            this.datacollectionplans = new DataCollectionPlans()
+            var PlansByOrder = DataCollectionPlans.extend({
+            	model: DataCollectionPlan.extend({idAttribute: "PLANORDER"}),
+            	comparator: function(model) { return model.get("PLANORDER")},
+            });
+            
+            this.datacollectionplans = new PlansByOrder();
             this.datacollectionplans.queryParams.CONTAINERID = this.model.get('CONTAINERID')
             // hmm this is not what you'd expect
             this.datacollectionplans.fetch({
                 SCANPARAMETERSMODELS: this.scanmodels,
                 DETECTORS: this.datacollectionplandetectors,
+                success: function(collection, response, options) {
+                	console.log("Fetched " + collection.size() + " plans");
+                },
             })
 
         },
@@ -630,13 +638,15 @@ define(['marionette',
 
             var columns = [
             	{ label: "", cell: CollapseExpandCell, editable: false, template: "<a class=\"button collapsar\" href=\"#\"><i class=\"expcol fa fa-chevron-right\"></i></a>"},
-                // { label: '#', cell: table.TemplateCell, editable: false, template: '<%=ORDER%>' },
+                { label: '#', cell: table.TemplateCell, editable: false, template: '<%=PLANORDER%>' },
                 { label: 'Instance', cell: table.TemplateCell, editable: false, template: '<%=SAMPLE%>' },
                 { label: 'Axes', cell: AxesCell, editable: false, scanservices: this.scanservices, scanmodels: this.scanmodels },
                 { label: 'Detectors', cell: DetectorsCell, editable: false, detectors: this.detectors, dpdetectors: this.datacollectionplandetectors },
                 { label: 'Parameters', cell: DCPlanCell, editable: false },
             ]
 
+            console.log("Rendering DCPs: found " + this.datacollectionplans.size());
+            
             this.table2 = new SortableTableView({ 
                 collection: this.datacollectionplans, 
                 columns: columns, 
