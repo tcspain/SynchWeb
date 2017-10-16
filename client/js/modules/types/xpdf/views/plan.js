@@ -597,7 +597,7 @@ define(['marionette',
 
             var PlansByOrder = DataCollectionPlans.extend({
             	model: DataCollectionPlan.extend({idAttribute: "PLANORDER"}),
-            	comparator: function(model) { return model.get("PLANORDER")},
+            	comparator: "PLANORDER",
             });
             
             this.datacollectionplans = new PlansByOrder();
@@ -652,9 +652,9 @@ define(['marionette',
                 columns: columns, 
                 tableClass: 'subsamples', 
                 loading: true,
-                backgrid: { emptyText: 'No plans found' },
             })
-
+            _.extend(this.table2.backgrid, {emptyText: "No plans found"});
+            
             this.psmps.show(this.table2)
         },
 
