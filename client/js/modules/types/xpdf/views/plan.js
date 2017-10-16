@@ -598,6 +598,12 @@ define(['marionette',
             var PlansByOrder = DataCollectionPlans.extend({
             	model: DataCollectionPlan.extend({idAttribute: "PLANORDER"}),
             	comparator: "PLANORDER",
+            	canonizeOrder: function() {
+            		console.log("creating canonical order");
+            		this.each(function(element, index, list) {
+            			element.set({"PLANORDER": index+1});
+            		});
+            	}
             });
             
             this.datacollectionplans = new PlansByOrder();
@@ -645,8 +651,6 @@ define(['marionette',
                 { label: 'Parameters', cell: DCPlanCell, editable: false },
             ]
 
-            console.log("Rendering DCPs: found " + this.datacollectionplans.size());
-            
             this.table2 = new SortableTableView({ 
                 collection: this.datacollectionplans, 
                 columns: columns, 
@@ -654,8 +658,15 @@ define(['marionette',
                 loading: true,
             })
             _.extend(this.table2.backgrid, {emptyText: "No plans found"});
+
+            this.listenTo(this.datacollectionplans, "order:updated", this._orderUpdated);
             
             this.psmps.show(this.table2)
+        },
+        
+        _orderUpdated: function() {
+        	this.datacollectionplans.canonizeOrder();
+        	this.psmps.render();
         },
 
     })
