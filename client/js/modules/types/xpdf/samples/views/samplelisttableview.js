@@ -42,8 +42,8 @@ define([
 		
 		goToInstancePage: function(e) {
 			e.preventDefault();
-			console.log("Making instance of "+this.model.get("BLSAMPLEID"));
-			app.trigger("instance:create", this.model.get("BLSAMPLEID"));
+			console.log("Making instance of "+this.model.get("CRYSTALID"));
+			app.trigger("instance:create", this.model.get("CRYSTALID"));
 		},
 	});
 	  
