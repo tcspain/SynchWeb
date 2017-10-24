@@ -76,7 +76,7 @@ define([
 //			            { name: "COMPOSITION", label: "Composition", cell: "string", editable: false },
 			            { name: "THEORETICALDENSITY", label: "Density", cell: "string", editable: false},
 			            { name: "PACKINGFRACTION", label: "Packing", cell:"string", editable: false},
-			            { name: "NEWINSTANCE", label: "Create new instance", cell: NewInstanceCell, editable: false, renderable: !hideNewInstance },
+//			            { name: "NEWINSTANCE", label: "Create new instance", cell: NewInstanceCell, editable: false, renderable: !hideNewInstance },
 			            ];
 
 			 if (options["row"] !== undefined) this.backgrid.row = options.row;

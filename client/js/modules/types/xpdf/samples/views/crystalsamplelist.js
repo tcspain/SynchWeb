@@ -29,6 +29,11 @@ define([
 			if (options.row) this.row = options.row;
 			
 			if (options.hideButton) this.hideButton = options.hideButton;
+
+			this.hideNewInstance = false;
+			if (options["hideNewInstance"] !== undefined)
+				this.hideNewInstance = options["hideNewInstance"];
+
 		},
 	
 		onRender: function() {
@@ -75,6 +80,22 @@ define([
 		},
 	});
 
+	var NewInstanceCell = table.TemplateCell.extend({
+		events: {
+			"click a.instance": "goToInstancePage",
+		},
+		
+		getTemplate: function() {
+			return "<a class=\"button instance\" href=\"#\"><i class=\"fa fa-plus\"></i></a>";
+		},
+		
+		goToInstancePage: function(e) {
+			e.preventDefault();
+			console.log("Making instance of "+this.model.get("CRYSTALID"));
+			app.trigger("instance:create", this.model.get("CRYSTALID"));
+		},
+	});
+
 	var CrystalListView = TableView.extend({
 		
 		backgrid: {
@@ -100,6 +121,7 @@ define([
 				{ name: "COMPOSITION", label: "Composition", cell: CompositionCell, editable: false },
 				{ name: "THEORETICALDENSITY", label: "Density", cell: "string", editable: false },
 				{ name: "NPHASES", label: "# Phases", cell: NPhaseCell, editable: false },
+	            { name: "NEWINSTANCE", label: "Create new instance", cell: NewInstanceCell, editable: false, renderable: !this.hideNewInstance },
 			];
 
 			if (options.row)
