@@ -126,7 +126,8 @@ define(['marionette',
       page = page ? parseInt(page) : 1
       var containers = new Containers(null, { state: { currentPage: page }, queryParams: { s: s, ty: ty } })
       containers.fetch().done(function() {
-          app.content.show(new ContainersView({ collection: containers, params: { s: s, ty: ty } }))
+//          app.content.show(new ContainersView({ collection: containers, params: { s: s, ty: ty } }))
+    	  app.content.show(GetView.ContainersView.get(app.type, {collection: containers, params: {s: s, ty: ty}}));
       })
     },
       
