@@ -11,6 +11,7 @@ define([
 	"collections/proteins",
 	"modules/types/xpdf/samples/views/linkphaseview",
     "modules/types/xpdf/samples/views/proteinlist",
+    "modules/types/xpdf/samples/views/phaseadddialog",
 	"tpl!templates/types/xpdf/samples/crystalphasetable.html"
 	], function(
 			Marionette,
@@ -20,6 +21,7 @@ define([
 			Phases,
 			LinkPhaseView,
 			PhaseList,
+			AddPhaseDialog,
 			template
 	) {
 	
@@ -51,6 +53,7 @@ define([
 		addNewPhase: function(e) {
 			e.preventDefault();
 			console.log("Add new phase");
+			app.dialog.show(new AddPhaseDialog({collection: this.collection}));
 		},
 		
 		
