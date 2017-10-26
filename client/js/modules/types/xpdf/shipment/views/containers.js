@@ -21,6 +21,8 @@ define([
 	});
 	  
 	var XpdfContainersView = ContainersView.extend({
+		
+		template: "<div><h1>Sample Changers</h1><div class=\"filter type\"></div><div class=\"wrapper\"></div></div>",
 		initialize: function(options) {
 			var columns = [
 				{ name: 'NAME', label: 'Name', cell: 'string', editable: false },
