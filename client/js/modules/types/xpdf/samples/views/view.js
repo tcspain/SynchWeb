@@ -261,12 +261,13 @@ define(["marionette",
 		getContainers: function() {
 			var drawRegion = this.xpdfContainer;
 			this.sampleGroup = new SampleGroup();
+			var targetId = this.model.get("BLSAMPLEID");
 			// Hardcoded, known ID. TODO: replace with actual fetch by BLSampleId
 			this.sampleGroup.fetch({
-				data: {"BLSAMPLEGROUPID": "1", },
+				data: {"BLSAMPLEID": targetId, },
 				success: function(collection, response, options) {
 					// The offset for the first container is 1, with 0 being the sample
-					drawRegion.show(new ContainerView({collection: collection, offset: 1}));
+					drawRegion.show(new ContainerView({collection: collection, offset: 1, isNew: false}));
 				},
 				error: function(collection, response, options) {
 					console.log("Failed to fetch sample group: ", response);

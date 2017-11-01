@@ -51,6 +51,12 @@ define([
 			this.listenTo(this.containers, "add", this.onContainersUpdate);
 			this.updateContainers();
 			
+			// get the (ISPyB) Container of (XPDF) containers
+			defaultContainer.getContainerContainer(this.assignContainerContainer, {self: this});
+		},
+		
+		assignContainerContainer: function(containerId, context) {
+			context.self.containerContainer = containerId;
 		},
 		
 		createModel: function() {
@@ -68,7 +74,7 @@ define([
 			});
 
 			// Here 'container' is the ISPyB container
-			defaultContainer.getDefault(this.setContainer, {model: this.model});
+			defaultContainer.getDefaultContainer(this.setContainer, {model: this.model});
 			
 		},
 		
@@ -109,9 +115,9 @@ define([
 
 		// Add the list of available containers to the interface 
 		onContainersUpdate: function() {
-			if (this.isRendered == true)
+			if (this.isRendered == true) 
 				// offset of the first layer of container is 1, 0 being the sample itself
-				this.containerview.show(new ContainerView({containers: this.containers, offset: 1}));
+				this.containerview.show(new ContainerView({containers: this.containers, offset: 1, isNew: true}));
 		},
 		
 		onRender: function() {
@@ -134,12 +140,77 @@ define([
 			
 			// TODO: define the new sample group here
 			var sampleGroup = new SampleGroup();
-			var member = new sampleGroupMember();
+			var member = new SampleGroupMember();
 			member.set({"BLSAMPLEID": this.model.get("BLSAMPLEID"),
 					"TYPE": "sample",
-					"ORDER": "0",});
+					"GROUPORDER": "0",});
 			sampleGroup.add(member);
 			
+			var containerIdArray = this.containerview.currentView.getContainerIDs();
+			
+			_.each(containerIdArray, function(containerId, index, ids) {
+				console.log("containerIds[" + index + "]", containerId);
+			});
+			
+			var containerContainer = this.containerContainer;
+			
+			// fetch all the BLSamples for this proposal
+			var allInstances = new Instances();
+			allInstances.state.pageSize = 10000;
+			allInstances.fetch({
+				success: function(collection, reponse, options) {
+					_.each(containerIdArray, function(id, index, list) {
+						// clonend: thing to be cloned
+						var clonend = allInstances.findWhere({"BLSAMPLEID": id});
+						// reset the ID, and set the container to the
+						// container-container, with a location equal
+						// to the total number of all instances 
+						var clone = new Instance();
+						var now = new Date();
+						var nowString = now.getDate()+"-"+now.getMonth()+"-"+now.getYear();
+						clone.set({
+							"CRYSTALID": clonend.get("CRYSTALID"),
+							"CONTAINERID": containerContainer.get("CONTAINERID"),
+							"NAME": clonend.get("NAME"),
+							"LOCATION": allInstances.length.toString(),
+							"RECORDTIMESTAMP": nowString,
+							"DIMENSION1": clonend.get("DIMENSION1"),
+							"DIMENSION2": clonend.get("DIMENSION2"),
+							"DIMENSION3": clonend.get("DIMENSION3"),
+							"SHAPE": clonend.get("SHAPE"),
+							"PACKINGFRACTION": clonend.get("PACKINGFRACTION"),
+						});
+						// Save the clone to get a new BLSampleId
+						clone.save({},{
+							success: function(model, repsonse, options) {
+							var member = new SampleGroupMember();
+							member.set({
+								"BLSAMPLEID": model.get("BLSAMPLEID"),
+								"TYPE": "container",
+								"GROUPORDER": (index+1).toString(), // add one, since the smaple is at index 0
+								});
+							sampleGroup.add(member);
+							// the same number of containers in the 
+							// group as were returned by the nested
+							// views, plus an additional member for the
+							// sample.
+							if (sampleGroup.length == containerIdArray.length+1)
+								sampleGroup.save();
+							// Navigate to the details page of the
+							// sample, being the first member of the
+							// group 
+								app.trigger("samples:view", sampleGroup.at(0).get("BLSAMPLEID"));
+							},
+							error: function(model, response, options) {
+								console.log("NewInstance: could not save cloned container: ", response);
+							},
+						});
+					});
+				},
+				error: function(collection, response, options) {
+					console.log("NewInstance: coould not fetch container instances to clone:", response);
+				},
+			})
 			
 //			app.trigger("samples:view", model.get("BLSAMPLEID"));
 		},

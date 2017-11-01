@@ -23,7 +23,7 @@ define([
 		},
 		
 		comparator: function(m) {
-			return parseInt(m.get("ORDER"));
+			return parseInt(m.get("GROUPORDER"));
 		},
 		
 		parseRecords: function(r, options) {
@@ -43,7 +43,7 @@ define([
 			this.offset = 0;
 			if (!this.groupId) {
 				var self = this;
-				this.at(this.offset).set({"ORDER": String(this.offset)});
+				this.at(this.offset).set({"GROUPORDER": String(this.offset)});
 				this.at(this.offset).save({}, {
 					success: function(model, response, options) {
 						self.groupId = model.get("BLSAMPLEGROUPID");
@@ -77,7 +77,7 @@ define([
 					return offset;
 				
 				model.set({
-					"ORDER": String(offset),
+					"GROUPORDER": String(offset),
 					"BLSAMPLEGROUPID": groupId
 					});
 				console.log("SampleGroup._saveContainers.reduce:", model, collection);

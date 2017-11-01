@@ -39,16 +39,17 @@ define([
 		initialize: function(options) {
 			console.log("ContainerView:", options);
 			this.offset = options.offset;
-			if (options.collection) {
-				this.collection = options.collection;
-				this.model = options.collection.at(this.offset);
-				this.containers = new Instances();
-				this.isNew = false;
-			} else {
-				this.collection = new Instances();
+			this.collection = options.collection;
+			if (options.isNew) {
 				this.model = null;
 				this.containers = options.containers;
 				this.isNew = true;
+				this.isGenuineContainer = false;
+			} else {
+				this.model = options.collection.at(this.offset);
+				this.containers = new Instances();
+				this.isNew = false;
+				this.isGenuineContainer = true;
 			}
 			this.containerProperties = {};
 		},
@@ -105,7 +106,7 @@ define([
 			});
 			// Show ecapsulating containers
 			if (this.offset+1 < this.collection.length) {
-				this.encapContainer.show(new ContainerView({collection: this.collection, offset: this.offset+1}))
+				this.encapContainer.show(new ContainerView({collection: this.collection, offset: this.offset+1, isNew: this.isNew}))
 			}
 		},
 		
@@ -115,12 +116,31 @@ define([
 			if (value === "nothing") {
 				this.containerDetails.reset();
 			} else if (value.match(/-form$/)) {
+				this.isGenuineContainer = false;
 				this.containerDetails.show(new PseudoContainerView({properties: this.containerProperties[value]}));
 			} else {
+				this.isGenuineContainer = true;
 				this.containerDetails.show(new TrueContainerView({properties: this.containerProperties[value]}));
 			}
 			
-			this.encapContainer.show(new ContainerView({containers: this.containers, offset: this.offset+1}));
+			this.encapContainer.show(new ContainerView({containers: this.containers, offset: this.offset+1, isNew: this.isNew}));
+		},
+		
+		getContainerIDs: function() {
+			
+			var idArray = [];
+			// Get the ID of the selected true container. 
+			// Pseudo-containers don't have IDs
+			if (this.isGenuineContainer) {
+				idArray = [this.containerDetails.currentView.model.get("BLSAMPLEID")];
+			}
+			
+			var encapsulatingView = this.encapContainer.currentView;
+			if (typeof encapsulatingView !== "undefined") {
+				idArray.concat(encapsulatingView.getContainerIDs());
+			}
+			
+			return idArray;
 		},
 	
 	});

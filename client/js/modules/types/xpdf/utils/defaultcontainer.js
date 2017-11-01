@@ -4,9 +4,11 @@
 
 define([
 	"models/container",
+	"collections/containers",
     "models/proposal"
 	], function(
 			Container,
+			Containers,
 			Proposal
 	) {
 
@@ -15,16 +17,22 @@ define([
 			 * callback is a one-argument function, taking the default containerId for the visit.
 			 * context is an object providing context for the callback
 			 */
-			getDefault: function(callback, context) {
-				this.getVisit(this.getDefaultDewar, this.getDefaultContainer, callback, context);
+			getDefaultContainer: function(callback, context) {
+				this._getVisit(this._getSpecialContainer, null, "_default", callback, context);
 			},
 
-			getVisit: function(callback, dewarCallback, finalCallback, finalContext) {
+			getContainerContainer: function(callback, context) {
+				this._getVisit(this._getSpecialContainer, null, "_containers", callback, context);
+			},
+			
+			// Currently: get the last visit. More refined approaches may be required later
+			_getVisit: function(callback, dewarCallback, name, finalCallback, finalContext) {
 				var prop = new Proposal({PROPOSAL: app.prop});
 				prop.fetch({
 					success: function(model, response, options) {
 						var visitString = prop.get("PROPOSAL")+"-"+prop.get("VCOUNT");
-						callback(visitString, dewarCallback, finalCallback, finalContext);
+						var containerName = visitString + name;
+						callback(visitString, containerName, finalCallback, finalContext);
 					},
 					error: function(model, response, options) {
 						console.log("Could not get proposal data.");
@@ -32,80 +40,96 @@ define([
 				});
 			},
 			
-			getDefaultDewar: function(visitId, successCallback, finalCallback, finalContext) {
-				var self = this;
-				Backbone.ajax({
-					url: app.apiurl+"/shipment/dewars/default",
-					data: {visit: visitId},
-					success: function(dewarId) {
-						console.log("new sample dewar obtained");
-						successCallback(dewarId, visitId, finalCallback, finalContext);	
-					},
-					error: function() {
-						app.bc.reset([bc, {title: "Error" }]);
-						app.message({ title: "Error", message: "The default dewar for this visit could not be created."});
-					},
-				});
-			},
+//			_getDefaultDewar: function(visitId, containerName, successCallback, finalCallback, finalContext) {
+//				var self = this;
+//				
+//				var defaultDewar = new DefaultDewar();
+//				defaultDewar.visitId = visitId;
+//				defaultDewar.fetch({
+//					success: function(dewar) {
+//						console.log("new sample dewar obtained");
+//						successCallback(containerName, dewar.get("DEWARID"), finalCallback, finalContext);
+//					},
+//					error: function() {
+//						app.bc.reset([bc, {title: "Error" }]);
+//						app.message({ title: "Error", message: "The default dewar for this visit could not be created."});
+//					},
+//				});
+//			},
 
-			// With the default dewar for this proposal, get the default
-			// container for this visit. Also, check default containers exist
-			// for all visits. 
-			getDefaultContainer : function(dewarId, visitId, successCallback, context) {
-				var self = this;
-				
-				Backbone.ajax({
-					url: app.apiurl+"/shipment/containers/did/"+dewarId,
-					success: function(containers) {
-						var defaultContainer;
-						console.log(containers.data.length+" default container(s) obtained for dewar "+dewarId);
-						console.log("containers.data is "+containers.data);
-						if (containers.total != 0) {
-							// Place the sample in the default container of the
-							// proposal. If this container does not exist, then
-							// create it
-							defaultContainerObject = _.find(containers.data, function(container) { return container["VISIT"] == null; });
+			
+			// find the first container with the special name that is in the given dewar.
+			_getSpecialContainer: function(visit, name, callback, context) {
 
-							// Convert the object (hash of attributes) version
-							// of the default container to the SynchWeb model
-							// of a Container
-							defaultContainer = new Container(defaultContainerObject);
-														
+				var visitContainers = new Containers();
+				visitContainers.fetch({
+					data: {visit: visit},
+					success: function(containers, response, options) {
+						if (containers.length <= 0) {
+							console.log("defaultContainer._getSpecialContainer: no containers found.");
+							createContainer(name, visit, callback, context);
 						}
-						
-						if (defaultContainer == null) {
-							console.log("no default container");
-						
-							// Create a default container
-							defaultContainer = new Container();
-							// set some values for this model
-							var defaultParameters = {"PROPOSALID" : app.prop,
-									"NAME": app.proposal.get("PROPOSALNUMBER")+"_default",
-									"CAPACITY": "0",
-									"CONTAINERTYPE": "box",
-									"DEWARID": dewarId,
-//									"CONTAINERID": "999999999",
-							};
-							defaultContainer.set(defaultParameters);
-							defaultContainer.save({},{
-								success: function(model, response, options) {
-									successCallback(model, context);
-								},
-								error: function(model, response, options) {
-									console.log("Error saving default container for proposal "+app.prop);
-								}
+						var specialContainer = containers.find(function(container){
+							return container.get("NAME") === name
 							});
-						} else {
-							successCallback(defaultContainer, context);
+						
+						if (typeof specialContainer === "undefined") {
+							console.log("defaultContainer._getSpecialContainer: no containers found.");
+							createContainer(name, visit, callback, context);
 						}
 
+						callback(specialContainer, context);
+							
 					},
-					error: function() {
-						console.log("Did not get containers for dewar "+dewarId);
+					error: function(collection, response, options) {
+						console.log("defaultContainer._getSpecialContainer: error getting containers for dewar " + dewarId + ": " + response);
+						createContainer(name, visit, callback, context);
 					},
 				});
+				
+				
 			},
+			
 	};
+
+	var createContainer = function(name, visit, callback, context) {
+		// Create a default container
+		var defaultContainer = new Container();
+		// set some values for this model
+		var defaultParameters = {
+				"NAME": name,
+				"CAPACITY": "0",
+				"CONTAINERTYPE": "box",
+		};
+		defaultContainer.set(defaultParameters);
+
+		Backbone.ajax({
+			url: app.apiurl+"/shipment/dewars/default",
+			data: {visit: visit},
+			success: function(did) {
+				defaultContainer.set({"DEWARID": did});
+				defaultContainer.save({},{
+					success: function(model, response, options) {
+						callback(model, context);
+					},
+					error: function(model, response, options) {
+						console.log("defaultContainer: Error saving container " + name + " for visit " + visit);
+					}
+				});
+			},
+			error: function() {
+				console.log("defaultContainer: Could not get default dewar for visit " + visit);
+			},
+		});
+		
+	};
+	
+	var DefaultDewar = Backbone.Model.extend({
+		idAttribute: "DEWARID",
+		url: function() {
+			return "/shipment/dewars/default?visit="+this.visitId; 
+		},
+	})
 	
 	return defaultContainer;
 	
