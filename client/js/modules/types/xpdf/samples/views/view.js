@@ -8,6 +8,7 @@ define(["marionette",
         "modules/dc/views/getdcview",
         "models/protein",
         "collections/proteins", /*"collections/phasecollection",*/
+        "collections/samples",
 //        "views/table",
         "utils/phasecompositor",
         "modules/types/xpdf/utils/phasecompositor",
@@ -25,6 +26,7 @@ define(["marionette",
         		GetDCView,
         		Phase,
         		PhaseCollection,
+        		Instances,
 //        		TableView,
         		oldPhaseCompositor,
         		phaseCompositor,
@@ -262,15 +264,33 @@ define(["marionette",
 			var drawRegion = this.xpdfContainer;
 			this.sampleGroup = new SampleGroup();
 			var targetId = this.model.get("BLSAMPLEID");
-			// Hardcoded, known ID. TODO: replace with actual fetch by BLSampleId
-			this.sampleGroup.fetch({
-				data: {"BLSAMPLEID": targetId, },
+
+			var allSamplesInGroups = this.sampleGroup;
+			
+			// Fetch all sample groups
+			allSamplesInGroups.fetch({
 				success: function(collection, response, options) {
-					// The offset for the first container is 1, with 0 being the sample
-					drawRegion.show(new ContainerView({collection: collection, offset: 1, isNew: false}));
+					// array of all IDs of groups that contain the instance
+					var groupIds = (new Instances(collection.where({"BLSAMPLEID": targetId}))).pluck("BLSAMPLEGROUPID");
+					// For now, only display the first
+					if (groupIds.length > 0) {
+						var groupId = groupIds[0];
+						var sampleGroup = new SampleGroup();
+						sampleGroup.fetch({
+							data: {"BLSAMPLEGROUPID": groupId, },
+							success: function(collection, response, options) {
+								// The offset for the first container is 1, with 0 being the sample
+								drawRegion.show(new ContainerView({collection: collection, offset: 1, isNew: false}));
+							},
+							error: function(collection, response, options) {
+								console.log("Instance View: failed to fetch sample group for sample " + targetId + ": ", response);
+							},
+							
+						});
+					}
 				},
 				error: function(collection, response, options) {
-					console.log("Failed to fetch sample group: ", response);
+					console.log("InstanceView: failed to get sample groups: ", response);
 				},
 			});
 		},
