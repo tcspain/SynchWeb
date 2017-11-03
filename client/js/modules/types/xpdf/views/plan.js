@@ -62,12 +62,13 @@ define(['marionette',
         addPlan: function(e) {
             e.preventDefault()
             var plans = this.column.get('datacollectionplans')
-
+            console.log("plan.AddPlan: ", plans);
             var p = new DataCollectionPlan({
                 BLSAMPLEID: this.model.get('BLSAMPLEID'),
                 SAMPLE: this.model.get('NAME'),
                 PROTEINID: this.model.get('PROTEINID'),
                 PROTEIN: this.model.get('ACRONYM'),
+                PLANORDER: 127,
             })
 
             p.save({}, {
@@ -596,14 +597,22 @@ define(['marionette',
             this.datacollectionplandetectors.fetch()
 
             var PlansByOrder = DataCollectionPlans.extend({
-            	model: DataCollectionPlan.extend({idAttribute: "PLANORDER"}),
+            	// In this collection, a plan with a given plan id may
+            	// appear twice, but the plan order will be unique
+            	model: DataCollectionPlan.extend({
+            		idAttribute: "PLANORDER",
+            		url: function() {
+            			return "/exp/plans/"+this.get("DIFFRACTIONPLANID");
+            		},
+            	}),
             	comparator: "PLANORDER",
             	canonizeOrder: function() {
             		console.log("creating canonical order");
             		this.each(function(element, index, list) {
             			element.set({"PLANORDER": index+1});
+            			element.save(element.changedAttributes(), {patch: true});
             		});
-            	}
+            	},
             });
             
             this.datacollectionplans = new PlansByOrder();
@@ -660,6 +669,7 @@ define(['marionette',
             _.extend(this.table2.backgrid, {emptyText: "No plans found"});
 
             this.listenTo(this.datacollectionplans, "order:updated", this._orderUpdated);
+            this.listenTo(this.datacollectionplans, "change", this._changePlans);
             
             this.psmps.show(this.table2)
         },
@@ -668,6 +678,10 @@ define(['marionette',
         	this.datacollectionplans.canonizeOrder();
         	this.psmps.render();
         },
+        
+        _changePlans: function() {
+        	console.log("PlanView: change of plan!");
+        }
 
     })
 
