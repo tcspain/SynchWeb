@@ -30,29 +30,37 @@ define(['backbone',
 
             if (options && options.SCANPARAMETERSMODELS) {
                 this.models = options.SCANPARAMETERSMODELS
-                this.listenTo(this.models, 'sync reset change add remove', this.syncModels)
+                this.listenTo(this.models, 'sync reset add remove', this.syncModels)
                 this.syncModels()
             }
 
             if (options && options.DETECTORS) {
                 this.detectors = options.DETECTORS   
-                this.listenTo(this.detectors, 'sync reset change add remove', this.syncDetectors)
+                this.listenTo(this.detectors, 'sync reset add remove', this.syncDetectors)
                 this.syncDetectors()
             }
+
+            this.listenTo(this, 'change:ENERGY', this.updateKevEnergy)
+            this.updateKevEnergy()
         },
 
         syncModels: function() {
+            if (!this.get('DIFFRACTIONPLANID')) return
             var mods = this.models.where({ DATACOLLECTIONPLANID: this.get('DIFFRACTIONPLANID')})
             // console.log('syncing models', this.get('DIFFRACTIONPLANID'), mods)
             this.get('SCANPARAMETERSMODELS').reset(mods)
         },
 
         syncDetectors: function() {
+            if (!this.get('DIFFRACTIONPLANID')) return
             var dets = this.detectors.where({ DATACOLLECTIONPLANID: this.get('DIFFRACTIONPLANID')})
             // console.log('syncing dets', this.get('DIFFRACTIONPLANID'), dets)
             this.get('DETECTORS').reset(dets)
         },
 
+        updateKevEnergy: function() {
+            this.set('KEVENERGY', (this.get('ENERGY')*0.001).toPrecision(3))
+        },
 
         validation: {
             BLSAMPLEID: {
@@ -116,7 +124,7 @@ define(['backbone',
             },
 
             ENERGY: {
-                required: true,
+                required: false,
                 pattern: 'digits',
             },
 
