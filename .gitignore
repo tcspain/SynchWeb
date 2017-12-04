@@ -25,3 +25,6 @@ api/lib/*
 
 api/config.php
 client/js/config.json
+
+api/includes/class.auth-dummy.php
+
